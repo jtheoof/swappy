@@ -23,7 +23,7 @@ wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 
-##subdir('protocol')
+subdir('protocol')
 
 executable(
 	'swappy',
@@ -33,7 +33,7 @@ executable(
 	]),
 	dependencies: [
 		cairo,
-		#client_protos,
+		client_protos,
 		realtime,
 		wayland_client,
 		wayland_cursor,
