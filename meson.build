@@ -19,6 +19,8 @@ cc = meson.get_compiler('c')
 
 cairo = dependency('cairo')
 realtime = cc.find_library('rt')
+gtk = dependency('gtk+-wayland-3.0', version: '>=3.22.0')
+gtk_layer_shell = dependency('gtk-layer-shell-0', version: '>= 0.1.0')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
@@ -30,10 +32,13 @@ executable(
 	files([
 		'main.c',
 		'wayland.c',
+		'application.c',
 	]),
 	dependencies: [
 		cairo,
 		client_protos,
+		gtk,
+		gtk_layer_shell,
 		realtime,
 		wayland_client,
 		wayland_cursor,

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <wayland-cursor.h>
 
+#include "application.h"
 #include "swappy.h"
 #include "wayland.h"
 
@@ -16,9 +17,11 @@ int main(int argc, char *argv[]) {
   state.argc = argc;
   state.argv = argv;
 
-  if (!wayland_init(&state)) {
+  if (!application_init(&state)) {
     exit(1);
   }
 
-  wayland_finish(&state);
+  application_run(&state);
+
+  application_finish(&state);
 }
