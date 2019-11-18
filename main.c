@@ -16,6 +16,9 @@ int main(int argc, char *argv[]) {
 
   state.argc = argc;
   state.argv = argv;
+  state.is_mode_brush = true;
+
+  sprintf(state.image, "%s", "/home/jattali/Desktop/sway.png");
 
   if (!application_init(&state)) {
     exit(1);

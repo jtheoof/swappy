@@ -1,10 +1,20 @@
 #ifndef _SWAPPY_H
 #define _SWAPPY_H
 
+#include <glib-2.0/glib.h>
 #include <gtk/gtk.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <wayland-client.h>
+
+struct swappy_brush_point {
+  double x;
+  double y;
+  double r;
+  double g;
+  double b;
+  double a;
+};
 
 struct swappy_state {
   GtkApplication *app;
@@ -19,10 +29,17 @@ struct swappy_state {
   struct wl_list seats;    // mako_seat::link
 
   struct wl_surface *surface;
-  struct mako_output *surface_output;
   struct zwlr_layer_surface_v1 *layer_surface;
-  struct mako_output *layer_surface_output;
+
   bool should_exit;
+  bool is_mode_brush;
+  bool is_mode_text;
+
+  int width;
+  int height;
+  char image[255];
+
+  GSList *brushes;
 
   int argc;
   char **argv;
