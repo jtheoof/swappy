@@ -19,6 +19,7 @@ struct swappy_brush_point {
 struct swappy_state {
   GtkApplication *app;
   GtkWindow *window;
+  GtkWidget *area;
   struct wl_display *display;
   struct wl_registry *registry;
   struct wl_compositor *compositor;
