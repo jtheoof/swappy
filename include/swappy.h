@@ -7,6 +7,12 @@
 #include <stdint.h>
 #include <wayland-client.h>
 
+enum swappy_brush_point_kind {
+  SWAPPY_BRUSH_POINT_FIRST = 0, /* A first point of new brush batch */
+  SWAPPY_BRUSH_POINT_WITHIN,    /* A point within a brush batch */
+  SWAPPY_BRUSH_POINT_LAST,      /* A point at the end of brush batch */
+};
+
 struct swappy_brush_point {
   double x;
   double y;
@@ -14,6 +20,7 @@ struct swappy_brush_point {
   double g;
   double b;
   double a;
+  enum swappy_brush_point_kind kind;
 };
 
 struct swappy_state {

@@ -83,19 +83,31 @@ static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
   cairo_surface_destroy(image);
   cairo_restore(cr);
 
-  for (GSList *point = state->brushes; point; point = point->next) {
-    struct swappy_brush_point *bp = point->data;
-    cairo_set_source_rgba(cr, bp->r, bp->g, bp->b, bp->a);
-    cairo_rectangle(cr, bp->x, bp->y, 1, 1);
-    cairo_set_line_width(cr, 1);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
-    cairo_stroke(cr);
+  for (GSList *brush = state->brushes; brush; brush = brush->next) {
+    GSList *brush_next = brush->next;
+    struct swappy_brush_point *point = brush->data;
+
+    if (brush_next && point->kind == SWAPPY_BRUSH_POINT_WITHIN) {
+      struct swappy_brush_point *next = brush_next->data;
+      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
+      cairo_set_line_width(cr, 2);
+      cairo_move_to(cr, point->x, point->y);
+      cairo_line_to(cr, next->x, next->y);
+      cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
+      cairo_stroke(cr);
+    } else {
+      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
+      cairo_set_line_width(cr, 2);
+      cairo_rectangle(cr, point->x, point->y, 1, 1);
+      cairo_stroke(cr);
+    }
   }
 
   return true;
 }
 
-static void brush_add_point(struct swappy_state *state, double x, double y) {
+static void brush_add_point(struct swappy_state *state, double x, double y,
+                            enum swappy_brush_point_kind kind) {
   struct swappy_brush_point *point = g_new(struct swappy_brush_point, 1);
   point->x = x;
   point->y = y;
@@ -103,26 +115,34 @@ static void brush_add_point(struct swappy_state *state, double x, double y) {
   point->g = 0;
   point->b = 0;
   point->a = 1;
+  point->kind = kind;
 
   state->brushes = g_slist_append(state->brushes, point);
 }
 
-static void draw_area_button_press_handler(GtkWidget *widget, GdkEvent *event,
+static void draw_area_button_press_handler(GtkWidget *widget,
+                                           GdkEventButton *event,
                                            struct swappy_state *state) {
-  printf("button pressed event\n");
+  if (state->is_mode_brush) {
+    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_FIRST);
+    gtk_widget_queue_draw(state->area);
+  }
 }
 
-static void draw_area_button_release_handler(GtkWidget *widget, GdkEvent *event,
+static void draw_area_button_release_handler(GtkWidget *widget,
+                                             GdkEventButton *event,
                                              struct swappy_state *state) {
-  printf("button release event\n");
+  if (state->is_mode_brush) {
+    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
+    gtk_widget_queue_draw(state->area);
+  }
 }
 
 static void draw_area_motion_notify_handler(GtkWidget *widget,
                                             GdkEventMotion *event,
                                             struct swappy_state *state) {
-  printf("motion notify event - x: %lf, y: %lf\n", event->x, event->y);
   if (state->is_mode_brush) {
-    brush_add_point(state, event->x, event->y);
+    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
     gtk_widget_queue_draw(state->area);
   }
 }
