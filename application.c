@@ -5,16 +5,22 @@
 
 #include "swappy.h"
 
+static void swappy_overlay_clear(struct swappy_state *state) {
+  if (state->brushes) {
+    g_slist_free_full(state->brushes, g_free);
+    state->brushes = NULL;
+  }
+}
+
 void application_finish(struct swappy_state *state) {
   printf("calling application_finish\n");
-  if (state->brushes) {
-    for (GSList *point = state->brushes; point; point = point->next) {
-      struct swappy_brush_point *bp = point->data;
-      printf("freeing point with x: %lf, y: %lf\n", bp->x, bp->y);
-    }
-    g_slist_free_full(state->brushes, g_free);
-  }
   g_object_unref(state->app);
+}
+
+static void tools_menu_button_clear_clicked_handler(
+    GtkWidget *widget, struct swappy_state *state) {
+  swappy_overlay_clear(state);
+  gtk_widget_queue_draw(state->area);
 }
 
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
@@ -148,18 +154,21 @@ static void build_layout_tools_menu(struct swappy_state *state,
   GtkWidget *brush = gtk_radio_button_new_with_label(NULL, "Brush");
   GtkWidget *text = gtk_radio_button_new_with_label_from_widget(
       GTK_RADIO_BUTTON(brush), "Text");
+  GtkWidget *clear = gtk_button_new_with_label("Reset");
 
   gtk_box_set_homogeneous(GTK_BOX(box), TRUE);
 
   gtk_container_add(GTK_CONTAINER(box), brush);
   gtk_container_add(GTK_CONTAINER(box), text);
-
+  gtk_container_add(GTK_CONTAINER(box), clear);
   gtk_container_add(GTK_CONTAINER(parent), box);
 
   g_signal_connect(brush, "toggled",
                    G_CALLBACK(tools_menu_button_brush_toggle_handler), state);
   g_signal_connect(text, "toggled",
                    G_CALLBACK(tools_menu_button_text_toggle_handler), state);
+  g_signal_connect(clear, "clicked",
+                   G_CALLBACK(tools_menu_button_clear_clicked_handler), state);
 }
 
 static void build_layout(struct swappy_state *state) {
