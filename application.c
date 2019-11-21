@@ -192,6 +192,7 @@ static void build_layout_tools_menu(struct swappy_state *state,
 }
 
 static void build_layout(struct swappy_state *state) {
+  return;
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
   build_layout_tools_menu(state, vbox);
@@ -204,6 +205,45 @@ static void build_layout(struct swappy_state *state) {
                    G_CALLBACK(keypress_handler), state);
 
   gtk_widget_show_all(GTK_WIDGET(state->window));
+}
+
+static void print_hello(GtkWidget *widget, gpointer data) {
+  g_print("Hello World\n");
+}
+
+static bool build_ui(struct swappy_state *state) {
+  GtkBuilder *builder;
+  GObject *container;
+  GObject *button;
+  GError *error = NULL;
+  /* Construct a GtkBuilder instance and load our UI description */
+  builder = gtk_builder_new();
+  if (gtk_builder_add_from_file(builder, "swappy.ui", &error) == 0) {
+    g_printerr("Error loading file: %s\n", error->message);
+    g_clear_error(&error);
+    return false;
+  }
+
+  /* Connect signal handlers to the constructed widgets. */
+  container = gtk_builder_get_object(builder, "container");
+
+  gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
+
+  g_signal_connect(G_OBJECT(state->window), "key_press_event",
+                   G_CALLBACK(keypress_handler), state);
+
+  button = gtk_builder_get_object(builder, "button1");
+  g_signal_connect(button, "clicked", G_CALLBACK(print_hello), NULL);
+
+  button = gtk_builder_get_object(builder, "button2");
+  g_signal_connect(button, "clicked", G_CALLBACK(print_hello), NULL);
+
+  button = gtk_builder_get_object(builder, "quit");
+  g_signal_connect(button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
+
+  gtk_widget_show_all(GTK_WIDGET(state->window));
+
+  return true;
 }
 
 static void application_activate(GtkApplication *app, void *data) {
@@ -237,6 +277,7 @@ static void application_activate(GtkApplication *app, void *data) {
   printf("window has sizes %dx%d\n", state->width, state->height);
 
   build_layout(state);
+  build_ui(state);
 }
 
 bool application_init(struct swappy_state *state) {
