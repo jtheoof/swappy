@@ -13,6 +13,12 @@ enum swappy_brush_point_kind {
   SWAPPY_BRUSH_POINT_LAST,      /* A point at the end of brush batch */
 };
 
+enum swappy_paint_mode_type {
+  SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
+  SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
+  SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
+};
+
 struct swappy_brush_point {
   double x;
   double y;
@@ -40,8 +46,8 @@ struct swappy_state {
   struct zwlr_layer_surface_v1 *layer_surface;
 
   bool should_exit;
-  bool is_mode_brush;
-  bool is_mode_text;
+
+  enum swappy_paint_mode_type mode;
 
   int width;
   int height;

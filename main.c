@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
   state.argc = argc;
   state.argv = argv;
-  state.is_mode_brush = true;
+  state.mode = SWAPPY_PAINT_MODE_BRUSH;
 
   sprintf(state.image, "%s", "/home/jattali/Desktop/sway.png");
 

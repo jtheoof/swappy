@@ -26,17 +26,19 @@ static void tools_menu_button_clear_clicked_handler(
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
   printf("brush toggled: %d\n", gtk_toggle_button_get_active(source));
-  bool is_active = gtk_toggle_button_get_active(source) == 1;
-  state->is_mode_brush = is_active;
-  state->is_mode_text = !is_active;
+  state->mode = SWAPPY_PAINT_MODE_BRUSH;
 }
 
 static void tools_menu_button_text_toggle_handler(GtkToggleButton *source,
                                                   struct swappy_state *state) {
   printf("text toggled: %d\n", gtk_toggle_button_get_active(source));
-  bool is_active = gtk_toggle_button_get_active(source) == 1;
-  state->is_mode_brush = !is_active;
-  state->is_mode_text = is_active;
+  state->mode = SWAPPY_PAINT_MODE_TEXT;
+}
+
+static void tools_menu_button_shape_toggle_handler(GtkToggleButton *source,
+                                                   struct swappy_state *state) {
+  printf("shape toggled: %d\n", gtk_toggle_button_get_active(source));
+  state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
 }
 
 static gboolean keypress_handler(GtkWidget *widget, GdkEventKey *event,
@@ -123,7 +125,11 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
 static void draw_area_button_press_handler(GtkWidget *widget,
                                            GdkEventButton *event,
                                            struct swappy_state *state) {
-  if (state->is_mode_brush) {
+  if (!(event->state & GDK_BUTTON1_MASK)) {
+    return;
+  }
+
+  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_FIRST);
     gtk_widget_queue_draw(state->area);
   }
@@ -132,7 +138,11 @@ static void draw_area_button_press_handler(GtkWidget *widget,
 static void draw_area_button_release_handler(GtkWidget *widget,
                                              GdkEventButton *event,
                                              struct swappy_state *state) {
-  if (state->is_mode_brush) {
+  if (!(event->state & GDK_BUTTON1_MASK)) {
+    return;
+  }
+
+  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
     gtk_widget_queue_draw(state->area);
   }
@@ -141,81 +151,32 @@ static void draw_area_button_release_handler(GtkWidget *widget,
 static void draw_area_motion_notify_handler(GtkWidget *widget,
                                             GdkEventMotion *event,
                                             struct swappy_state *state) {
-  if (state->is_mode_brush) {
-    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
-    gtk_widget_queue_draw(state->area);
+  GdkDisplay *display = gdk_display_get_default();
+  GdkWindow *window = event->window;
+
+  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
+    GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
+    gdk_window_set_cursor(window, crosshair);
+
+    if (event->state & GDK_BUTTON1_MASK) {
+      brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
+      gtk_widget_queue_draw(state->area);
+    }
+  } else {
+    gdk_window_set_cursor(window, NULL);
   }
-}
-
-static void build_layout_drawing_area(struct swappy_state *state,
-                                      GtkWidget *parent) {
-  GtkWidget *area = gtk_drawing_area_new();
-  state->area = area;
-
-  gtk_widget_set_size_request(area, state->width, state->height);
-
-  gtk_container_add(GTK_CONTAINER(parent), area);
-  gtk_widget_add_events(area, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK |
-                                  GDK_BUTTON1_MOTION_MASK);
-
-  g_signal_connect(G_OBJECT(area), "draw", G_CALLBACK(draw_area_handler),
-                   state);
-  g_signal_connect(G_OBJECT(area), "button-press-event",
-                   G_CALLBACK(draw_area_button_press_handler), state);
-  g_signal_connect(G_OBJECT(area), "button-release-event",
-                   G_CALLBACK(draw_area_button_release_handler), state);
-  g_signal_connect(G_OBJECT(area), "motion-notify-event",
-                   G_CALLBACK(draw_area_motion_notify_handler), state);
-}
-
-static void build_layout_tools_menu(struct swappy_state *state,
-                                    GtkWidget *parent) {
-  GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-  GtkWidget *brush = gtk_radio_button_new_with_label(NULL, "Brush");
-  GtkWidget *text = gtk_radio_button_new_with_label_from_widget(
-      GTK_RADIO_BUTTON(brush), "Text");
-  GtkWidget *clear = gtk_button_new_with_label("Reset");
-
-  gtk_box_set_homogeneous(GTK_BOX(box), TRUE);
-
-  gtk_container_add(GTK_CONTAINER(box), brush);
-  gtk_container_add(GTK_CONTAINER(box), text);
-  gtk_container_add(GTK_CONTAINER(box), clear);
-  gtk_container_add(GTK_CONTAINER(parent), box);
-
-  g_signal_connect(brush, "toggled",
-                   G_CALLBACK(tools_menu_button_brush_toggle_handler), state);
-  g_signal_connect(text, "toggled",
-                   G_CALLBACK(tools_menu_button_text_toggle_handler), state);
-  g_signal_connect(clear, "clicked",
-                   G_CALLBACK(tools_menu_button_clear_clicked_handler), state);
-}
-
-static void build_layout(struct swappy_state *state) {
-  return;
-  GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-
-  build_layout_tools_menu(state, vbox);
-  build_layout_drawing_area(state, vbox);
-
-  gtk_container_add(GTK_CONTAINER(state->window), vbox);
-  gtk_container_set_border_width(GTK_CONTAINER(state->window), 2);
-
-  g_signal_connect(G_OBJECT(state->window), "key_press_event",
-                   G_CALLBACK(keypress_handler), state);
-
-  gtk_widget_show_all(GTK_WIDGET(state->window));
-}
-
-static void print_hello(GtkWidget *widget, gpointer data) {
-  g_print("Hello World\n");
 }
 
 static bool build_ui(struct swappy_state *state) {
   GtkBuilder *builder;
   GObject *container;
-  GObject *button;
+  GObject *brush;
+  GObject *text;
+  GObject *shape;
+  GtkWidget *area;
+  GObject *clear;
   GError *error = NULL;
+
   /* Construct a GtkBuilder instance and load our UI description */
   builder = gtk_builder_new();
   if (gtk_builder_add_from_file(builder, "swappy.ui", &error) == 0) {
@@ -226,21 +187,38 @@ static bool build_ui(struct swappy_state *state) {
 
   /* Connect signal handlers to the constructed widgets. */
   container = gtk_builder_get_object(builder, "container");
+  brush = gtk_builder_get_object(builder, "brush");
+  text = gtk_builder_get_object(builder, "text");
+  shape = gtk_builder_get_object(builder, "shape");
+  clear = gtk_builder_get_object(builder, "clear");
+  area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
 
   gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
 
   g_signal_connect(G_OBJECT(state->window), "key_press_event",
                    G_CALLBACK(keypress_handler), state);
+  g_signal_connect(brush, "toggled",
+                   G_CALLBACK(tools_menu_button_brush_toggle_handler), state);
+  g_signal_connect(text, "toggled",
+                   G_CALLBACK(tools_menu_button_text_toggle_handler), state);
+  g_signal_connect(shape, "toggled",
+                   G_CALLBACK(tools_menu_button_shape_toggle_handler), state);
+  g_signal_connect(clear, "clicked",
+                   G_CALLBACK(tools_menu_button_clear_clicked_handler), state);
 
-  button = gtk_builder_get_object(builder, "button1");
-  g_signal_connect(button, "clicked", G_CALLBACK(print_hello), NULL);
+  gtk_widget_set_size_request(area, state->width, state->height);
+  gtk_widget_add_events(area, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
+                                  GDK_BUTTON_RELEASE_MASK |
+                                  GDK_BUTTON1_MOTION_MASK);
+  g_signal_connect(area, "draw", G_CALLBACK(draw_area_handler), state);
+  g_signal_connect(area, "button-press-event",
+                   G_CALLBACK(draw_area_button_press_handler), state);
+  g_signal_connect(area, "button-release-event",
+                   G_CALLBACK(draw_area_button_release_handler), state);
+  g_signal_connect(area, "motion-notify-event",
+                   G_CALLBACK(draw_area_motion_notify_handler), state);
 
-  button = gtk_builder_get_object(builder, "button2");
-  g_signal_connect(button, "clicked", G_CALLBACK(print_hello), NULL);
-
-  button = gtk_builder_get_object(builder, "quit");
-  g_signal_connect(button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
-
+  state->area = area;
   gtk_widget_show_all(GTK_WIDGET(state->window));
 
   return true;
@@ -249,7 +227,7 @@ static bool build_ui(struct swappy_state *state) {
 static void application_activate(GtkApplication *app, void *data) {
   struct swappy_state *state = data;
 
-  // Create a normal GTK window however you like
+  // Create a normal GTK vbox however you like
   GtkWindow *window = GTK_WINDOW(gtk_application_window_new(app));
   state->window = window;
 
@@ -276,7 +254,6 @@ static void application_activate(GtkApplication *app, void *data) {
 
   printf("window has sizes %dx%d\n", state->width, state->height);
 
-  build_layout(state);
   build_ui(state);
 }
 
