@@ -53,6 +53,3 @@ dkms.conf
 
 # Build folders
 build/
-
-# IDE
-.vscode/

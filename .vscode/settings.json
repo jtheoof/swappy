@@ -1,0 +1,12 @@
+{
+    "mesonbuild.configureOnOpen": true,
+    "files.associations": {
+        "swappy.h": "c",
+        "wayland.h": "c",
+        "gtk.h": "c",
+        "gdkevents.h": "c",
+        "glib.h": "c",
+        "notification.h": "c",
+        "stdbool.h": "c"
+    }
+}

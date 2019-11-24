@@ -47,7 +47,7 @@ static void action_save_area_to_file(struct swappy_state *state) {
   }
 
   char message[MAX_PATH];
-  snprintf(message, MAX_PATH, "Saved Swapp Shot to: %s", path);
+  snprintf(message, MAX_PATH, "Saved Swapp Shot to: %s\n", path);
   notification_send("Swappy", message);
 }
 
@@ -84,15 +84,15 @@ static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
   char text[255] = "This is a nice text";
   gtk_clipboard_set_text(clipboard, text, -1);
   gtk_clipboard_store(clipboard);
-  g_debug("clipboard stored");
+  g_debug("clipboard stored\n");
 }
 
 static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              gpointer data) {
   struct swappy_state *state = data;
-  g_debug("keypress_handler key pressed: %d", event->keyval);
+  g_debug("keypress_handler key pressed: %d\n", event->keyval);
   if (event->keyval == GDK_KEY_Escape) {
-    g_debug("keypress_handler: escape key pressed, ciao bye");
+    g_debug("keypress_handler: escape key pressed, ciao bye\n");
     state->should_exit = true;
     gtk_window_close(state->window);
   }
