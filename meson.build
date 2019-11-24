@@ -12,6 +12,7 @@ project(
 )
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
+add_project_arguments('-Wno-format-truncation', language: 'c')
 
 swappy_inc = include_directories('include')
 
@@ -21,6 +22,7 @@ cairo = dependency('cairo')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-wayland-3.0', version: '>=3.22.0')
 gtk_layer_shell = dependency('gtk-layer-shell-0', version: '>= 0.1.0')
+libnotify = dependency('libnotify')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
@@ -31,6 +33,8 @@ executable(
 	'swappy',
 	files([
 		'main.c',
+		'notification.c',
+		'config.c',
 		'wayland.c',
 		'application.c',
 	]),
@@ -39,6 +43,7 @@ executable(
 		client_protos,
 		gtk,
 		gtk_layer_shell,
+		libnotify,
 		realtime,
 		wayland_client,
 		wayland_cursor,

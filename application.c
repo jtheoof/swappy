@@ -2,7 +2,9 @@
 #include <glib-2.0/glib.h>
 #include <gtk-layer-shell/gtk-layer-shell.h>
 #include <gtk/gtk.h>
+#include <time.h>
 
+#include "notification.h"
 #include "swappy.h"
 
 static void swappy_overlay_clear(struct swappy_state *state) {
@@ -14,7 +16,43 @@ static void swappy_overlay_clear(struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   printf("calling application_finish\n");
+  swappy_overlay_clear(state);
+  g_free(state->storage_path);
   g_object_unref(state->app);
+}
+
+static void tools_menu_button_save_clicked_handler(GtkButton *button,
+                                                   struct swappy_state *state) {
+  printf("clicked!\n");
+
+  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->area));
+  GdkPixbuf *pixbuf =
+      gdk_pixbuf_get_from_window(window, 0, 0, state->width, state->height);
+  GError *error = NULL;
+
+  time_t current_time;
+  char *c_time_string;
+
+  time(&current_time);
+
+  c_time_string = ctime(&current_time);
+  c_time_string[strlen(c_time_string) - 1] = '\0';
+  char path[MAX_PATH];
+  snprintf(path, MAX_PATH, "%s/%s %s", state->storage_path, "Swapp Shot",
+           c_time_string);
+  g_info("saving swapp shot to: \"%s\"", path);
+  char *ext = "png";
+  gdk_pixbuf_savev(pixbuf, path, ext, NULL, NULL, &error);
+
+  if (error != NULL) {
+    fprintf(stderr, "unable to save drawing area to pixbuf: %s\n",
+            error->message);
+    g_error_free(error);
+  }
+
+  char message[MAX_PATH];
+  snprintf(message, MAX_PATH, "Saved Swapp Shot to: %s\n", path);
+  notification_send("Swappy", message);
 }
 
 static void tools_menu_button_clear_clicked_handler(
@@ -39,6 +77,17 @@ static void tools_menu_button_shape_toggle_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
   printf("shape toggled: %d\n", gtk_toggle_button_get_active(source));
   state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+}
+
+static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
+                                                   struct swappy_state *state) {
+  printf("copy clicked\n");
+  GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+
+  char text[255] = "This is a nice text";
+  gtk_clipboard_set_text(clipboard, text, -1);
+  gtk_clipboard_store(clipboard);
+  printf("clipboard stored\n");
 }
 
 static gboolean keypress_handler(GtkWidget *widget, GdkEventKey *event,
@@ -174,6 +223,8 @@ static bool build_ui(struct swappy_state *state) {
   GObject *text;
   GObject *shape;
   GtkWidget *area;
+  GObject *copy;
+  GObject *save;
   GObject *clear;
   GError *error = NULL;
 
@@ -190,6 +241,8 @@ static bool build_ui(struct swappy_state *state) {
   brush = gtk_builder_get_object(builder, "brush");
   text = gtk_builder_get_object(builder, "text");
   shape = gtk_builder_get_object(builder, "shape");
+  copy = gtk_builder_get_object(builder, "copy");
+  save = gtk_builder_get_object(builder, "save");
   clear = gtk_builder_get_object(builder, "clear");
   area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
 
@@ -203,6 +256,10 @@ static bool build_ui(struct swappy_state *state) {
                    G_CALLBACK(tools_menu_button_text_toggle_handler), state);
   g_signal_connect(shape, "toggled",
                    G_CALLBACK(tools_menu_button_shape_toggle_handler), state);
+  g_signal_connect(copy, "clicked",
+                   G_CALLBACK(tools_menu_button_copy_clicked_handler), state);
+  g_signal_connect(save, "clicked",
+                   G_CALLBACK(tools_menu_button_save_clicked_handler), state);
   g_signal_connect(clear, "clicked",
                    G_CALLBACK(tools_menu_button_clear_clicked_handler), state);
 

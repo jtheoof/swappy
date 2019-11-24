@@ -5,7 +5,10 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <wayland-client.h>
+
+#define MAX_PATH 4096
 
 enum swappy_brush_point_kind {
   SWAPPY_BRUSH_POINT_FIRST = 0, /* A first point of new brush batch */
@@ -46,6 +49,8 @@ struct swappy_state {
   struct zwlr_layer_surface_v1 *layer_surface;
 
   bool should_exit;
+
+  char *storage_path;
 
   enum swappy_paint_mode_type mode;
 
