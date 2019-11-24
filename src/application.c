@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #include <time.h>
 
+#include "draw.h"
 #include "notification.h"
 #include "swappy.h"
 
@@ -15,16 +16,13 @@ static void swappy_overlay_clear(struct swappy_state *state) {
 }
 
 void application_finish(struct swappy_state *state) {
-  printf("calling application_finish\n");
+  g_debug("application is shutting down");
   swappy_overlay_clear(state);
   g_free(state->storage_path);
   g_object_unref(state->app);
 }
 
-static void tools_menu_button_save_clicked_handler(GtkButton *button,
-                                                   struct swappy_state *state) {
-  printf("clicked!\n");
-
+static void action_save_area_to_file(struct swappy_state *state) {
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->area));
   GdkPixbuf *pixbuf =
       gdk_pixbuf_get_from_window(window, 0, 0, state->width, state->height);
@@ -41,18 +39,21 @@ static void tools_menu_button_save_clicked_handler(GtkButton *button,
   snprintf(path, MAX_PATH, "%s/%s %s", state->storage_path, "Swapp Shot",
            c_time_string);
   g_info("saving swapp shot to: \"%s\"", path);
-  char *ext = "png";
-  gdk_pixbuf_savev(pixbuf, path, ext, NULL, NULL, &error);
+  gdk_pixbuf_savev(pixbuf, path, "png", NULL, NULL, &error);
 
   if (error != NULL) {
-    fprintf(stderr, "unable to save drawing area to pixbuf: %s\n",
-            error->message);
+    g_error("unable to save drawing area to pixbuf: %s", error->message);
     g_error_free(error);
   }
 
   char message[MAX_PATH];
-  snprintf(message, MAX_PATH, "Saved Swapp Shot to: %s\n", path);
+  snprintf(message, MAX_PATH, "Saved Swapp Shot to: %s", path);
   notification_send("Swappy", message);
+}
+
+static void tools_menu_button_save_clicked_handler(GtkButton *button,
+                                                   struct swappy_state *state) {
+  action_save_area_to_file(state);
 }
 
 static void tools_menu_button_clear_clicked_handler(
@@ -63,98 +64,38 @@ static void tools_menu_button_clear_clicked_handler(
 
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
-  printf("brush toggled: %d\n", gtk_toggle_button_get_active(source));
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
 }
 
 static void tools_menu_button_text_toggle_handler(GtkToggleButton *source,
                                                   struct swappy_state *state) {
-  printf("text toggled: %d\n", gtk_toggle_button_get_active(source));
   state->mode = SWAPPY_PAINT_MODE_TEXT;
 }
 
 static void tools_menu_button_shape_toggle_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
-  printf("shape toggled: %d\n", gtk_toggle_button_get_active(source));
   state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
 }
 
 static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
-  printf("copy clicked\n");
   GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
 
   char text[255] = "This is a nice text";
   gtk_clipboard_set_text(clipboard, text, -1);
   gtk_clipboard_store(clipboard);
-  printf("clipboard stored\n");
+  g_debug("clipboard stored");
 }
 
-static gboolean keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                                 gpointer data) {
+static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
+                             gpointer data) {
   struct swappy_state *state = data;
-  printf("keypress_handler key pressed: %d\n", event->keyval);
+  g_debug("keypress_handler key pressed: %d", event->keyval);
   if (event->keyval == GDK_KEY_Escape) {
-    printf("keypress_handler: escape key pressed, ciao bye\n");
+    g_debug("keypress_handler: escape key pressed, ciao bye");
     state->should_exit = true;
     gtk_window_close(state->window);
-    return TRUE;
   }
-  return FALSE;
-}
-
-static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
-                                  struct swappy_state *state) {
-  guint width, height;
-  GtkStyleContext *context;
-
-  context = gtk_widget_get_style_context(widget);
-  width = gtk_widget_get_allocated_width(widget);
-  height = gtk_widget_get_allocated_height(widget);
-
-  gtk_render_background(context, cr, 0, 0, width, height);
-
-  // Drawing backgroound
-  cairo_save(cr);
-  cairo_set_source_rgb(cr, 1, 1, 1);
-  cairo_rectangle(cr, 0, 0, width, height);
-  cairo_stroke_preserve(cr);
-  cairo_fill(cr);
-  cairo_restore(cr);
-
-  // Drawing image
-  cairo_surface_t *image;
-  image = cairo_image_surface_create_from_png(state->image);
-  cairo_save(cr);
-  cairo_surface_flush(image);
-  cairo_surface_mark_dirty(image);
-  cairo_set_source_surface(cr, image, 0, 0);
-  cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
-  cairo_paint(cr);
-  cairo_surface_destroy(image);
-  cairo_restore(cr);
-
-  for (GSList *brush = state->brushes; brush; brush = brush->next) {
-    GSList *brush_next = brush->next;
-    struct swappy_brush_point *point = brush->data;
-
-    if (brush_next && point->kind == SWAPPY_BRUSH_POINT_WITHIN) {
-      struct swappy_brush_point *next = brush_next->data;
-      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, 2);
-      cairo_move_to(cr, point->x, point->y);
-      cairo_line_to(cr, next->x, next->y);
-      cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
-      cairo_stroke(cr);
-    } else {
-      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, 2);
-      cairo_rectangle(cr, point->x, point->y, 1, 1);
-      cairo_stroke(cr);
-    }
-  }
-
-  return true;
 }
 
 static void brush_add_point(struct swappy_state *state, double x, double y,
@@ -231,7 +172,7 @@ static bool build_ui(struct swappy_state *state) {
   /* Construct a GtkBuilder instance and load our UI description */
   builder = gtk_builder_new();
   if (gtk_builder_add_from_file(builder, "swappy.ui", &error) == 0) {
-    g_printerr("Error loading file: %s\n", error->message);
+    g_printerr("Error loading file: %s", error->message);
     g_clear_error(&error);
     return false;
   }
@@ -267,7 +208,7 @@ static bool build_ui(struct swappy_state *state) {
   gtk_widget_add_events(area, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
                                   GDK_BUTTON_RELEASE_MASK |
                                   GDK_BUTTON1_MOTION_MASK);
-  g_signal_connect(area, "draw", G_CALLBACK(draw_area_handler), state);
+  g_signal_connect(area, "draw", G_CALLBACK(draw_area), state);
   g_signal_connect(area, "button-press-event",
                    G_CALLBACK(draw_area_button_press_handler), state);
   g_signal_connect(area, "button-release-event",
@@ -309,7 +250,7 @@ static void application_activate(GtkApplication *app, void *data) {
 
   gtk_window_get_size(window, &state->width, &state->height);
 
-  printf("window has sizes %dx%d\n", state->width, state->height);
+  g_debug("window has sizes %dx%d", state->width, state->height);
 
   build_ui(state);
 }
@@ -319,7 +260,8 @@ bool application_init(struct swappy_state *state) {
       gtk_application_new("me.jtheoof.swappy", G_APPLICATION_FLAGS_NONE);
 
   if (state->app == NULL) {
-    fprintf(stderr, "cannot create gtk application\n");
+    g_critical("cannot create gtk application");
+    return false;
   }
 
   g_signal_connect(state->app, "activate", G_CALLBACK(application_activate),

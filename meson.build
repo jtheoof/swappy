@@ -32,11 +32,12 @@ subdir('protocol')
 executable(
 	'swappy',
 	files([
-		'main.c',
-		'notification.c',
-		'config.c',
-		'wayland.c',
-		'application.c',
+		'src/main.c',
+		'src/notification.c',
+		'src/config.c',
+		'src/draw.c',
+		'src/wayland.c',
+		'src/application.c',
 	]),
 	dependencies: [
 		cairo,
