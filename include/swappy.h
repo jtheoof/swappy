@@ -1,5 +1,4 @@
-#ifndef _SWAPPY_H
-#define _SWAPPY_H
+#pragma once
 
 #include <glib-2.0/glib.h>
 #include <gtk/gtk.h>
@@ -63,5 +62,3 @@ struct swappy_state {
   int argc;
   char **argv;
 };
-
-#endif
