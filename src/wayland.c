@@ -4,6 +4,7 @@
 
 #include "swappy.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
+#include "wlr-screencopy-unstable-v1-client-protocol.h"
 
 static bool parse_box(struct swappy_box *box, const char *str) {
   char *end = NULL;
@@ -65,6 +66,10 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     state->layer_shell = wl_registry_bind(
         registry, name, &zwlr_layer_shell_v1_interface, version);
     bound = true;
+  } else if (strcmp(interface, zwlr_screencopy_manager_v1_interface.name) ==
+             0) {
+    state->zwlr_screencopy_manager = wl_registry_bind(
+        registry, name, &zwlr_screencopy_manager_v1_interface, 1);
   }
 
   if (bound) {
@@ -107,6 +112,9 @@ bool wayland_init(struct swappy_state *state) {
   if (state->layer_shell == NULL) {
     g_error("compositor doesn't support zwlr_layer_shell_v1");
     return false;
+  }
+  if (state->zwlr_screencopy_manager == NULL) {
+    g_error("compositor does not support zwlr_screencopy_v1");
   }
 
   return true;

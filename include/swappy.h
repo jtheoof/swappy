@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <wayland-client.h>
 
+#include "wlr-layer-shell-unstable-v1-client-protocol.h"
+#include "wlr-screencopy-unstable-v1-client-protocol.h"
+
 #define MAX_PATH 4096
 
 #define GEOMETRY_PATTERN "xx,yy wwxhh"
@@ -50,6 +53,7 @@ struct swappy_state {
   struct wl_shm *shm;
   struct zwlr_layer_shell_v1 *layer_shell;
   struct zxdg_output_manager_v1 *xdg_output_manager;
+  struct zwlr_screencopy_manager_v1 *zwlr_screencopy_manager;
   struct wl_list outputs;  // mako_output::link
   struct wl_list seats;    // mako_seat::link
 
