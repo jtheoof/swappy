@@ -1,7 +1,7 @@
-#ifndef _WAYLAND_H
-#define _WAYLAND_H
+#pragma once
+
+#include "swappy.h"
 
 bool wayland_init(struct swappy_state *state);
 void wayland_finish(struct swappy_state *state);
-
-#endif
+bool wayland_screencopy_geometry(struct swappy_state *state);

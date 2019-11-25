@@ -27,7 +27,6 @@ bool config_get_storage_path(struct swappy_state *state) {
 
   for (size_t i = 0; i < sizeof(storage_paths) / sizeof(char *); ++i) {
     wordexp_t p;
-    g_debug("trying to wordexp: %s", storage_paths[i]);
     if (wordexp(storage_paths[i], &p, 0) == 0) {
       char *path = g_strdup(p.we_wordv[0]);
       wordfree(&p);
@@ -36,7 +35,6 @@ bool config_get_storage_path(struct swappy_state *state) {
         state->storage_path = path;
         return true;
       }
-      g_debug("freeing: %s", path);
       g_free(path);
     }
   }

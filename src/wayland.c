@@ -5,10 +5,51 @@
 #include "swappy.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
-void global_registry_handler(void *data, struct wl_registry *registry,
-                             uint32_t name, const char *interface,
-                             uint32_t version) {
-  printf("got a registry event for interface: %s, name: %d\n", interface, name);
+static bool parse_box(struct swappy_box *box, const char *str) {
+  char *end = NULL;
+  box->x = strtol(str, &end, 10);
+  if (end[0] != ',') {
+    return false;
+  }
+
+  char *next = end + 1;
+  box->y = strtol(next, &end, 10);
+  if (end[0] != ' ') {
+    return false;
+  }
+
+  next = end + 1;
+  box->width = strtol(next, &end, 10);
+  if (end[0] != 'x') {
+    return false;
+  }
+
+  next = end + 1;
+  box->height = strtol(next, &end, 10);
+  if (end[0] != '\0') {
+    return false;
+  }
+
+  return true;
+}
+
+bool wayland_screencopy_geometry(struct swappy_state *state) {
+  struct swappy_box *geometry = g_new(struct swappy_box, 1);
+  char *geometry_str = state->geometry_str;
+  state->geometry = geometry;
+
+  if (!parse_box(geometry, geometry_str)) {
+    g_critical("%s is not a valid geometry, must follow the pattern \"%s",
+               geometry_str, GEOMETRY_PATTERN);
+    return false;
+  }
+  return true;
+}
+
+static void global_registry_handler(void *data, struct wl_registry *registry,
+                                    uint32_t name, const char *interface,
+                                    uint32_t version) {
+  g_debug("got a registry event for interface: %s, name: %d", interface, name);
 
   struct swappy_state *state = data;
   bool bound = false;
@@ -27,16 +68,17 @@ void global_registry_handler(void *data, struct wl_registry *registry,
   }
 
   if (bound) {
-    printf("bound registry: %s\n", interface);
+    g_debug("bound registry: %s", interface);
   }
 }
 
-void global_registry_remove_handler(void *data, struct wl_registry *wl_registry,
-                                    uint32_t name) {
-  printf("got a registry remove event for name: %d\n", name);
+static void global_registry_remove_handler(void *data,
+                                           struct wl_registry *wl_registry,
+                                           uint32_t name) {
+  g_debug("got a registry remove event for name: %d", name);
 }
 
-struct wl_registry_listener registry_listener = {
+static struct wl_registry_listener registry_listener = {
     .global = global_registry_handler,
     .global_remove = global_registry_remove_handler,
 };
@@ -44,26 +86,26 @@ struct wl_registry_listener registry_listener = {
 bool wayland_init(struct swappy_state *state) {
   state->display = wl_display_connect(NULL);
   if (state->display == NULL) {
-    fprintf(stderr, "cannot connect to wayland display\n");
+    g_error("cannot connect to wayland display");
     return false;
   }
 
-  printf("connected to wayland display\n");
+  g_debug("connected to wayland display");
 
   state->registry = wl_display_get_registry(state->display);
   wl_registry_add_listener(state->registry, &registry_listener, state);
   wl_display_roundtrip(state->display);
 
   if (state->compositor == NULL) {
-    fprintf(stderr, "compositor doesn't support wl_compositor\n");
+    g_error("compositor doesn't support wl_compositor");
     return false;
   }
   if (state->shm == NULL) {
-    fprintf(stderr, "compositor doesn't support wl_shm\n");
+    g_error("compositor doesn't support wl_shm");
     return false;
   }
   if (state->layer_shell == NULL) {
-    fprintf(stderr, "compositor doesn't support zwlr_layer_shell_v1\n");
+    g_error("compositor doesn't support zwlr_layer_shell_v1");
     return false;
   }
 
@@ -72,5 +114,5 @@ bool wayland_init(struct swappy_state *state) {
 
 void wayland_finish(struct swappy_state *state) {
   wl_display_disconnect(state->display);
-  printf("disconnected from wayland display\n");
+  g_debug("disconnected from wayland display");
 }

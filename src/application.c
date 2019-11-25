@@ -7,6 +7,7 @@
 #include "draw.h"
 #include "notification.h"
 #include "swappy.h"
+#include "wayland.h"
 
 static void swappy_overlay_clear(struct swappy_state *state) {
   if (state->brushes) {
@@ -19,6 +20,8 @@ void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
   g_free(state->storage_path);
+  g_free(state->geometry_str);
+  g_free(state->geometry);
   g_object_unref(state->app);
 }
 
@@ -222,8 +225,8 @@ static bool build_ui(struct swappy_state *state) {
   return true;
 }
 
-static void application_activate(GtkApplication *app, void *data) {
-  struct swappy_state *state = data;
+static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
+  g_info("activating application ----------");
 
   // Create a normal GTK vbox however you like
   GtkWindow *window = GTK_WINDOW(gtk_application_window_new(app));
@@ -255,16 +258,43 @@ static void application_activate(GtkApplication *app, void *data) {
   build_ui(state);
 }
 
+static gint command_line_handler(GtkApplication *app,
+                                 GApplicationCommandLine *cmdline,
+                                 struct swappy_state *state) {
+  g_debug("geometry is: %s", state->geometry_str);
+
+  if (!wayland_screencopy_geometry(state)) {
+    return EXIT_FAILURE;
+  }
+
+  init_layer_shell(app, state);
+
+  return EXIT_SUCCESS;
+}
+
 bool application_init(struct swappy_state *state) {
-  state->app =
-      gtk_application_new("me.jtheoof.swappy", G_APPLICATION_FLAGS_NONE);
+  const GOptionEntry cli_options[] = {
+      {
+          .long_name = "geometry",
+          .short_name = 'g',
+          .arg = G_OPTION_ARG_STRING,
+          .arg_data = &state->geometry_str,
+          .description =
+              "Set the region to capture. (Can be an output of slurp)",
+      },
+      {NULL}};
+
+  state->app = gtk_application_new("me.jtheoof.swappy",
+                                   G_APPLICATION_HANDLES_COMMAND_LINE);
 
   if (state->app == NULL) {
     g_critical("cannot create gtk application");
     return false;
   }
 
-  g_signal_connect(state->app, "activate", G_CALLBACK(application_activate),
+  g_application_add_main_option_entries(G_APPLICATION(state->app), cli_options);
+
+  g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
 
   return true;

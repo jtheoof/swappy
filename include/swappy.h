@@ -9,6 +9,8 @@
 
 #define MAX_PATH 4096
 
+#define GEOMETRY_PATTERN "xx,yy wwxhh"
+
 enum swappy_brush_point_kind {
   SWAPPY_BRUSH_POINT_FIRST = 0, /* A first point of new brush batch */
   SWAPPY_BRUSH_POINT_WITHIN,    /* A point within a brush batch */
@@ -29,6 +31,13 @@ struct swappy_brush_point {
   double b;
   double a;
   enum swappy_brush_point_kind kind;
+};
+
+struct swappy_box {
+  int32_t x;
+  int32_t y;
+  int32_t width;
+  int32_t height;
 };
 
 struct swappy_state {
@@ -56,6 +65,11 @@ struct swappy_state {
   int width;
   int height;
   char image[255];
+
+  /* Options */
+  char *geometry_str;
+
+  struct swappy_box *geometry;
 
   GSList *brushes;
 

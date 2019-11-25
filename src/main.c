@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 2
 #include <errno.h>
+#include <getopt.h>
 #include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,52 @@
 #include "config.h"
 #include "swappy.h"
 #include "wayland.h"
+
+// static const char usage[] =
+//     "Usage: swappy [OPTIONS...]\n"
+//     "\n"
+//     "Options:\n"
+//     "  -h, --help                   Show help message and quit.\n"
+//     "  -g, --geometry=\"x,y wxh\"   Set the region to capture.\n"
+//     "                               (Can be an output of slurp)\n";
+
+// static bool parse_options(struct swappy_state *state) {
+//   int argc = state->argc;
+//   char **argv = state->argv;
+
+//   int c;
+
+//   while (1) {
+//     int option_index = 0;
+
+//     static struct option long_options[] = {
+//         {"help", optional_argument, NULL, 'h'},
+//         {"geometry", required_argument, NULL, 'g'},
+//         {0, 0, 0, 0}};
+
+//     c = getopt_long(argc, argv, "hg:", long_options, &option_index);
+//     if (c == -1) break;
+
+//     switch (c) {
+//       case 'h':
+//         printf(usage);
+//         break;
+//       case 'g':
+//         g_debug("geometry is: %s", optarg);
+//         break;
+//       default:
+//         printf("waaaaaaaaaaaa\n");
+//     }
+//   }
+
+//   if (optind < argc) {
+//     g_error("invalid usage");
+//     printf(usage);
+//     return false;
+//   }
+
+//   return true;
+// }
 
 int main(int argc, char *argv[]) {
   struct swappy_state state = {0};
@@ -30,12 +77,18 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+  if (!wayland_init(&state)) {
+    g_critical("failed to initialize wayland");
+    exit(1);
+  }
+
   if (!application_init(&state)) {
-    g_critical("failed to init application");
+    g_critical("failed to initialize gtk application");
     exit(1);
   }
 
   application_run(&state);
 
   application_finish(&state);
+  wayland_finish(&state);
 }
