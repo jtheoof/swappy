@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G ninja" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="745e50cb-9320-46fe-bbe5-c48193519ec6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/.ninja_deps" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CompDBLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="build" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="build" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="modificationStamps">
+      <map>
+        <entry key="$PROJECT_DIR$" value="1575218680103" />
+        <entry key="$PROJECT_DIR$/compile_commands.json" value="708660356" />
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1UMBFaqpb6fmq4JzXHYA772ZCLp" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.advertisement.text.overridden" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/swappy" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RunManager">
+    <configuration name="swappy" type="CLionExternalRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-g &quot;1024,200 300x300&quot;" WORKING_DIR="file://$PROJECT_DIR$/.." PASS_PARENT_ENVS_2="true" PROJECT_NAME="build" TARGET_NAME="Build" CONFIG_NAME="Build" RUN_PATH="$PROJECT_DIR$/swappy">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1184" y="407" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1575220003282">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state x="1184" y="407" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.3440.1440@0.0.3440.1440" timestamp="1575220003282" />
+    <state x="1508" y="507" key="FileChooserDialogImpl" timestamp="1575220001580">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state x="1508" y="507" key="FileChooserDialogImpl/0.0.3440.1440@0.0.3440.1440" timestamp="1575220001580" />
+    <state width="1546" height="471" key="GridCell.Tab.0.bottom" timestamp="1575220019308">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.0.bottom/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019308" />
+    <state width="1546" height="471" key="GridCell.Tab.0.center" timestamp="1575220019306">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.0.center/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019306" />
+    <state width="1546" height="471" key="GridCell.Tab.0.left" timestamp="1575220019305">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.0.left/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019305" />
+    <state width="1546" height="471" key="GridCell.Tab.0.right" timestamp="1575220019307">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.0.right/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019307" />
+    <state width="1546" height="471" key="GridCell.Tab.1.bottom" timestamp="1575220019310">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.1.bottom/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019310" />
+    <state width="1546" height="471" key="GridCell.Tab.1.center" timestamp="1575220019309">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.1.center/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019309" />
+    <state width="1546" height="471" key="GridCell.Tab.1.left" timestamp="1575220019309">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.1.left/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019309" />
+    <state width="1546" height="471" key="GridCell.Tab.1.right" timestamp="1575220019310">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state width="1546" height="471" key="GridCell.Tab.1.right/0.0.3440.1440@0.0.3440.1440" timestamp="1575220019310" />
+    <state x="1037" y="384" width="1366" height="700" key="SettingsEditor" timestamp="1575219846526">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state x="1037" y="384" width="1366" height="700" key="SettingsEditor/0.0.3440.1440@0.0.3440.1440" timestamp="1575219846526" />
+    <state x="1318" y="458" width="804" height="552" key="find.popup" timestamp="1575219955347">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state x="1318" y="458" width="804" height="552" key="find.popup/0.0.3440.1440@0.0.3440.1440" timestamp="1575219955347" />
+    <state x="2529" y="368" width="672" height="678" key="search.everywhere.popup" timestamp="1575220139123">
+      <screen x="0" y="0" width="3440" height="1440" />
+    </state>
+    <state x="2529" y="368" width="672" height="678" key="search.everywhere.popup/0.0.3440.1440@0.0.3440.1440" timestamp="1575220139123" />
+  </component>
+</project>

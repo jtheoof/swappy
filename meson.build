@@ -12,7 +12,7 @@ project(
 )
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
-add_project_arguments('-Wno-format-truncation', language: 'c')
+#add_project_arguments('-Wno-format-truncation', language: 'c')
 
 swappy_inc = include_directories('include')
 

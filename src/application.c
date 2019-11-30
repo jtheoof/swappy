@@ -273,6 +273,8 @@ static gint command_line_handler(GtkApplication *app,
 }
 
 bool application_init(struct swappy_state *state) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
   const GOptionEntry cli_options[] = {
       {
           .long_name = "geometry",
@@ -283,6 +285,7 @@ bool application_init(struct swappy_state *state) {
               "Set the region to capture. (Can be an output of slurp)",
       },
       {NULL}};
+#pragma clang diagnostic pop
 
   state->app = gtk_application_new("me.jtheoof.swappy",
                                    G_APPLICATION_HANDLES_COMMAND_LINE);

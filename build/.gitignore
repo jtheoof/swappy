@@ -1,0 +1,10 @@
+compiler-file*.d
+meson-info
+meson-logs
+meson-private
+.ninja_deps
+.ninja_log
+protocol
+swappy
+swappy.1
+swappy@exe
