@@ -258,9 +258,18 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
   build_ui(state);
 }
 
+static gboolean is_geometry_valid(struct swappy_state *state) {
+  return (state->geometry_str != NULL);
+}
+
 static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
+  if (!is_geometry_valid(state)) {
+    g_warning("geometry parameter is missing");
+    return EXIT_FAILURE;
+  }
+
   g_debug("geometry is: %s", state->geometry_str);
 
   if (!wayland_screencopy_geometry(state)) {

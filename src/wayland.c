@@ -70,6 +70,7 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
              0) {
     state->zwlr_screencopy_manager = wl_registry_bind(
         registry, name, &zwlr_screencopy_manager_v1_interface, 1);
+    bound = true;
   }
 
   if (bound) {
