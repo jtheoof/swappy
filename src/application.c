@@ -6,6 +6,7 @@
 
 #include "draw.h"
 #include "notification.h"
+#include "screencopy.h"
 #include "swappy.h"
 #include "wayland.h"
 
@@ -272,8 +273,13 @@ static gint command_line_handler(GtkApplication *app,
 
   g_debug("geometry is: %s", state->geometry_str);
 
-  if (!wayland_screencopy_geometry(state)) {
+  if (!screencopy_parse_geometry(state)) {
     return EXIT_FAILURE;
+  }
+
+  if (!screencopy_init(state)) {
+    g_warning("unable to initialize zwlr_screencopy_v1");
+    return false;
   }
 
   init_layer_shell(app, state);

@@ -31,13 +31,13 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (!wayland_init(&state)) {
-    g_critical("failed to initialize wayland");
+  if (!application_init(&state)) {
+    g_critical("failed to initialize gtk application");
     exit(1);
   }
 
-  if (!application_init(&state)) {
-    g_critical("failed to initialize gtk application");
+  if (!wayland_init(&state)) {
+    g_critical("failed to initialize wayland");
     exit(1);
   }
 

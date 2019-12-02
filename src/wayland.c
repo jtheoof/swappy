@@ -4,7 +4,7 @@
 #include <string.h>
 #include <wayland-client.h>
 
-#include "box.h"
+#include "screencopy.h"
 #include "swappy.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
@@ -115,19 +115,6 @@ static const struct wl_output_listener output_listener = {
     .scale = output_handle_scale,
 };
 
-bool wayland_screencopy_geometry(struct swappy_state *state) {
-  struct swappy_box *geometry = g_new(struct swappy_box, 1);
-  char *geometry_str = state->geometry_str;
-  state->geometry = geometry;
-
-  if (!box_parse(geometry, geometry_str)) {
-    g_critical("%s is not a valid geometry, must follow the pattern \"%s",
-               geometry_str, GEOMETRY_PATTERN);
-    return false;
-  }
-  return true;
-}
-
 static void global_registry_handler(void *data, struct wl_registry *registry,
                                     uint32_t name, const char *interface,
                                     uint32_t version) {
@@ -163,7 +150,7 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
   } else if (strcmp(interface, zwlr_screencopy_manager_v1_interface.name) ==
              0) {
     state->zwlr_screencopy_manager = wl_registry_bind(
-        registry, name, &zwlr_screencopy_manager_v1_interface, 1);
+        registry, name, &zwlr_screencopy_manager_v1_interface, version);
     bound = true;
   }
 

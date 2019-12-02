@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <wayland-client.h>
 
-#include "xdg-output-unstable-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
+#include "xdg-output-unstable-v1-client-protocol.h"
 
 #define MAX_PATH 4096
 
@@ -61,6 +61,8 @@ struct swappy_state {
   struct wl_surface *surface;
   struct zwlr_layer_surface_v1 *layer_surface;
 
+  size_t n_done;
+
   bool should_exit;
 
   char *storage_path;
@@ -82,6 +84,8 @@ struct swappy_state {
   char **argv;
 };
 
+struct swappy_buffer;
+
 struct swappy_output {
   struct swappy_state *state;
   struct wl_output *wl_output;
@@ -93,10 +97,10 @@ struct swappy_output {
   int32_t scale;
 
   struct swappy_box logical_geometry;
-  double logical_scale; // guessed from the logical size
+  double logical_scale;  // guessed from the logical size
   char *name;
 
-//  struct swappy_buffer *buffer;
+  struct swappy_buffer *buffer;
   struct zwlr_screencopy_frame_v1 *screencopy_frame;
-  uint32_t screencopy_frame_flags; // enum zwlr_screencopy_frame_v1_flags
+  uint32_t screencopy_frame_flags;  // enum zwlr_screencopy_frame_v1_flags
 };
