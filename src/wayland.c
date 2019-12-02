@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 2000809L
+
 #include <stdio.h>
 #include <string.h>
 #include <wayland-client.h>
@@ -34,6 +36,71 @@ static bool parse_box(struct swappy_box *box, const char *str) {
 
   return true;
 }
+
+static bool guess_output_logical_geometry(struct swappy_output *output) {
+  // TODO Implement
+  g_critical("guessing output is not yet implemented");
+  return false;
+}
+
+void apply_output_transform(enum wl_output_transform transform, int32_t *width,
+                            int32_t *height) {
+  if (transform & WL_OUTPUT_TRANSFORM_90) {
+    int32_t tmp = *width;
+    *width = *height;
+    *height = tmp;
+  }
+}
+
+static void xdg_output_handle_logical_position(
+    void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
+  struct swappy_output *output = data;
+
+  output->logical_geometry.x = x;
+  output->logical_geometry.y = y;
+}
+
+static void xdg_output_handle_logical_size(void *data,
+                                           struct zxdg_output_v1 *xdg_output,
+                                           int32_t width, int32_t height) {
+  struct swappy_output *output = data;
+
+  output->logical_geometry.width = width;
+  output->logical_geometry.height = height;
+}
+
+static void xdg_output_handle_done(void *data,
+                                   struct zxdg_output_v1 *xdg_output) {
+  struct swappy_output *output = data;
+
+  // Guess the output scale from the logical size
+  int32_t width = output->geometry.width;
+  int32_t height = output->geometry.height;
+  apply_output_transform(output->transform, &width, &height);
+  output->logical_scale = (double)width / output->logical_geometry.width;
+}
+
+static void xdg_output_handle_name(void *data,
+                                   struct zxdg_output_v1 *xdg_output,
+                                   const char *name) {
+  g_debug("xdg_output_v1: name: %s", name);
+  struct swappy_output *output = data;
+  output->name = strdup(name);
+}
+
+static void xdg_output_handle_description(void *data,
+                                          struct zxdg_output_v1 *xdg_output,
+                                          const char *name) {
+  g_debug("xdg_output_v1: description: %s", name);
+}
+
+static const struct zxdg_output_v1_listener xdg_output_listener = {
+    .logical_position = xdg_output_handle_logical_position,
+    .logical_size = xdg_output_handle_logical_size,
+    .done = xdg_output_handle_done,
+    .name = xdg_output_handle_name,
+    .description = xdg_output_handle_description,
+};
 
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t physical_width,
@@ -116,6 +183,10 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     state->layer_shell = wl_registry_bind(
         registry, name, &zwlr_layer_shell_v1_interface, version);
     bound = true;
+  } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
+    state->xdg_output_manager = wl_registry_bind(
+        registry, name, &zxdg_output_manager_v1_interface, version);
+    bound = true;
   } else if (strcmp(interface, zwlr_screencopy_manager_v1_interface.name) ==
              0) {
     state->zwlr_screencopy_manager = wl_registry_bind(
@@ -162,11 +233,36 @@ bool wayland_init(struct swappy_state *state) {
     return false;
   }
 
-  if (wl_list_empty(&state.outputs)) {
+  if (wl_list_empty(&state->outputs)) {
     g_warning("no wl_output found");
     return false;
   }
 
+  if (state->xdg_output_manager != NULL) {
+    struct swappy_output *output;
+    wl_list_for_each(output, &state->outputs, link) {
+      output->xdg_output = zxdg_output_manager_v1_get_xdg_output(
+          state->xdg_output_manager, output->wl_output);
+      zxdg_output_v1_add_listener(output->xdg_output, &xdg_output_listener,
+                                  output);
+    }
+
+    wl_display_dispatch(state->display);
+    wl_display_roundtrip(state->display);
+  } else {
+    g_warning(
+        "zxdg_output_manager_v1 isn't available, guessing the output layout");
+
+    struct swappy_output *output;
+    bool output_guessed = false;
+    wl_list_for_each(output, &state->outputs, link) {
+      output_guessed = guess_output_logical_geometry(output);
+    }
+    if (!output_guessed) {
+      g_warning("could not guess output logical geometry");
+      return false;
+    }
+  }
   if (state->layer_shell == NULL) {
     g_warning("compositor doesn't support zwlr_layer_shell_v1");
     return false;
@@ -198,11 +294,32 @@ void wayland_finish(struct swappy_state *state) {
     wl_output_release(output->wl_output);
     free(output);
   }
-  //  zwlr_screencopy_manager_v1_destroy(state.screencopy_manager);
-  //  if (state.xdg_output_manager != NULL) {
-  //    zxdg_output_manager_v1_destroy(state.xdg_output_manager);
-  //  }
-  //  wl_shm_destroy(state.shm);
-  wl_registry_destroy(state->registry);
-  wl_display_disconnect(state->display);
+
+  if (state->compositor != NULL) {
+    wl_compositor_destroy(state->compositor);
+  }
+
+  if (state->layer_shell != NULL) {
+    zwlr_layer_shell_v1_destroy(state->layer_shell);
+  }
+
+  if (state->zwlr_screencopy_manager != NULL) {
+    zwlr_screencopy_manager_v1_destroy(state->zwlr_screencopy_manager);
+  }
+
+  if (state->xdg_output_manager != NULL) {
+    zxdg_output_manager_v1_destroy(state->xdg_output_manager);
+  }
+
+  if (state->shm != NULL) {
+    wl_shm_destroy(state->shm);
+  }
+
+  if (state->registry != NULL) {
+    wl_registry_destroy(state->registry);
+  }
+
+  if (state->display) {
+    wl_display_disconnect(state->display);
+  }
 }
