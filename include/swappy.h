@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <wayland-client.h>
 
+#include "xdg-output-unstable-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 
@@ -79,4 +80,23 @@ struct swappy_state {
 
   int argc;
   char **argv;
+};
+
+struct swappy_output {
+  struct swappy_state *state;
+  struct wl_output *wl_output;
+  struct zxdg_output_v1 *xdg_output;
+  struct wl_list link;
+
+  struct swappy_box geometry;
+  enum wl_output_transform transform;
+  int32_t scale;
+
+  struct swappy_box logical_geometry;
+  double logical_scale; // guessed from the logical size
+  char *name;
+
+//  struct swappy_buffer *buffer;
+  struct zwlr_screencopy_frame_v1 *screencopy_frame;
+  uint32_t screencopy_frame_flags; // enum zwlr_screencopy_frame_v1_flags
 };
