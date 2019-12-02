@@ -4,38 +4,11 @@
 #include <string.h>
 #include <wayland-client.h>
 
+#include "box.h"
 #include "swappy.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
-
-static bool parse_box(struct swappy_box *box, const char *str) {
-  char *end = NULL;
-  box->x = strtol(str, &end, 10);
-  if (end[0] != ',') {
-    return false;
-  }
-
-  char *next = end + 1;
-  box->y = strtol(next, &end, 10);
-  if (end[0] != ' ') {
-    return false;
-  }
-
-  next = end + 1;
-  box->width = strtol(next, &end, 10);
-  if (end[0] != 'x') {
-    return false;
-  }
-
-  next = end + 1;
-  box->height = strtol(next, &end, 10);
-  if (end[0] != '\0') {
-    return false;
-  }
-
-  return true;
-}
 
 static bool guess_output_logical_geometry(struct swappy_output *output) {
   // TODO Implement
@@ -147,7 +120,7 @@ bool wayland_screencopy_geometry(struct swappy_state *state) {
   char *geometry_str = state->geometry_str;
   state->geometry = geometry;
 
-  if (!parse_box(geometry, geometry_str)) {
+  if (!box_parse(geometry, geometry_str)) {
     g_critical("%s is not a valid geometry, must follow the pattern \"%s",
                geometry_str, GEOMETRY_PATTERN);
     return false;

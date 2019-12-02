@@ -34,6 +34,7 @@ executable(
 	files([
 		'src/main.c',
 		'src/notification.c',
+		'src/box.c',
 		'src/config.c',
 		'src/draw.c',
 		'src/wayland.c',

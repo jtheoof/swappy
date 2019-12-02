@@ -37,6 +37,12 @@
   },
   {
     "directory": "/home/jattali/dev/jtheoof/swappy/build",
+    "command": "clang -Iswappy@exe -I. -I.. -I../include -I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/gtk-3.0 -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/atk-1.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-layer-shell -Xclang -fcolor-diagnostics -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -Werror -std=c11 -g -Wno-unused-parameter -pthread -MD -MQ 'swappy@exe/src_box.c.o' -MF 'swappy@exe/src_box.c.o.d' -o 'swappy@exe/src_box.c.o' -c ../src/box.c",
+    "file": "../src/box.c",
+    "output": "swappy@exe/src_box.c.o"
+  },
+  {
+    "directory": "/home/jattali/dev/jtheoof/swappy/build",
     "command": "clang -Iswappy@exe -I. -I.. -I../include -I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/libffi-3.2.1/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/gtk-3.0 -I/usr/include/pango-1.0 -I/usr/include/fribidi -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libmount -I/usr/include/blkid -I/usr/include/gio-unix-2.0 -I/usr/include/atk-1.0 -I/usr/include/at-spi2-atk/2.0 -I/usr/include/at-spi-2.0 -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/include/gtk-layer-shell -Xclang -fcolor-diagnostics -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -Wextra -Werror -std=c11 -g -Wno-unused-parameter -pthread -MD -MQ 'swappy@exe/src_config.c.o' -MF 'swappy@exe/src_config.c.o.d' -o 'swappy@exe/src_config.c.o' -c ../src/config.c",
     "file": "../src/config.c",
     "output": "swappy@exe/src_config.c.o"
