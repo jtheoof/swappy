@@ -142,7 +142,7 @@ static struct wl_registry_listener registry_listener = {
 bool wayland_init(struct swappy_state *state) {
   state->display = wl_display_connect(NULL);
   if (state->display == NULL) {
-    g_error("cannot connect to wayland display");
+    g_warning("cannot connect to wayland display");
     return false;
   }
 
@@ -154,19 +154,27 @@ bool wayland_init(struct swappy_state *state) {
   wl_display_roundtrip(state->display);
 
   if (state->compositor == NULL) {
-    g_error("compositor doesn't support wl_compositor");
+    g_warning("compositor doesn't support wl_compositor");
     return false;
   }
   if (state->shm == NULL) {
-    g_error("compositor doesn't support wl_shm");
+    g_warning("compositor doesn't support wl_shm");
     return false;
   }
+
+  if (wl_list_empty(&state.outputs)) {
+    g_warning("no wl_output found");
+    return false;
+  }
+
   if (state->layer_shell == NULL) {
-    g_error("compositor doesn't support zwlr_layer_shell_v1");
+    g_warning("compositor doesn't support zwlr_layer_shell_v1");
     return false;
   }
+
   if (state->zwlr_screencopy_manager == NULL) {
-    g_error("compositor does not support zwlr_screencopy_v1");
+    g_warning("compositor does not support zwlr_screencopy_v1");
+    return false;
   }
 
   return true;
