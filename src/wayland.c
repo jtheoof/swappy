@@ -247,7 +247,6 @@ void wayland_finish(struct swappy_state *state) {
     if (output->screencopy_frame != NULL) {
       zwlr_screencopy_frame_v1_destroy(output->screencopy_frame);
     }
-    // destroy_buffer(output->buffer);
     if (output->xdg_output != NULL) {
       zxdg_output_v1_destroy(output->xdg_output);
     }

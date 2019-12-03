@@ -220,6 +220,7 @@ static bool build_ui(struct swappy_state *state) {
                    G_CALLBACK(draw_area_motion_notify_handler), state);
 
   state->area = area;
+  g_object_unref(G_OBJECT(builder));
   gtk_widget_show_all(GTK_WIDGET(state->window));
 
   return true;
