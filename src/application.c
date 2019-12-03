@@ -97,7 +97,6 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
   g_debug("keypress_handler key pressed: %d\n", event->keyval);
   if (event->keyval == GDK_KEY_Escape) {
     g_debug("keypress_handler: escape key pressed, ciao bye\n");
-    state->should_exit = true;
     gtk_window_close(state->window);
   }
 }

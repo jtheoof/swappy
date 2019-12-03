@@ -63,8 +63,6 @@ struct swappy_state {
 
   size_t n_done;
 
-  bool should_exit;
-
   char *storage_path;
 
   enum swappy_paint_mode_type mode;
