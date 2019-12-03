@@ -7,6 +7,15 @@
         "gdkevents.h": "c",
         "glib.h": "c",
         "notification.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "box.h": "c",
+        "*.tcc": "c",
+        "memory_resource": "c",
+        "memory": "c",
+        "fstream": "c",
+        "istream": "c",
+        "ostream": "c",
+        "sstream": "c",
+        "streambuf": "c"
     }
 }
