@@ -115,7 +115,7 @@ void screencopy_frame_handle_buffer(void *data,
     exit(EXIT_FAILURE);
   }
 
-    zwlr_screencopy_frame_v1_copy(frame, output->buffer->wl_buffer);
+  zwlr_screencopy_frame_v1_copy(frame, output->buffer->wl_buffer);
 }
 
 void screencopy_frame_handle_flags(void *data,
