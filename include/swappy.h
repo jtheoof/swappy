@@ -82,7 +82,13 @@ struct swappy_state {
   char **argv;
 };
 
-struct swappy_buffer;
+struct swappy_buffer {
+  struct wl_buffer *wl_buffer;
+  void *data;
+  int32_t width, height, stride;
+  size_t size;
+  enum wl_shm_format format;
+};
 
 struct swappy_output {
   struct swappy_state *state;

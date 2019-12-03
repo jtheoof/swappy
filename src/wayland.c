@@ -252,6 +252,7 @@ void wayland_finish(struct swappy_state *state) {
       zxdg_output_v1_destroy(output->xdg_output);
     }
     wl_output_release(output->wl_output);
+    screencopy_destroy_buffer(output->buffer);
     free(output);
   }
 

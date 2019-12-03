@@ -20,4 +20,5 @@ void screencopy_frame_handle_ready(void *data,
 void screencopy_frame_handle_failed(void *data,
                                     struct zwlr_screencopy_frame_v1 *frame);
 bool screencopy_init(struct swappy_state *state);
+void screencopy_destroy_buffer(struct swappy_buffer *buffer);
 bool screencopy_parse_geometry(struct swappy_state *state);
