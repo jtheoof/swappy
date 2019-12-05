@@ -231,6 +231,7 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
 
   // Create a normal GTK vbox however you like
   GtkWindow *window = GTK_WINDOW(gtk_application_window_new(app));
+  struct swappy_box *geometry = state->geometry;
   state->window = window;
 
   // Before the window is first realized, set it up to be a layer surface
@@ -238,7 +239,7 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
 
   // Order above normal windows
   gtk_layer_set_layer(window, GTK_LAYER_SHELL_LAYER_TOP);
-  gtk_window_set_default_size(window, 300, 300);
+  gtk_window_set_default_size(window, geometry->width, geometry->height);
 
   // Need to set keyboard interactivity for key bindings
   gtk_layer_set_keyboard_interactivity(window, true);
@@ -248,11 +249,13 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
 
   // The margins are the gaps around the window's edges
   // Margins and anchors can be set like this...
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_LEFT, 40);
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_RIGHT, 40);
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_TOP, 20);
+  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_LEFT, 1);
+  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_RIGHT, 1);
+  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_TOP, 1);
+  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_BOTTOM, 1);
 
   gtk_window_get_size(window, &state->width, &state->height);
+  gtk_window_move(window, geometry->x, geometry->y);
 
   g_debug("window has sizes %dx%d", state->width, state->height);
 
