@@ -29,6 +29,9 @@ static void xdg_output_handle_logical_position(
     void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
   struct swappy_output *output = data;
 
+  g_debug("xdg_output: logical position: received x,y: %d,%d for output %s", x,
+          y, output->name);
+
   output->logical_geometry.x = x;
   output->logical_geometry.y = y;
 }
