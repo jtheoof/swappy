@@ -3,6 +3,17 @@
 
 #include "swappy.h"
 
+static cairo_format_t get_cairo_format(enum wl_shm_format wl_fmt) {
+  switch (wl_fmt) {
+    case WL_SHM_FORMAT_ARGB8888:
+      return CAIRO_FORMAT_ARGB32;
+    case WL_SHM_FORMAT_XRGB8888:
+      return CAIRO_FORMAT_RGB24;
+    default:
+      return CAIRO_FORMAT_INVALID;
+  }
+}
+
 static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   // FIXME This is wrong, the geometry here is not quite valid
   // It must be based on output, but will work fine on single screen
@@ -10,9 +21,13 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   struct swappy_output *output;
   wl_list_for_each(output, &state->outputs, link) {
     struct swappy_buffer *buffer = output->buffer;
+    cairo_format_t format = get_cairo_format(buffer->format);
     cairo_surface_t *image;
+
+    g_assert(format != CAIRO_FORMAT_INVALID);
+
     image = cairo_image_surface_create_for_data(
-        buffer->data, CAIRO_FORMAT_ARGB32, geometry->height, geometry->width,
+        buffer->data, format, geometry->height, geometry->width,
         buffer->stride);
     cairo_save(cr);
     cairo_surface_flush(image);
@@ -25,7 +40,7 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
-//static void draw_image(cairo_t *cr, struct swappy_state *state) {
+// static void draw_image(cairo_t *cr, struct swappy_state *state) {
 //  cairo_surface_t *image;
 //  image = cairo_image_surface_create_from_png(state->image);
 //  cairo_save(cr);
@@ -79,6 +94,6 @@ void draw_area(GtkWidget *widget, cairo_t *cr, struct swappy_state *state) {
   cairo_restore(cr);
 
   draw_buffer(cr, state);
-//  draw_image(cr, state);
+  //  draw_image(cr, state);
   draw_brushes(cr, state);
 }

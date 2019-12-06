@@ -60,7 +60,9 @@ static struct swappy_buffer *create_buffer(struct wl_shm *shm,
                                            int32_t width, int32_t height,
                                            int32_t stride) {
   size_t size = stride * height;
-  g_debug("creating buffer with dimensions: %dx%d", width, height);
+  g_debug(
+      "creating buffer with dimensions: %dx%d - format: 0x%08x - stride: %d",
+      width, height, format, stride);
 
   int fd = create_shm_file(size);
   if (fd == -1) {
