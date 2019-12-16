@@ -86,19 +86,6 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
-// static void draw_image(cairo_t *cr, struct swappy_state *state) {
-//  cairo_surface_t *image;
-//  image = cairo_image_surface_create_from_png(state->image);
-//  cairo_save(cr);
-//  cairo_surface_flush(image);
-//  cairo_surface_mark_dirty(image);
-//  cairo_set_source_surface(cr, image, 0, 0);
-//  cairo_pattern_set_filter(cairo_get_source(cr), CAIRO_FILTER_NEAREST);
-//  cairo_paint(cr);
-//  cairo_surface_destroy(image);
-//  cairo_restore(cr);
-//}
-
 void draw_brushes(struct swappy_state *state) {
   cairo_t *cr = cairo_create(state->cairo_surface);
 
@@ -133,8 +120,6 @@ void draw_clear_surface(struct swappy_state *state) {
   cairo_set_source_rgb(cr, 1, 1, 1);
 
   draw_buffer(cr, state);
-
-  // cairo_paint(cr);
 
   cairo_destroy(cr);
 }
