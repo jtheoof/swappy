@@ -99,7 +99,9 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
 //  cairo_restore(cr);
 //}
 
-static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
+void draw_brushes(struct swappy_state *state) {
+  cairo_t *cr = cairo_create(state->cairo_surface);
+
   for (GSList *brush = state->brushes; brush; brush = brush->next) {
     GSList *brush_next = brush->next;
     struct swappy_brush_point *point = brush->data;
@@ -119,47 +121,26 @@ static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
       cairo_stroke(cr);
     }
   }
-}
-
-gboolean draw_area(GtkWidget *widget, cairo_t *cr, struct swappy_state *state) {
-  g_debug("received draw callback");
-  guint width, height;
-  GtkStyleContext *context;
-
-  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
-
-  context = gtk_widget_get_style_context(widget);
-
-  width = gtk_widget_get_allocated_width(widget);
-  height = gtk_widget_get_allocated_height(widget);
-
-  gtk_render_background(context, cr, 0, 0, width, height);
-
-  // Drawing backgroound
-  cairo_save(cr);
-  cairo_set_source_rgb(cr, 1, 1, 1);
-  cairo_rectangle(cr, 0, 0, width, height);
-  cairo_stroke_preserve(cr);
-  cairo_fill(cr);
-  cairo_restore(cr);
-
-  draw_buffer(cr, state);
-  //  draw_image(cr, state);
-  draw_brushes(cr, state);
-
-  return FALSE;
-
-  // state->cairo_surface = cairo_get_target(cr);
-  // cairo_surface_reference(state->cairo_surface);
-}
-
-void draw_clear_surface(cairo_surface_t *surface) {
-  cairo_t *cr;
-
-  cr = cairo_create(surface);
-
-  cairo_set_source_rgb(cr, 1, 1, 1);
-  cairo_paint(cr);
 
   cairo_destroy(cr);
+}
+
+void draw_clear_surface(struct swappy_state *state) {
+  cairo_t *cr;
+
+  cr = cairo_create(state->cairo_surface);
+
+  cairo_set_source_rgb(cr, 1, 1, 1);
+
+  draw_buffer(cr, state);
+
+  // cairo_paint(cr);
+
+  cairo_destroy(cr);
+}
+
+void draw_area(struct swappy_state *state) {
+  draw_clear_surface(state);
+  draw_brushes(state);
+  gtk_widget_queue_draw(state->area);
 }

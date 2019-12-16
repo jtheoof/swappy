@@ -28,6 +28,15 @@ void application_finish(struct swappy_state *state) {
   g_object_unref(state->app);
 }
 
+static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
+                                  struct swappy_state *state) {
+  g_debug("received draw callback");
+  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
+  cairo_paint(cr);
+
+  return FALSE;
+}
+
 static gboolean configure_event_handler(GtkWidget *area,
                                         GdkEventConfigure *event,
                                         struct swappy_state *state) {
@@ -39,14 +48,13 @@ static gboolean configure_event_handler(GtkWidget *area,
       gtk_widget_get_allocated_width(area),
       gtk_widget_get_allocated_height(area));
 
-  draw_clear_surface(state->cairo_surface);
+  draw_clear_surface(state);
 
   return TRUE;
 }
 
 static void action_save_area_to_file(struct swappy_state *state) {
   g_debug("saving area to file");
-  // gtk_widget_queue_draw(state->area);
 
   guint width = gtk_widget_get_allocated_width(state->area);
   guint height = gtk_widget_get_allocated_height(state->area);
@@ -87,7 +95,7 @@ static void tools_menu_button_save_clicked_handler(GtkButton *button,
 static void tools_menu_button_clear_clicked_handler(
     GtkWidget *widget, struct swappy_state *state) {
   swappy_overlay_clear(state);
-  gtk_widget_queue_draw(state->area);
+  draw_area(state);
 }
 
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
@@ -143,7 +151,7 @@ static void draw_area_button_press_handler(GtkWidget *widget,
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_FIRST);
-    gtk_widget_queue_draw(state->area);
+    draw_area(state);
   }
 }
 
@@ -156,7 +164,7 @@ static void draw_area_button_release_handler(GtkWidget *widget,
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
-    gtk_widget_queue_draw(state->area);
+    draw_area(state);
   }
 }
 
@@ -172,7 +180,7 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
 
     if (event->state & GDK_BUTTON1_MASK) {
       brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
-      gtk_widget_queue_draw(state->area);
+      draw_area(state);
     }
   } else {
     gdk_window_set_cursor(window, NULL);
@@ -230,7 +238,7 @@ static bool build_ui(struct swappy_state *state) {
   gtk_widget_add_events(area, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
                                   GDK_BUTTON_RELEASE_MASK |
                                   GDK_BUTTON1_MOTION_MASK);
-  g_signal_connect(area, "draw", G_CALLBACK(draw_area), state);
+  g_signal_connect(area, "draw", G_CALLBACK(draw_area_handler), state);
   g_signal_connect(area, "configure-event", G_CALLBACK(configure_event_handler),
                    state);
   g_signal_connect(area, "button-press-event",
