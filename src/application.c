@@ -25,6 +25,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
+  g_resources_unregister(state->resource);
   g_object_unref(state->app);
 }
 
@@ -337,6 +338,7 @@ static gint command_line_handler(GtkApplication *app,
 }
 
 bool application_init(struct swappy_state *state) {
+  GError *error = NULL;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
   const GOptionEntry cli_options[] = {
@@ -360,6 +362,15 @@ bool application_init(struct swappy_state *state) {
   }
 
   g_application_add_main_option_entries(G_APPLICATION(state->app), cli_options);
+
+  state->resource = g_resource_load("build/meson-out/swappy.gresource", &error);
+
+  if (error != NULL) {
+    g_error("unable to load swappy resource file: %s", error->message);
+    g_error_free(error);
+  }
+
+  g_resources_register(state->resource);
 
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);

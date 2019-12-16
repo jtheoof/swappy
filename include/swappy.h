@@ -45,7 +45,9 @@ struct swappy_box {
 };
 
 struct swappy_state {
+  GResource *resource;
   GtkApplication *app;
+
   GtkWindow *window;
   GtkWidget *area;
   GtkPopover *popover;
