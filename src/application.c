@@ -182,7 +182,23 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
   }
 }
 
-static bool build_ui(struct swappy_state *state) {
+static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
+  gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
+                                 1);
+  if (GTK_IS_CONTAINER(widget)) {
+    gtk_container_forall(GTK_CONTAINER(widget), (GtkCallback)apply_css,
+                         provider);
+  }
+}
+
+static void load_css(struct swappy_state *state) {
+  GtkCssProvider *provider = gtk_css_provider_new();
+  gtk_css_provider_load_from_resource(provider, "/swappy/style/popover.css");
+  apply_css(GTK_WIDGET(state->popover), GTK_STYLE_PROVIDER(provider));
+  g_object_unref(provider);
+}
+
+static bool load_layout(struct swappy_state *state) {
   GtkBuilder *builder;
   GObject *container;
   GObject *brush;
@@ -288,7 +304,8 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
 
   g_debug("window has sizes %dx%d", state->width, state->height);
 
-  build_ui(state);
+  load_layout(state);
+  load_css(state);
 }
 
 static gboolean is_geometry_valid(struct swappy_state *state) {

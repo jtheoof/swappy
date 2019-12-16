@@ -27,6 +27,7 @@ wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
 
+subdir('res')
 subdir('protocol')
 
 executable(
