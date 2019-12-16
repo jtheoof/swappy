@@ -48,7 +48,7 @@ static gboolean configure_event_handler(GtkWidget *area,
       gtk_widget_get_allocated_width(area),
       gtk_widget_get_allocated_height(area));
 
-  draw_clear_surface(state);
+  draw_state(state);
 
   return TRUE;
 }
@@ -95,7 +95,7 @@ static void tools_menu_button_save_clicked_handler(GtkButton *button,
 static void tools_menu_button_clear_clicked_handler(
     GtkWidget *widget, struct swappy_state *state) {
   swappy_overlay_clear(state);
-  draw_area(state);
+  draw_state(state);
 }
 
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
@@ -151,7 +151,7 @@ static void draw_area_button_press_handler(GtkWidget *widget,
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_FIRST);
-    draw_area(state);
+    draw_state(state);
   }
 }
 
@@ -164,7 +164,7 @@ static void draw_area_button_release_handler(GtkWidget *widget,
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
-    draw_area(state);
+    draw_state(state);
   }
 }
 
@@ -180,7 +180,7 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
 
     if (event->state & GDK_BUTTON1_MASK) {
       brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
-      draw_area(state);
+      draw_state(state);
     }
   } else {
     gdk_window_set_cursor(window, NULL);

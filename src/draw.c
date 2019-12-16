@@ -32,6 +32,7 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   // It must be based on output, but will work fine on single screen
   struct swappy_box *geometry = state->geometry;
   struct swappy_output *output;
+
   wl_list_for_each(output, &state->outputs, link) {
     struct swappy_buffer *buffer = output->buffer;
     cairo_format_t format = get_cairo_format(buffer->format);
@@ -86,9 +87,7 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
-void draw_brushes(struct swappy_state *state) {
-  cairo_t *cr = cairo_create(state->cairo_surface);
-
+static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
   for (GSList *brush = state->brushes; brush; brush = brush->next) {
     GSList *brush_next = brush->next;
     struct swappy_brush_point *point = brush->data;
@@ -112,20 +111,16 @@ void draw_brushes(struct swappy_state *state) {
   cairo_destroy(cr);
 }
 
-void draw_clear_surface(struct swappy_state *state) {
-  cairo_t *cr;
-
-  cr = cairo_create(state->cairo_surface);
+void draw_state(struct swappy_state *state) {
+  cairo_t *cr = cairo_create(state->cairo_surface);
 
   cairo_set_source_rgb(cr, 1, 1, 1);
 
   draw_buffer(cr, state);
+  draw_brushes(cr, state);
+
+  // Drawing is finised, notify the GtkDrawingArea it needs to be redrawn.
+  gtk_widget_queue_draw(state->area);
 
   cairo_destroy(cr);
-}
-
-void draw_area(struct swappy_state *state) {
-  draw_clear_surface(state);
-  draw_brushes(state);
-  gtk_widget_queue_draw(state->area);
 }
