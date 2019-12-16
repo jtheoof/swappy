@@ -4,6 +4,7 @@
 #include <gtk/gtk.h>
 #include <time.h>
 
+#include "clipboard.h"
 #include "draw.h"
 #include "notification.h"
 #include "screencopy.h"
@@ -20,16 +21,39 @@ static void swappy_overlay_clear(struct swappy_state *state) {
 void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
+  cairo_surface_destroy(state->cairo_surface);
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
   g_object_unref(state->app);
 }
 
+static gboolean configure_event_handler(GtkWidget *area,
+                                        GdkEventConfigure *event,
+                                        struct swappy_state *state) {
+  g_debug("received configure_event handler");
+  cairo_surface_destroy(state->cairo_surface);
+
+  state->cairo_surface = gdk_window_create_similar_surface(
+      gtk_widget_get_window(area), CAIRO_CONTENT_COLOR,
+      gtk_widget_get_allocated_width(area),
+      gtk_widget_get_allocated_height(area));
+
+  draw_clear_surface(state->cairo_surface);
+
+  return TRUE;
+}
+
 static void action_save_area_to_file(struct swappy_state *state) {
-  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->area));
+  g_debug("saving area to file");
+  // gtk_widget_queue_draw(state->area);
+
+  guint width = gtk_widget_get_allocated_width(state->area);
+  guint height = gtk_widget_get_allocated_height(state->area);
+  // GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->area));
+  g_debug("generating pixbuf from area");
   GdkPixbuf *pixbuf =
-      gdk_pixbuf_get_from_window(window, 0, 0, state->width, state->height);
+      gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
   GError *error = NULL;
 
   time_t current_time;
@@ -83,12 +107,7 @@ static void tools_menu_button_shape_toggle_handler(GtkToggleButton *source,
 
 static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
                                                    struct swappy_state *state) {
-  GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-
-  char text[255] = "This is a nice text";
-  gtk_clipboard_set_text(clipboard, text, -1);
-  gtk_clipboard_store(clipboard);
-  g_debug("clipboard stored\n");
+  clipboard_copy_drawing_area_to_selection(state);
 }
 
 static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
@@ -212,6 +231,8 @@ static bool build_ui(struct swappy_state *state) {
                                   GDK_BUTTON_RELEASE_MASK |
                                   GDK_BUTTON1_MOTION_MASK);
   g_signal_connect(area, "draw", G_CALLBACK(draw_area), state);
+  g_signal_connect(area, "configure-event", G_CALLBACK(configure_event_handler),
+                   state);
   g_signal_connect(area, "button-press-event",
                    G_CALLBACK(draw_area_button_press_handler), state);
   g_signal_connect(area, "button-release-event",
@@ -235,24 +256,24 @@ static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
   state->window = window;
 
   // Before the window is first realized, set it up to be a layer surface
-  gtk_layer_init_for_window(window);
+  // gtk_layer_init_for_window(window);
 
   // Order above normal windows
-  gtk_layer_set_layer(window, GTK_LAYER_SHELL_LAYER_TOP);
+  // gtk_layer_set_layer(window, GTK_LAYER_SHELL_LAYER_TOP);
   gtk_window_set_default_size(window, geometry->width, geometry->height);
 
   // Need to set keyboard interactivity for key bindings
-  gtk_layer_set_keyboard_interactivity(window, true);
+  // gtk_layer_set_keyboard_interactivity(window, true);
 
   // Push other windows out of the way
-  gtk_layer_auto_exclusive_zone_enable(window);
+  // gtk_layer_auto_exclusive_zone_enable(window);
 
   // The margins are the gaps around the window's edges
   // Margins and anchors can be set like this...
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_LEFT, 1);
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_RIGHT, 1);
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_TOP, 1);
-  gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_BOTTOM, 1);
+  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_LEFT, 1);
+  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_RIGHT, 1);
+  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_TOP, 1);
+  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_BOTTOM, 1);
 
   gtk_window_get_size(window, &state->width, &state->height);
   gtk_window_move(window, geometry->x, geometry->y);

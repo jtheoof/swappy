@@ -16,6 +16,7 @@
         "istream": "c",
         "ostream": "c",
         "sstream": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "clipboard.h": "c"
     }
 }

@@ -36,6 +36,7 @@ executable(
 		'src/notification.c',
 		'src/box.c',
 		'src/config.c',
+		'src/clipboard.c',
 		'src/draw.c',
 		'src/screencopy.c',
 		'src/wayland.c',

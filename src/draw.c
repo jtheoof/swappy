@@ -121,11 +121,15 @@ static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
-void draw_area(GtkWidget *widget, cairo_t *cr, struct swappy_state *state) {
+gboolean draw_area(GtkWidget *widget, cairo_t *cr, struct swappy_state *state) {
+  g_debug("received draw callback");
   guint width, height;
   GtkStyleContext *context;
 
+  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
+
   context = gtk_widget_get_style_context(widget);
+
   width = gtk_widget_get_allocated_width(widget);
   height = gtk_widget_get_allocated_height(widget);
 
@@ -142,4 +146,20 @@ void draw_area(GtkWidget *widget, cairo_t *cr, struct swappy_state *state) {
   draw_buffer(cr, state);
   //  draw_image(cr, state);
   draw_brushes(cr, state);
+
+  return FALSE;
+
+  // state->cairo_surface = cairo_get_target(cr);
+  // cairo_surface_reference(state->cairo_surface);
+}
+
+void draw_clear_surface(cairo_surface_t *surface) {
+  cairo_t *cr;
+
+  cr = cairo_create(surface);
+
+  cairo_set_source_rgb(cr, 1, 1, 1);
+  cairo_paint(cr);
+
+  cairo_destroy(cr);
 }
