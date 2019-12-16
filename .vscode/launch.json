@@ -8,7 +8,7 @@
       "name": "Swappy",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/swappy",
+      "program": "${workspaceFolder}/build/meson-out/swappy",
       "args": ["-g", "0,0 200x200"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

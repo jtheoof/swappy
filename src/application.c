@@ -30,7 +30,6 @@ void application_finish(struct swappy_state *state) {
 
 static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
                                   struct swappy_state *state) {
-  g_debug("received draw callback");
   cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
   cairo_paint(cr);
 
@@ -145,13 +144,9 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
 static void draw_area_button_press_handler(GtkWidget *widget,
                                            GdkEventButton *event,
                                            struct swappy_state *state) {
-  if (!(event->state & GDK_BUTTON1_MASK)) {
-    return;
-  }
-
-  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
-    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_FIRST);
-    draw_state(state);
+  g_debug("press event: state: %d, button: %d", event->state, event->button);
+  if (event->button == 3) {
+    g_debug("right click la paaaaaaaaa");
   }
 }
 
@@ -197,6 +192,7 @@ static bool build_ui(struct swappy_state *state) {
   GObject *copy;
   GObject *save;
   GObject *clear;
+  GtkWidget *dialog;
   GError *error = NULL;
 
   /* Construct a GtkBuilder instance and load our UI description */
@@ -217,7 +213,9 @@ static bool build_ui(struct swappy_state *state) {
   clear = gtk_builder_get_object(builder, "clear");
   area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
 
+  dialog = GTK_WIDGET(gtk_builder_get_object(builder, "dialog"));
   gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
+  // gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(dialog));
 
   g_signal_connect(G_OBJECT(state->window), "key_press_event",
                    G_CALLBACK(keypress_handler), state);
@@ -248,7 +246,9 @@ static bool build_ui(struct swappy_state *state) {
   g_signal_connect(area, "motion-notify-event",
                    G_CALLBACK(draw_area_motion_notify_handler), state);
 
+  state->dialog = dialog;
   state->area = area;
+
   g_object_unref(G_OBJECT(builder));
   gtk_widget_show_all(GTK_WIDGET(state->window));
 

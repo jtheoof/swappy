@@ -107,8 +107,6 @@ static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
       cairo_stroke(cr);
     }
   }
-
-  cairo_destroy(cr);
 }
 
 void draw_state(struct swappy_state *state) {
