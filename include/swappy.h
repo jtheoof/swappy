@@ -48,7 +48,7 @@ struct swappy_state {
   GtkApplication *app;
   GtkWindow *window;
   GtkWidget *area;
-  GtkWidget *dialog;
+  GtkPopover *popover;
 
   cairo_surface_t *cairo_surface;
 

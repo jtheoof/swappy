@@ -146,7 +146,7 @@ static void draw_area_button_press_handler(GtkWidget *widget,
                                            struct swappy_state *state) {
   g_debug("press event: state: %d, button: %d", event->state, event->button);
   if (event->button == 3) {
-    g_debug("right click la paaaaaaaaa");
+    gtk_popover_popup(state->popover);
   }
 }
 
@@ -192,7 +192,7 @@ static bool build_ui(struct swappy_state *state) {
   GObject *copy;
   GObject *save;
   GObject *clear;
-  GtkWidget *dialog;
+  GtkPopover *popover;
   GError *error = NULL;
 
   /* Construct a GtkBuilder instance and load our UI description */
@@ -212,10 +212,7 @@ static bool build_ui(struct swappy_state *state) {
   save = gtk_builder_get_object(builder, "save");
   clear = gtk_builder_get_object(builder, "clear");
   area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
-
-  dialog = GTK_WIDGET(gtk_builder_get_object(builder, "dialog"));
-  gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
-  // gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(dialog));
+  popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
 
   g_signal_connect(G_OBJECT(state->window), "key_press_event",
                    G_CALLBACK(keypress_handler), state);
@@ -246,7 +243,10 @@ static bool build_ui(struct swappy_state *state) {
   g_signal_connect(area, "motion-notify-event",
                    G_CALLBACK(draw_area_motion_notify_handler), state);
 
-  state->dialog = dialog;
+  gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
+  gtk_popover_set_relative_to(popover, area);
+
+  state->popover = popover;
   state->area = area;
 
   g_object_unref(G_OBJECT(builder));
