@@ -2,5 +2,6 @@
 <gresources>
 	<gresource prefix="/swappy">
 		<file>style/popover.css</file>
+		<file>swappy.ui</file>
 	</gresource>
 </gresources>

@@ -214,7 +214,8 @@ static bool load_layout(struct swappy_state *state) {
 
   /* Construct a GtkBuilder instance and load our UI description */
   builder = gtk_builder_new();
-  if (gtk_builder_add_from_file(builder, "swappy.ui", &error) == 0) {
+  if (gtk_builder_add_from_resource(builder, "/swappy/swappy.ui", &error) ==
+      0) {
     g_printerr("Error loading file: %s", error->message);
     g_clear_error(&error);
     return false;
