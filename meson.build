@@ -53,6 +53,7 @@ executable(
 		wayland_client,
 		wayland_cursor,
 	],
+	link_args: '-rdynamic',
 	include_directories: [swappy_inc],
 	install: true,
 )

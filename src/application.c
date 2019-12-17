@@ -18,6 +18,11 @@ static void swappy_overlay_clear(struct swappy_state *state) {
   }
 }
 
+static void switch_mode_to_brush(struct swappy_state *state) {
+  g_debug("switching mode to brush");
+  state->mode = SWAPPY_PAINT_MODE_BRUSH;
+}
+
 void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
@@ -27,6 +32,10 @@ void application_finish(struct swappy_state *state) {
   g_free(state->geometry);
   g_resources_unregister(state->resource);
   g_object_unref(state->app);
+}
+
+void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_brush(state);
 }
 
 static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
@@ -119,12 +128,13 @@ static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
 }
 
 static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                             gpointer data) {
-  struct swappy_state *state = data;
+                             struct swappy_state *state) {
   g_debug("keypress_handler key pressed: %d\n", event->keyval);
   if (event->keyval == GDK_KEY_Escape) {
     g_debug("keypress_handler: escape key pressed, ciao bye\n");
     gtk_window_close(state->window);
+  } else if (event->keyval == GDK_KEY_B || event->keyval == GDK_KEY_b) {
+    switch_mode_to_brush(state);
   }
 }
 
@@ -231,6 +241,8 @@ static bool load_layout(struct swappy_state *state) {
   clear = gtk_builder_get_object(builder, "clear");
   area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
   popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
+
+  gtk_builder_connect_signals(builder, state);
 
   g_signal_connect(G_OBJECT(state->window), "key_press_event",
                    G_CALLBACK(keypress_handler), state);
