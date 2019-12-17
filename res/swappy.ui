@@ -14,63 +14,7 @@
         <property name="orientation">vertical</property>
         <property name="homogeneous">True</property>
         <child>
-          <object class="GtkBox" id="paint_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkRadioButton" id="brush">
-                <property name="label" translatable="yes">Brush</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">text</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="text">
-                <property name="label" translatable="yes">Text</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">brush</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="shape">
-                <property name="label" translatable="yes">Shape</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">brush</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <object class="GtkBox" id="control_box">
@@ -157,15 +101,10 @@
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkToggleButton" id="brus">
-                <property name="label" translatable="yes"></property>
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="brush_clicked_handler" swapped="no"/>
-                <style>
-                  <class name="brush"/>
-                </style>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">B</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -174,14 +113,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="tex">
-                <property name="label" translatable="yes"></property>
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <style>
-                  <class name="text"/>
-                </style>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">T</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -190,14 +125,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="shapes">
-                <property name="label" translatable="yes"></property>
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <style>
-                  <class name="shapes"/>
-                </style>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">R,O,A</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -219,15 +150,15 @@
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="homogeneous">True</property>
             <child>
-              <object class="GtkRadioButton">
+              <object class="GtkRadioButton" id="brush">
                 <property name="label" translatable="yes"></property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">False</property>
-                <property name="group">brush</property>
                 <signal name="clicked" handler="brush_clicked_handler" swapped="no"/>
               </object>
               <packing>
@@ -237,7 +168,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkRadioButton">
+              <object class="GtkRadioButton" id="text">
                 <property name="label" translatable="yes"></property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -253,7 +184,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkRadioButton">
+              <object class="GtkRadioButton" id="rectangle">
                 <property name="label" translatable="yes"></property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

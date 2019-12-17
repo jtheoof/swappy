@@ -45,13 +45,21 @@ struct swappy_box {
   int32_t height;
 };
 
+struct swappy_state_ui_popover {
+  GtkPopover *container;
+  GtkRadioButton *brush;
+  GtkRadioButton *text;
+  GtkRadioButton *rectangle;
+};
+
 struct swappy_state {
   GResource *resource;
   GtkApplication *app;
 
   GtkWindow *window;
   GtkWidget *area;
-  GtkPopover *popover;
+
+  struct swappy_state_ui_popover *popover;
 
   cairo_surface_t *cairo_surface;
 

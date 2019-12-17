@@ -23,19 +23,31 @@ static void switch_mode_to_brush(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
 }
 
-void text_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+static void switch_mode_to_text(struct swappy_state *state) {
+  g_debug("switching mode to arrow");
+  state->mode = SWAPPY_PAINT_MODE_TEXT;
+}
+
+static void switch_mode_to_arrow(struct swappy_state *state) {
   g_debug("switching mode to arrow");
   state->mode = SWAPPY_PAINT_MODE_ARROW;
+}
+
+static void switch_mode_to_rectangle(struct swappy_state *state) {
+  g_debug("switching mode to rectangle");
+  state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+}
+
+void text_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_text(state);
 }
 
 void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  g_debug("switching mode to arrow");
-  state->mode = SWAPPY_PAINT_MODE_ARROW;
+  switch_mode_to_arrow(state);
 }
 
 void rectangle_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  g_debug("switching mode to rectangle");
-  state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+  switch_mode_to_rectangle(state);
 }
 
 void application_finish(struct swappy_state *state) {
@@ -46,6 +58,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->geometry_str);
   g_free(state->geometry);
   g_resources_unregister(state->resource);
+  g_free(state->popover);
   g_object_unref(state->app);
 }
 
@@ -150,6 +163,11 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
     gtk_window_close(state->window);
   } else if (event->keyval == GDK_KEY_B || event->keyval == GDK_KEY_b) {
     switch_mode_to_brush(state);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->brush),
+                                 true);
+  } else if (event->keyval == GDK_KEY_T || event->keyval == GDK_KEY_t) {
+    switch_mode_to_text(state);
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->text), true);
   }
 }
 
@@ -172,7 +190,7 @@ static void draw_area_button_press_handler(GtkWidget *widget,
                                            struct swappy_state *state) {
   g_debug("press event: state: %d, button: %d", event->state, event->button);
   if (event->button == 3) {
-    gtk_popover_popup(state->popover);
+    gtk_popover_popup(state->popover->container);
   }
 }
 
@@ -220,21 +238,22 @@ static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
 static void load_css(struct swappy_state *state) {
   GtkCssProvider *provider = gtk_css_provider_new();
   gtk_css_provider_load_from_resource(provider, "/swappy/style/popover.css");
-  apply_css(GTK_WIDGET(state->popover), GTK_STYLE_PROVIDER(provider));
+  apply_css(GTK_WIDGET(state->popover->container),
+            GTK_STYLE_PROVIDER(provider));
   g_object_unref(provider);
 }
 
 static bool load_layout(struct swappy_state *state) {
   GtkBuilder *builder;
   GObject *container;
-  GObject *brush;
-  GObject *text;
-  GObject *shape;
   GtkWidget *area;
   GObject *copy;
   GObject *save;
   GObject *clear;
   GtkPopover *popover;
+  GtkRadioButton *brush;
+  GtkRadioButton *text;
+  GtkRadioButton *rectangle;
   GError *error = NULL;
 
   /* Construct a GtkBuilder instance and load our UI description */
@@ -248,14 +267,16 @@ static bool load_layout(struct swappy_state *state) {
 
   /* Connect signal handlers to the constructed widgets. */
   container = gtk_builder_get_object(builder, "container");
-  brush = gtk_builder_get_object(builder, "brush");
-  text = gtk_builder_get_object(builder, "text");
-  shape = gtk_builder_get_object(builder, "shape");
+
   copy = gtk_builder_get_object(builder, "copy");
   save = gtk_builder_get_object(builder, "save");
   clear = gtk_builder_get_object(builder, "clear");
   area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
+
   popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
+  brush = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "brush"));
+  text = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "text"));
+  rectangle = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "shape"));
 
   gtk_builder_connect_signals(builder, state);
 
@@ -265,7 +286,7 @@ static bool load_layout(struct swappy_state *state) {
                    G_CALLBACK(tools_menu_button_brush_toggle_handler), state);
   g_signal_connect(text, "toggled",
                    G_CALLBACK(tools_menu_button_text_toggle_handler), state);
-  g_signal_connect(shape, "toggled",
+  g_signal_connect(rectangle, "toggled",
                    G_CALLBACK(tools_menu_button_shape_toggle_handler), state);
   g_signal_connect(copy, "clicked",
                    G_CALLBACK(tools_menu_button_copy_clicked_handler), state);
@@ -291,7 +312,10 @@ static bool load_layout(struct swappy_state *state) {
   gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
   gtk_popover_set_relative_to(popover, area);
 
-  state->popover = popover;
+  state->popover->container = popover;
+  state->popover->brush = brush;
+  state->popover->text = text;
+  state->popover->rectangle = rectangle;
   state->area = area;
 
   g_object_unref(G_OBJECT(builder));
@@ -397,6 +421,8 @@ bool application_init(struct swappy_state *state) {
     g_error("unable to load swappy resource file: %s", error->message);
     g_error_free(error);
   }
+
+  state->popover = g_new(struct swappy_state_ui_popover, 1);
 
   g_resources_register(state->resource);
 
