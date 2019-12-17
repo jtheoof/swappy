@@ -24,6 +24,7 @@ enum swappy_brush_point_kind {
 enum swappy_paint_mode_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
+  SWAPPY_PAINT_MODE_ARROW,     /* Rectangle shapes */
   SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
 };
 

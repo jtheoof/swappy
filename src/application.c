@@ -23,6 +23,21 @@ static void switch_mode_to_brush(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
 }
 
+void text_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  g_debug("switching mode to arrow");
+  state->mode = SWAPPY_PAINT_MODE_ARROW;
+}
+
+void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  g_debug("switching mode to arrow");
+  state->mode = SWAPPY_PAINT_MODE_ARROW;
+}
+
+void rectangle_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  g_debug("switching mode to rectangle");
+  state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+}
+
 void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
