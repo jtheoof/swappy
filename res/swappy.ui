@@ -160,9 +160,6 @@
                 <property name="position">4</property>
               </packing>
             </child>
-            <style>
-              <class name="drawing"/>
-            </style>
           </object>
           <packing>
             <property name="expand">False</property>
