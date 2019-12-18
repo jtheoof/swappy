@@ -51,5 +51,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Temporary files
+*.ui~
+
 # Build folders
 build/
