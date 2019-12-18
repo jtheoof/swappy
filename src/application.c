@@ -67,6 +67,7 @@ void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
   cairo_surface_destroy(state->cairo_surface);
+  g_free(state->temp_paint);
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -206,6 +207,46 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
   state->brushes = g_slist_append(state->brushes, point);
 }
 
+static void paint_add_temporary(struct swappy_state *state, double x, double y,
+                                enum swappy_paint_mode_type type) {
+  struct swappy_paint *temp = g_new(struct swappy_paint, 1);
+
+  temp->from.x = x;
+  temp->from.y = y;
+  temp->type = type;
+
+  if (state->temp_paint) {
+    g_free(state->temp_paint);
+    state->temp_paint = NULL;
+  }
+
+  state->temp_paint = temp;
+}
+
+static void paint_update_temporary(struct swappy_state *state, double x,
+                                   double y) {
+  if (!state->temp_paint) {
+    return;
+  }
+
+  state->temp_paint->to.x = x;
+  state->temp_paint->to.y = y;
+}
+
+static void paint_commit_temporary(struct swappy_state *state, double x,
+                                   double y) {
+  if (!state->temp_paint) {
+    return;
+  }
+
+  state->temp_paint->to.x = x;
+  state->temp_paint->to.y = y;
+
+  g_debug("commit temp paint: from: %lf,%lf to: %lf,%lf",
+          state->temp_paint->from.x, state->temp_paint->from.y,
+          state->temp_paint->to.x, state->temp_paint->to.y);
+}
+
 static void draw_area_button_press_handler(GtkWidget *widget,
                                            GdkEventButton *event,
                                            struct swappy_state *state) {
@@ -213,17 +254,31 @@ static void draw_area_button_press_handler(GtkWidget *widget,
   if (event->button == 3) {
     gtk_popover_popup(state->popover->container);
   }
+
+  if (event->button == 1) {
+    if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
+      paint_add_temporary(state, event->x, event->y,
+                          SWAPPY_PAINT_MODE_RECTANGLE);
+      draw_state(state);
+    }
+  }
 }
 
 static void draw_area_button_release_handler(GtkWidget *widget,
                                              GdkEventButton *event,
                                              struct swappy_state *state) {
+  g_debug("releasing button in state: %d", event->state);
   if (!(event->state & GDK_BUTTON1_MASK)) {
     return;
   }
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
     brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
+    draw_state(state);
+  }
+
+  if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
+    paint_commit_temporary(state, event->x, event->y);
     draw_state(state);
   }
 }
@@ -233,13 +288,17 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
                                             struct swappy_state *state) {
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = event->window;
+  GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
+  gdk_window_set_cursor(window, crosshair);
 
   if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
-    GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
-    gdk_window_set_cursor(window, crosshair);
-
     if (event->state & GDK_BUTTON1_MASK) {
       brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
+      draw_state(state);
+    }
+  } else if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
+    if (event->state & GDK_BUTTON1_MASK) {
+      paint_update_temporary(state, event->x, event->y);
       draw_state(state);
     }
   } else {

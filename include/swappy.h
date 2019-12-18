@@ -29,6 +29,17 @@ enum swappy_paint_mode_type {
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
 };
 
+struct swappy_point {
+  gdouble x;
+  gdouble y;
+};
+
+struct swappy_paint {
+  struct swappy_point from;
+  struct swappy_point to;
+  enum swappy_paint_mode_type type;
+};
+
 struct swappy_brush_point {
   double x;
   double y;
@@ -95,6 +106,7 @@ struct swappy_state {
   struct swappy_box *geometry;
 
   GSList *brushes;
+  struct swappy_paint *temp_paint;  // Temporary paint
 
   int argc;
   char **argv;
