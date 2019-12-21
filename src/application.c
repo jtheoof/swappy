@@ -539,7 +539,7 @@ bool application_init(struct swappy_state *state) {
   state->resource = g_resource_load("build/meson-out/swappy.gresource", &error);
 
   if (error != NULL) {
-    g_error("unable to load swappy resource file: %s", error->message);
+    g_critical("unable to load swappy resource file: %s", error->message);
     g_error_free(error);
   }
 
