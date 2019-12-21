@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include <stdlib.h>
 
 #include "swappy.h"
 
@@ -24,6 +25,32 @@ static void apply_output_transform(enum wl_output_transform transform,
     int32_t tmp = *width;
     *width = *height;
     *height = tmp;
+  }
+}
+
+static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
+  double x = fmin(shape->from.x, shape->to.x);
+  double y = fmin(shape->from.y, shape->to.y);
+  double w = fabs(shape->from.x - shape->to.x);
+  double h = fabs(shape->from.y - shape->to.y);
+
+  cairo_set_source_rgba(cr, 1, 0, 0, 1);
+  cairo_set_line_width(cr, 2);
+
+  cairo_rectangle(cr, x, y, w, h);
+  cairo_stroke_preserve(cr);
+  // cairo_fill(cr);
+}
+
+static void draw_shapes(cairo_t *cr, struct swappy_state *state) {
+  for (GSList *elem = state->shapes; elem; elem = elem->next) {
+    struct swappy_shape *shape = elem->data;
+
+    draw_shape(cr, shape);
+  }
+
+  if (state->temp_shape) {
+    draw_shape(cr, state->temp_shape);
   }
 }
 
@@ -116,6 +143,7 @@ void draw_state(struct swappy_state *state) {
 
   draw_buffer(cr, state);
   draw_brushes(cr, state);
+  draw_shapes(cr, state);
 
   // Drawing is finised, notify the GtkDrawingArea it needs to be redrawn.
   gtk_widget_queue_draw(state->area);

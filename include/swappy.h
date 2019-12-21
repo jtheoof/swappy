@@ -34,7 +34,7 @@ struct swappy_point {
   gdouble y;
 };
 
-struct swappy_paint {
+struct swappy_shape {
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_mode_type type;
@@ -106,7 +106,8 @@ struct swappy_state {
   struct swappy_box *geometry;
 
   GSList *brushes;
-  struct swappy_paint *temp_paint;  // Temporary paint
+  GSList *shapes;
+  struct swappy_shape *temp_shape;  // Temporary shape
 
   int argc;
   char **argv;

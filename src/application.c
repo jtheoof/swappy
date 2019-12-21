@@ -16,6 +16,16 @@ static void swappy_overlay_clear(struct swappy_state *state) {
     g_slist_free_full(state->brushes, g_free);
     state->brushes = NULL;
   }
+
+  if (state->shapes) {
+    g_slist_free_full(state->shapes, g_free);
+    state->shapes = NULL;
+  }
+
+  if (state->temp_shape) {
+    g_free(state->temp_shape);
+    state->temp_shape = NULL;
+  }
 }
 
 static void switch_mode_to_brush(struct swappy_state *state) {
@@ -67,7 +77,7 @@ void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
   swappy_overlay_clear(state);
   cairo_surface_destroy(state->cairo_surface);
-  g_free(state->temp_paint);
+  g_free(state->temp_shape);
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -209,42 +219,47 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
 
 static void paint_add_temporary(struct swappy_state *state, double x, double y,
                                 enum swappy_paint_mode_type type) {
-  struct swappy_paint *temp = g_new(struct swappy_paint, 1);
+  struct swappy_shape *temp = g_new(struct swappy_shape, 1);
 
   temp->from.x = x;
   temp->from.y = y;
   temp->type = type;
 
-  if (state->temp_paint) {
-    g_free(state->temp_paint);
-    state->temp_paint = NULL;
+  if (state->temp_shape) {
+    g_free(state->temp_shape);
+    state->temp_shape = NULL;
   }
 
-  state->temp_paint = temp;
+  state->temp_shape = temp;
 }
 
 static void paint_update_temporary(struct swappy_state *state, double x,
                                    double y) {
-  if (!state->temp_paint) {
+  if (!state->temp_shape) {
     return;
   }
 
-  state->temp_paint->to.x = x;
-  state->temp_paint->to.y = y;
+  state->temp_shape->to.x = x;
+  state->temp_shape->to.y = y;
 }
 
 static void paint_commit_temporary(struct swappy_state *state, double x,
                                    double y) {
-  if (!state->temp_paint) {
+  if (!state->temp_shape) {
     return;
   }
 
-  state->temp_paint->to.x = x;
-  state->temp_paint->to.y = y;
+  state->temp_shape->to.x = x;
+  state->temp_shape->to.y = y;
 
   g_debug("commit temp paint: from: %lf,%lf to: %lf,%lf",
-          state->temp_paint->from.x, state->temp_paint->from.y,
-          state->temp_paint->to.x, state->temp_paint->to.y);
+          state->temp_shape->from.x, state->temp_shape->from.y,
+          state->temp_shape->to.x, state->temp_shape->to.y);
+
+  struct swappy_shape *shape =
+      g_memdup(state->temp_shape, sizeof(struct swappy_shape));
+
+  state->shapes = g_slist_append(state->shapes, shape);
 }
 
 static void draw_area_button_press_handler(GtkWidget *widget,
@@ -259,7 +274,6 @@ static void draw_area_button_press_handler(GtkWidget *widget,
     if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
       paint_add_temporary(state, event->x, event->y,
                           SWAPPY_PAINT_MODE_RECTANGLE);
-      draw_state(state);
     }
   }
 }
@@ -272,14 +286,18 @@ static void draw_area_button_release_handler(GtkWidget *widget,
     return;
   }
 
-  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
-    brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
-    draw_state(state);
-  }
+  switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
+      draw_state(state);
+      break;
 
-  if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
-    paint_commit_temporary(state, event->x, event->y);
-    draw_state(state);
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+      paint_commit_temporary(state, event->x, event->y);
+      draw_state(state);
+      break;
+    default:
+      return;
   }
 }
 
