@@ -1,8 +1,13 @@
+
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 #include <stdlib.h>
 
 #include "swappy.h"
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
 static cairo_format_t get_cairo_format(enum wl_shm_format wl_fmt) {
   switch (wl_fmt) {
@@ -27,8 +32,23 @@ static void apply_output_transform(enum wl_output_transform transform,
     *height = tmp;
   }
 }
+static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
+  double x = fabs(shape->from.x - shape->to.x);
+  double y = fabs(shape->from.y - shape->to.y);
+  double xc = shape->from.x + ((shape->to.x - shape->from.x) / 2);
+  double yc = shape->from.y + ((shape->to.y - shape->from.y) / 2);
 
-static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
+  double r = sqrt(x * x + y * y) / 2;
+
+  cairo_set_source_rgba(cr, 1, 0, 0, 1);
+  cairo_set_line_width(cr, 2);
+
+  cairo_arc(cr, xc, yc, r, 0, 2 * M_PI);
+  cairo_stroke(cr);
+  cairo_close_path(cr);
+}
+
+static void draw_shape_rectangle(cairo_t *cr, struct swappy_shape *shape) {
   double x = fmin(shape->from.x, shape->to.x);
   double y = fmin(shape->from.y, shape->to.y);
   double w = fabs(shape->from.x - shape->to.x);
@@ -38,18 +58,31 @@ static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
   cairo_set_line_width(cr, 2);
 
   cairo_rectangle(cr, x, y, w, h);
-  cairo_stroke_preserve(cr);
-  // cairo_fill(cr);
+  cairo_close_path(cr);
+  cairo_stroke(cr);
+}
+
+static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
+  switch (shape->type) {
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+      draw_shape_rectangle(cr, shape);
+      break;
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+      draw_shape_ellipse(cr, shape);
+      break;
+    default:
+      g_debug("unknown shape type: %d", shape->type);
+  }
 }
 
 static void draw_shapes(cairo_t *cr, struct swappy_state *state) {
   for (GSList *elem = state->shapes; elem; elem = elem->next) {
     struct swappy_shape *shape = elem->data;
-
     draw_shape(cr, shape);
   }
 
   if (state->temp_shape) {
+    g_debug("drawing temporary shape");
     draw_shape(cr, state->temp_shape);
   }
 }

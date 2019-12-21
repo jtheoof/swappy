@@ -19,6 +19,7 @@ swappy_inc = include_directories('include')
 cc = meson.get_compiler('c')
 
 cairo = dependency('cairo')
+math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-wayland-3.0', version: '>=3.22.0')
 gtk_layer_shell = dependency('gtk-layer-shell-0', version: '>= 0.1.0')
@@ -49,6 +50,7 @@ executable(
 		gtk,
 		gtk_layer_shell,
 		libnotify,
+		math,
 		realtime,
 		wayland_client,
 		wayland_cursor,

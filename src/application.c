@@ -260,6 +260,9 @@ static void paint_commit_temporary(struct swappy_state *state, double x,
       g_memdup(state->temp_shape, sizeof(struct swappy_shape));
 
   state->shapes = g_slist_append(state->shapes, shape);
+
+  g_free(state->temp_shape);
+  state->temp_shape = NULL;
 }
 
 static void draw_area_button_press_handler(GtkWidget *widget,
@@ -271,9 +274,14 @@ static void draw_area_button_press_handler(GtkWidget *widget,
   }
 
   if (event->button == 1) {
-    if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
-      paint_add_temporary(state, event->x, event->y,
-                          SWAPPY_PAINT_MODE_RECTANGLE);
+    switch (state->mode) {
+      case SWAPPY_PAINT_MODE_RECTANGLE:
+      case SWAPPY_PAINT_MODE_ELLIPSE:
+      case SWAPPY_PAINT_MODE_ARROW:
+        paint_add_temporary(state, event->x, event->y, state->mode);
+        break;
+      default:
+        return;
     }
   }
 }
@@ -291,8 +299,9 @@ static void draw_area_button_release_handler(GtkWidget *widget,
       brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
       draw_state(state);
       break;
-
     case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
       paint_commit_temporary(state, event->x, event->y);
       draw_state(state);
       break;
@@ -309,18 +318,26 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
   GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
   gdk_window_set_cursor(window, crosshair);
 
-  if (state->mode == SWAPPY_PAINT_MODE_BRUSH) {
-    if (event->state & GDK_BUTTON1_MASK) {
-      brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
-      draw_state(state);
-    }
-  } else if (state->mode == SWAPPY_PAINT_MODE_RECTANGLE) {
-    if (event->state & GDK_BUTTON1_MASK) {
-      paint_update_temporary(state, event->x, event->y);
-      draw_state(state);
-    }
-  } else {
-    gdk_window_set_cursor(window, NULL);
+  gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
+
+  switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      if (is_button1_pressed) {
+        brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
+        draw_state(state);
+      }
+      break;
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      if (is_button1_pressed) {
+        paint_update_temporary(state, event->x, event->y);
+        draw_state(state);
+      }
+      break;
+    default:
+      //      gdk_window_set_cursor(window, NULL);
+      return;
   }
 }
 
