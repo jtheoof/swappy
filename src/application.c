@@ -2,7 +2,6 @@
 #include <glib-2.0/glib.h>
 #include <gtk-layer-shell/gtk-layer-shell.h>
 #include <gtk/gtk.h>
-#include <include/swappy.h>
 #include <time.h>
 
 #include "clipboard.h"
@@ -12,21 +11,30 @@
 #include "swappy.h"
 #include "wayland.h"
 
-static void swappy_overlay_clear(struct swappy_state *state) {
-  if (state->brushes) {
-    g_slist_free_full(state->brushes, g_free);
-    state->brushes = NULL;
+static void paint_free(gpointer data) {
+  struct swappy_paint *paint = (struct swappy_paint *)data;
+
+  if (paint == NULL) {
+    return;
   }
 
+  switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      g_slist_free_full(paint->content.brush.points, g_free);
+      break;
+    default:
+      g_free(paint);
+  }
+}
+
+static void paint_free_all(struct swappy_state *state) {
   if (state->paints) {
-    g_slist_free_full(state->paints, g_free);
+    g_slist_free_full(state->paints, paint_free);
     state->paints = NULL;
   }
 
-  if (state->temp_paint) {
-    g_free(state->temp_paint);
-    state->temp_paint = NULL;
-  }
+  paint_free(state->temp_paint);
+  state->temp_paint = NULL;
 }
 
 static void switch_mode_to_brush(struct swappy_state *state) {
@@ -76,9 +84,8 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   g_debug("application is shutting down");
-  swappy_overlay_clear(state);
+  paint_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
-  g_free(state->temp_shape);
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -152,7 +159,7 @@ static void tools_menu_button_save_clicked_handler(GtkButton *button,
 
 static void tools_menu_button_clear_clicked_handler(
     GtkWidget *widget, struct swappy_state *state) {
-  swappy_overlay_clear(state);
+  paint_free_all(state);
   draw_state(state);
 }
 
@@ -204,30 +211,34 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
   }
 }
 
-static void brush_add_point(struct swappy_state *state, double x, double y,
-                            enum swappy_brush_point_kind kind) {
-  struct swappy_paint_brush *point = g_new(struct swappy_paint_brush, 1);
-  point->x = x;
-  point->y = y;
-  point->r = 1;
-  point->g = 0;
-  point->b = 0;
-  point->a = 1;
-  point->w = 2;
-  point->kind = kind;
-
-  state->brushes = g_slist_append(state->brushes, point);
-}
-
 static void paint_add_temporary(struct swappy_state *state, double x, double y,
                                 enum swappy_paint_type type) {
   struct swappy_paint *paint = g_new(struct swappy_paint, 1);
+  struct swappy_point *brush;
+
   paint->type = type;
 
   switch (type) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      paint->can_draw = true;
+
+      paint->content.brush.r = 1;
+      paint->content.brush.g = 0;
+      paint->content.brush.b = 0;
+      paint->content.brush.a = 1;
+      paint->content.brush.w = 2;
+
+      brush = g_new(struct swappy_point, 1);
+      brush->x = x;
+      brush->y = y;
+
+      paint->content.brush.points = g_slist_append(NULL, brush);
+      break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+      paint->can_draw = false;  // need `to` vector
+
       paint->content.shape.from.x = x;
       paint->content.shape.from.y = y;
       paint->content.shape.r = 1;
@@ -251,47 +262,51 @@ static void paint_add_temporary(struct swappy_state *state, double x, double y,
 
 static void paint_update_temporary(struct swappy_state *state, double x,
                                    double y) {
-  if (!state->temp_paint) {
+  struct swappy_paint *paint = state->temp_paint;
+  struct swappy_point *brush;
+  GSList *points;
+
+  if (!paint) {
     return;
   }
 
-  switch (state->temp_paint->type) {
+  switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      points = paint->content.brush.points;
+      brush = g_new(struct swappy_point, 1);
+      brush->x = x;
+      brush->y = y;
+
+      paint->content.brush.points = g_slist_append(points, brush);
+      break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
-      state->temp_paint->content.shape.to.x = x;
-      state->temp_paint->content.shape.to.y = y;
+      paint->content.shape.to.x = x;
+      paint->content.shape.to.y = y;
+      paint->can_draw = true;  // all set
       break;
     default:
-      g_info("unable to update temporary paint: %d", state->temp_paint->type);
+      g_info("unable to update temporary paint: %d", paint->type);
       break;
   }
 }
 
-static void paint_commit_temporary(struct swappy_state *state, double x,
-                                   double y) {
-  if (!state->temp_paint) {
+static void paint_commit_temporary(struct swappy_state *state) {
+  struct swappy_paint *paint = state->temp_paint;
+
+  if (!paint) {
     return;
   }
 
-  switch (state->temp_paint->type) {
-    case SWAPPY_PAINT_MODE_RECTANGLE:
-    case SWAPPY_PAINT_MODE_ELLIPSE:
-    case SWAPPY_PAINT_MODE_ARROW:
-      state->temp_paint->content.shape.to.x = x;
-      state->temp_paint->content.shape.to.y = y;
-
-      struct swappy_paint *paint =
-          g_memdup(state->temp_paint, sizeof(struct swappy_paint));
-
-      state->paints = g_slist_append(state->paints, paint);
-      break;
-    default:
-      g_info("unable to commit temporary paint: %d", state->temp_paint->type);
-      break;
+  if (!paint->can_draw) {
+    paint_free(paint);
+  } else {
+    state->paints = g_slist_append(state->paints, paint);
   }
 
-  g_free(state->temp_paint);
+  // Set the temporary paint to NULL but keep the content in memory
+  // because it's now part of the GSList.
   state->temp_paint = NULL;
 }
 
@@ -305,10 +320,12 @@ static void draw_area_button_press_handler(GtkWidget *widget,
 
   if (event->button == 1) {
     switch (state->mode) {
+      case SWAPPY_PAINT_MODE_BRUSH:
       case SWAPPY_PAINT_MODE_RECTANGLE:
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
         paint_add_temporary(state, event->x, event->y, state->mode);
+        draw_state(state);
         break;
       default:
         return;
@@ -326,13 +343,10 @@ static void draw_area_button_release_handler(GtkWidget *widget,
 
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BRUSH:
-      brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_LAST);
-      draw_state(state);
-      break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
-      paint_commit_temporary(state, event->x, event->y);
+      paint_commit_temporary(state);
       draw_state(state);
       break;
     default:
@@ -352,11 +366,6 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
 
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BRUSH:
-      if (is_button1_pressed) {
-        brush_add_point(state, event->x, event->y, SWAPPY_BRUSH_POINT_WITHIN);
-        draw_state(state);
-      }
-      break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:

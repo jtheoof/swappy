@@ -185,30 +185,35 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
-static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
-  for (GSList *brush = state->brushes; brush; brush = brush->next) {
-    GSList *brush_next = brush->next;
-    struct swappy_paint_brush *point = brush->data;
+static void draw_brush(cairo_t *cr, struct swappy_paint_brush brush) {
+  cairo_set_source_rgba(cr, brush.r, brush.g, brush.b, brush.a);
+  cairo_set_line_width(cr, brush.w);
+  cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
 
-    if (brush_next && point->kind == SWAPPY_BRUSH_POINT_WITHIN) {
-      struct swappy_paint_brush *next = brush_next->data;
-      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, point->w);
-      cairo_move_to(cr, point->x, point->y);
-      cairo_line_to(cr, next->x, next->y);
-      cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
-      cairo_stroke(cr);
-    } else {
-      cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, point->w);
-      cairo_rectangle(cr, point->x, point->y, 1, 1);
-      cairo_stroke(cr);
+  guint l = g_slist_length(brush.points);
+
+  if (l == 1) {
+    struct swappy_point *point = g_slist_nth_data(brush.points, 0);
+    cairo_rectangle(cr, point->x, point->y, brush.w, brush.w);
+    cairo_fill(cr);
+  } else {
+    for (GSList *elem = brush.points; elem; elem = elem->next) {
+      struct swappy_point *point = elem->data;
+      cairo_line_to(cr, point->x, point->y);
     }
+    cairo_stroke(cr);
   }
 }
 
 static void draw_paint(cairo_t *cr, struct swappy_paint *paint) {
+  if (!paint->can_draw) {
+    return;
+  }
+
   switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      draw_brush(cr, paint->content.brush);
+      break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
@@ -237,7 +242,6 @@ void draw_state(struct swappy_state *state) {
   cairo_set_source_rgb(cr, 1, 1, 1);
 
   draw_buffer(cr, state);
-  draw_brushes(cr, state);
   draw_paints(cr, state);
 
   // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.

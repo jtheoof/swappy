@@ -46,18 +46,17 @@ struct swappy_paint_shape {
 };
 
 struct swappy_paint_brush {
-  double x;
-  double y;
   double r;
   double g;
   double b;
   double a;
   double w;
-  enum swappy_brush_point_kind kind;
+  GSList *points;
 };
 
 struct swappy_paint {
   enum swappy_paint_type type;
+  bool can_draw;
   union {
     struct swappy_paint_brush brush;
     struct swappy_paint_shape shape;
@@ -119,10 +118,8 @@ struct swappy_state {
 
   struct swappy_box *geometry;
 
-  GSList *brushes;
   GSList *paints;
-  struct swappy_paint_shape *temp_shape;  // Temporary shape
-  struct swappy_paint *temp_paint;        // Temporary pain
+  struct swappy_paint *temp_paint;
 
   int argc;
   char **argv;
