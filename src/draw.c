@@ -34,8 +34,8 @@ static void apply_output_transform(enum wl_output_transform transform,
 }
 
 static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
-  cairo_set_source_rgba(cr, 1, 0, 0, 1);
-  cairo_set_line_width(cr, 2);
+  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
+  cairo_set_line_width(cr, shape->w);
 
   cairo_move_to(cr, shape->from.x, shape->from.y);
   cairo_line_to(cr, shape->to.x, shape->to.y);
@@ -82,8 +82,8 @@ static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
   double n = sqrt(x * x + y * y);
   double r = n / 2;
 
-  cairo_set_source_rgba(cr, 1, 0, 0, 1);
-  cairo_set_line_width(cr, 2);
+  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
+  cairo_set_line_width(cr, shape->w);
 
   cairo_matrix_t save_matrix;
   cairo_get_matrix(cr, &save_matrix);
@@ -101,8 +101,8 @@ static void draw_shape_rectangle(cairo_t *cr, struct swappy_shape *shape) {
   double w = fabs(shape->from.x - shape->to.x);
   double h = fabs(shape->from.y - shape->to.y);
 
-  cairo_set_source_rgba(cr, 1, 0, 0, 1);
-  cairo_set_line_width(cr, 2);
+  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
+  cairo_set_line_width(cr, shape->w);
 
   cairo_rectangle(cr, x, y, w, h);
   cairo_close_path(cr);
@@ -207,14 +207,14 @@ static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
     if (brush_next && point->kind == SWAPPY_BRUSH_POINT_WITHIN) {
       struct swappy_brush_point *next = brush_next->data;
       cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, 2);
+      cairo_set_line_width(cr, point->w);
       cairo_move_to(cr, point->x, point->y);
       cairo_line_to(cr, next->x, next->y);
       cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
       cairo_stroke(cr);
     } else {
       cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
-      cairo_set_line_width(cr, 2);
+      cairo_set_line_width(cr, point->w);
       cairo_rectangle(cr, point->x, point->y, 1, 1);
       cairo_stroke(cr);
     }

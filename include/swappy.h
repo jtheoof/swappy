@@ -35,6 +35,11 @@ struct swappy_point {
 };
 
 struct swappy_shape {
+  double r;
+  double g;
+  double b;
+  double a;
+  double w;
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_mode_type type;
@@ -47,6 +52,7 @@ struct swappy_brush_point {
   double g;
   double b;
   double a;
+  double w;
   enum swappy_brush_point_kind kind;
 };
 

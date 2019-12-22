@@ -212,6 +212,7 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
   point->g = 0;
   point->b = 0;
   point->a = 1;
+  point->w = 2;
   point->kind = kind;
 
   state->brushes = g_slist_append(state->brushes, point);
@@ -223,6 +224,11 @@ static void paint_add_temporary(struct swappy_state *state, double x, double y,
 
   temp->from.x = x;
   temp->from.y = y;
+  temp->r = 1;
+  temp->g = 0;
+  temp->b = 0;
+  temp->a = 1;
+  temp->w = 2;
   temp->type = type;
 
   if (state->temp_shape) {
