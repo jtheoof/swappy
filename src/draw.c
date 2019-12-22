@@ -1,7 +1,5 @@
-
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-#include <stdlib.h>
 
 #include "swappy.h"
 
@@ -33,12 +31,12 @@ static void apply_output_transform(enum wl_output_transform transform,
   }
 }
 
-static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
-  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
-  cairo_set_line_width(cr, shape->w);
+static void draw_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
+  cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
+  cairo_set_line_width(cr, shape.w);
 
-  cairo_move_to(cr, shape->from.x, shape->from.y);
-  cairo_line_to(cr, shape->to.x, shape->to.y);
+  cairo_move_to(cr, shape.from.x, shape.from.y);
+  cairo_line_to(cr, shape.to.x, shape.to.y);
   cairo_stroke(cr);
   cairo_fill(cr);
 
@@ -51,8 +49,8 @@ static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
   double xb = r * cos(tb);
   double yb = r * sin(tb);
 
-  double ftx = shape->to.x - shape->from.x;
-  double fty = shape->to.y - shape->from.y;
+  double ftx = shape.to.x - shape.from.x;
+  double fty = shape.to.y - shape.from.y;
   double ftz = sqrt(ftx * ftx + fty * fty);
 
   if (ftz == 0) {
@@ -64,7 +62,7 @@ static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
     theta = M_PI + theta;
   }
 
-  cairo_translate(cr, shape->to.x, shape->to.y);
+  cairo_translate(cr, shape.to.x, shape.to.y);
   cairo_rotate(cr, theta);
   cairo_move_to(cr, 0, 0);
   cairo_line_to(cr, xa, ya);
@@ -73,17 +71,17 @@ static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
   cairo_fill(cr);
 }
 
-static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
-  double x = fabs(shape->from.x - shape->to.x);
-  double y = fabs(shape->from.y - shape->to.y);
-  double xc = shape->from.x + ((shape->to.x - shape->from.x) / 2);
-  double yc = shape->from.y + ((shape->to.y - shape->from.y) / 2);
+static void draw_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
+  double x = fabs(shape.from.x - shape.to.x);
+  double y = fabs(shape.from.y - shape.to.y);
+  double xc = shape.from.x + ((shape.to.x - shape.from.x) / 2);
+  double yc = shape.from.y + ((shape.to.y - shape.from.y) / 2);
 
   double n = sqrt(x * x + y * y);
   double r = n / 2;
 
-  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
-  cairo_set_line_width(cr, shape->w);
+  cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
+  cairo_set_line_width(cr, shape.w);
 
   cairo_matrix_t save_matrix;
   cairo_get_matrix(cr, &save_matrix);
@@ -95,23 +93,23 @@ static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
   cairo_close_path(cr);
 }
 
-static void draw_shape_rectangle(cairo_t *cr, struct swappy_shape *shape) {
-  double x = fmin(shape->from.x, shape->to.x);
-  double y = fmin(shape->from.y, shape->to.y);
-  double w = fabs(shape->from.x - shape->to.x);
-  double h = fabs(shape->from.y - shape->to.y);
+static void draw_shape_rectangle(cairo_t *cr, struct swappy_paint_shape shape) {
+  double x = fmin(shape.from.x, shape.to.x);
+  double y = fmin(shape.from.y, shape.to.y);
+  double w = fabs(shape.from.x - shape.to.x);
+  double h = fabs(shape.from.y - shape.to.y);
 
-  cairo_set_source_rgba(cr, shape->r, shape->g, shape->b, shape->a);
-  cairo_set_line_width(cr, shape->w);
+  cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
+  cairo_set_line_width(cr, shape.w);
 
   cairo_rectangle(cr, x, y, w, h);
   cairo_close_path(cr);
   cairo_stroke(cr);
 }
 
-static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
+static void draw_shape(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_save(cr);
-  switch (shape->type) {
+  switch (shape.type) {
     case SWAPPY_PAINT_MODE_RECTANGLE:
       draw_shape_rectangle(cr, shape);
       break;
@@ -122,21 +120,9 @@ static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
       draw_shape_arrow(cr, shape);
       break;
     default:
-      g_debug("unknown shape type: %d", shape->type);
+      g_debug("unknown shape type: %d", shape.type);
   }
   cairo_restore(cr);
-}
-
-static void draw_shapes(cairo_t *cr, struct swappy_state *state) {
-  for (GSList *elem = state->shapes; elem; elem = elem->next) {
-    struct swappy_shape *shape = elem->data;
-    draw_shape(cr, shape);
-  }
-
-  if (state->temp_shape) {
-    g_debug("drawing temporary shape");
-    draw_shape(cr, state->temp_shape);
-  }
 }
 
 static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
@@ -202,10 +188,10 @@ static void draw_buffer(cairo_t *cr, struct swappy_state *state) {
 static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
   for (GSList *brush = state->brushes; brush; brush = brush->next) {
     GSList *brush_next = brush->next;
-    struct swappy_brush_point *point = brush->data;
+    struct swappy_paint_brush *point = brush->data;
 
     if (brush_next && point->kind == SWAPPY_BRUSH_POINT_WITHIN) {
-      struct swappy_brush_point *next = brush_next->data;
+      struct swappy_paint_brush *next = brush_next->data;
       cairo_set_source_rgba(cr, point->r, point->g, point->b, point->a);
       cairo_set_line_width(cr, point->w);
       cairo_move_to(cr, point->x, point->y);
@@ -221,6 +207,30 @@ static void draw_brushes(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static void draw_paint(cairo_t *cr, struct swappy_paint *paint) {
+  switch (paint->type) {
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      draw_shape(cr, paint->content.shape);
+      break;
+    default:
+      g_info("unable to draw paint with type: %d", paint->type);
+      break;
+  }
+}
+
+static void draw_paints(cairo_t *cr, struct swappy_state *state) {
+  for (GSList *elem = state->paints; elem; elem = elem->next) {
+    struct swappy_paint *paint = elem->data;
+    draw_paint(cr, paint);
+  }
+
+  if (state->temp_paint) {
+    draw_paint(cr, state->temp_paint);
+  }
+}
+
 void draw_state(struct swappy_state *state) {
   cairo_t *cr = cairo_create(state->cairo_surface);
 
@@ -228,9 +238,9 @@ void draw_state(struct swappy_state *state) {
 
   draw_buffer(cr, state);
   draw_brushes(cr, state);
-  draw_shapes(cr, state);
+  draw_paints(cr, state);
 
-  // Drawing is finised, notify the GtkDrawingArea it needs to be redrawn.
+  // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.
   gtk_widget_queue_draw(state->area);
 
   cairo_destroy(cr);

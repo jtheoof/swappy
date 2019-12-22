@@ -2,6 +2,7 @@
 #include <glib-2.0/glib.h>
 #include <gtk-layer-shell/gtk-layer-shell.h>
 #include <gtk/gtk.h>
+#include <include/swappy.h>
 #include <time.h>
 
 #include "clipboard.h"
@@ -17,14 +18,14 @@ static void swappy_overlay_clear(struct swappy_state *state) {
     state->brushes = NULL;
   }
 
-  if (state->shapes) {
-    g_slist_free_full(state->shapes, g_free);
-    state->shapes = NULL;
+  if (state->paints) {
+    g_slist_free_full(state->paints, g_free);
+    state->paints = NULL;
   }
 
-  if (state->temp_shape) {
-    g_free(state->temp_shape);
-    state->temp_shape = NULL;
+  if (state->temp_paint) {
+    g_free(state->temp_paint);
+    state->temp_paint = NULL;
   }
 }
 
@@ -205,7 +206,7 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
 
 static void brush_add_point(struct swappy_state *state, double x, double y,
                             enum swappy_brush_point_kind kind) {
-  struct swappy_brush_point *point = g_new(struct swappy_brush_point, 1);
+  struct swappy_paint_brush *point = g_new(struct swappy_paint_brush, 1);
   point->x = x;
   point->y = y;
   point->r = 1;
@@ -219,56 +220,79 @@ static void brush_add_point(struct swappy_state *state, double x, double y,
 }
 
 static void paint_add_temporary(struct swappy_state *state, double x, double y,
-                                enum swappy_paint_mode_type type) {
-  struct swappy_shape *temp = g_new(struct swappy_shape, 1);
+                                enum swappy_paint_type type) {
+  struct swappy_paint *paint = g_new(struct swappy_paint, 1);
+  paint->type = type;
 
-  temp->from.x = x;
-  temp->from.y = y;
-  temp->r = 1;
-  temp->g = 0;
-  temp->b = 0;
-  temp->a = 1;
-  temp->w = 2;
-  temp->type = type;
-
-  if (state->temp_shape) {
-    g_free(state->temp_shape);
-    state->temp_shape = NULL;
+  switch (type) {
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      paint->content.shape.from.x = x;
+      paint->content.shape.from.y = y;
+      paint->content.shape.r = 1;
+      paint->content.shape.g = 0;
+      paint->content.shape.b = 0;
+      paint->content.shape.a = 1;
+      paint->content.shape.w = 2;
+      paint->content.shape.type = type;
+      break;
+    default:
+      g_info("unable to add temporary paint: %d", type);
+      break;
   }
 
-  state->temp_shape = temp;
+  if (state->temp_paint) {
+    g_free(state->temp_paint);
+  }
+
+  state->temp_paint = paint;
 }
 
 static void paint_update_temporary(struct swappy_state *state, double x,
                                    double y) {
-  if (!state->temp_shape) {
+  if (!state->temp_paint) {
     return;
   }
 
-  state->temp_shape->to.x = x;
-  state->temp_shape->to.y = y;
+  switch (state->temp_paint->type) {
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      state->temp_paint->content.shape.to.x = x;
+      state->temp_paint->content.shape.to.y = y;
+      break;
+    default:
+      g_info("unable to update temporary paint: %d", state->temp_paint->type);
+      break;
+  }
 }
 
 static void paint_commit_temporary(struct swappy_state *state, double x,
                                    double y) {
-  if (!state->temp_shape) {
+  if (!state->temp_paint) {
     return;
   }
 
-  state->temp_shape->to.x = x;
-  state->temp_shape->to.y = y;
+  switch (state->temp_paint->type) {
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      state->temp_paint->content.shape.to.x = x;
+      state->temp_paint->content.shape.to.y = y;
 
-  g_debug("commit temp paint: from: %lf,%lf to: %lf,%lf",
-          state->temp_shape->from.x, state->temp_shape->from.y,
-          state->temp_shape->to.x, state->temp_shape->to.y);
+      struct swappy_paint *paint =
+          g_memdup(state->temp_paint, sizeof(struct swappy_paint));
 
-  struct swappy_shape *shape =
-      g_memdup(state->temp_shape, sizeof(struct swappy_shape));
+      state->paints = g_slist_append(state->paints, paint);
+      break;
+    default:
+      g_info("unable to commit temporary paint: %d", state->temp_paint->type);
+      break;
+  }
 
-  state->shapes = g_slist_append(state->shapes, shape);
-
-  g_free(state->temp_shape);
-  state->temp_shape = NULL;
+  g_free(state->temp_paint);
+  state->temp_paint = NULL;
 }
 
 static void draw_area_button_press_handler(GtkWidget *widget,

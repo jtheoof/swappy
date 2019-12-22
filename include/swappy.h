@@ -21,7 +21,7 @@ enum swappy_brush_point_kind {
   SWAPPY_BRUSH_POINT_LAST,      /* A point at the end of brush batch */
 };
 
-enum swappy_paint_mode_type {
+enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
   SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
@@ -34,7 +34,7 @@ struct swappy_point {
   gdouble y;
 };
 
-struct swappy_shape {
+struct swappy_paint_shape {
   double r;
   double g;
   double b;
@@ -42,10 +42,10 @@ struct swappy_shape {
   double w;
   struct swappy_point from;
   struct swappy_point to;
-  enum swappy_paint_mode_type type;
+  enum swappy_paint_type type;
 };
 
-struct swappy_brush_point {
+struct swappy_paint_brush {
   double x;
   double y;
   double r;
@@ -54,6 +54,14 @@ struct swappy_brush_point {
   double a;
   double w;
   enum swappy_brush_point_kind kind;
+};
+
+struct swappy_paint {
+  enum swappy_paint_type type;
+  union {
+    struct swappy_paint_brush brush;
+    struct swappy_paint_shape shape;
+  } content;
 };
 
 struct swappy_box {
@@ -100,7 +108,7 @@ struct swappy_state {
 
   char *storage_path;
 
-  enum swappy_paint_mode_type mode;
+  enum swappy_paint_type mode;
 
   int width;
   int height;
@@ -112,8 +120,9 @@ struct swappy_state {
   struct swappy_box *geometry;
 
   GSList *brushes;
-  GSList *shapes;
-  struct swappy_shape *temp_shape;  // Temporary shape
+  GSList *paints;
+  struct swappy_paint_shape *temp_shape;  // Temporary shape
+  struct swappy_paint *temp_paint;        // Temporary pain
 
   int argc;
   char **argv;
