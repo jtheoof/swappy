@@ -32,6 +32,47 @@ static void apply_output_transform(enum wl_output_transform transform,
     *height = tmp;
   }
 }
+
+static void draw_shape_arrow(cairo_t *cr, struct swappy_shape *shape) {
+  cairo_set_source_rgba(cr, 1, 0, 0, 1);
+  cairo_set_line_width(cr, 2);
+
+  cairo_move_to(cr, shape->from.x, shape->from.y);
+  cairo_line_to(cr, shape->to.x, shape->to.y);
+  cairo_stroke(cr);
+  cairo_fill(cr);
+
+  double r = 20;
+
+  double ta = 5 * M_PI / 6;
+  double xa = r * cos(ta);
+  double ya = r * sin(ta);
+  double tb = 7 * M_PI / 6;
+  double xb = r * cos(tb);
+  double yb = r * sin(tb);
+
+  double ftx = shape->to.x - shape->from.x;
+  double fty = shape->to.y - shape->from.y;
+  double ftz = sqrt(ftx * ftx + fty * fty);
+
+  if (ftz == 0) {
+    return;
+  }
+
+  double theta = atan(fty / ftx);
+  if (ftx < DBL_EPSILON) {
+    theta = M_PI + theta;
+  }
+
+  cairo_translate(cr, shape->to.x, shape->to.y);
+  cairo_rotate(cr, theta);
+  cairo_move_to(cr, 0, 0);
+  cairo_line_to(cr, xa, ya);
+  cairo_line_to(cr, xb, yb);
+  cairo_line_to(cr, 0, 0);
+  cairo_fill(cr);
+}
+
 static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
   double x = fabs(shape->from.x - shape->to.x);
   double y = fabs(shape->from.y - shape->to.y);
@@ -63,6 +104,7 @@ static void draw_shape_rectangle(cairo_t *cr, struct swappy_shape *shape) {
 }
 
 static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
+  cairo_save(cr);
   switch (shape->type) {
     case SWAPPY_PAINT_MODE_RECTANGLE:
       draw_shape_rectangle(cr, shape);
@@ -70,9 +112,13 @@ static void draw_shape(cairo_t *cr, struct swappy_shape *shape) {
     case SWAPPY_PAINT_MODE_ELLIPSE:
       draw_shape_ellipse(cr, shape);
       break;
+    case SWAPPY_PAINT_MODE_ARROW:
+      draw_shape_arrow(cr, shape);
+      break;
     default:
       g_debug("unknown shape type: %d", shape->type);
   }
+  cairo_restore(cr);
 }
 
 static void draw_shapes(cairo_t *cr, struct swappy_state *state) {

@@ -336,9 +336,9 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
       }
       break;
     default:
-      //      gdk_window_set_cursor(window, NULL);
       return;
   }
+  g_object_unref(crosshair);
 }
 
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
