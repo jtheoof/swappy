@@ -79,12 +79,18 @@ static void draw_shape_ellipse(cairo_t *cr, struct swappy_shape *shape) {
   double xc = shape->from.x + ((shape->to.x - shape->from.x) / 2);
   double yc = shape->from.y + ((shape->to.y - shape->from.y) / 2);
 
-  double r = sqrt(x * x + y * y) / 2;
+  double n = sqrt(x * x + y * y);
+  double r = n / 2;
 
   cairo_set_source_rgba(cr, 1, 0, 0, 1);
   cairo_set_line_width(cr, 2);
 
-  cairo_arc(cr, xc, yc, r, 0, 2 * M_PI);
+  cairo_matrix_t save_matrix;
+  cairo_get_matrix(cr, &save_matrix);
+  cairo_translate(cr, xc, yc);
+  cairo_scale(cr, x / n, y / n);
+  cairo_arc(cr, 0, 0, r, 0, 2 * M_PI);
+  cairo_set_matrix(cr, &save_matrix);
   cairo_stroke(cr);
   cairo_close_path(cr);
 }
