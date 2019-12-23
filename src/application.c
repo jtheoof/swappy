@@ -210,6 +210,8 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
                                  true);
   } else if (event->keyval == GDK_KEY_c && event->state & GDK_CONTROL_MASK) {
     clipboard_copy_drawing_area_to_selection(state);
+  } else if (event->keyval == GDK_KEY_s && event->state & GDK_CONTROL_MASK) {
+    action_save_area_to_file(state);
   }
 }
 
