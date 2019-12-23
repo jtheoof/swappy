@@ -185,33 +185,59 @@ static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
 
 static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
-  g_debug("keypress_handler key pressed: %d\n", event->keyval);
-  if (event->keyval == GDK_KEY_Escape) {
-    g_debug("keypress_handler: escape key pressed, ciao bye\n");
-    gtk_window_close(state->window);
-  } else if (event->keyval == GDK_KEY_B || event->keyval == GDK_KEY_b) {
-    switch_mode_to_brush(state);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->brush),
-                                 true);
-  } else if (event->keyval == GDK_KEY_T || event->keyval == GDK_KEY_t) {
-    switch_mode_to_text(state);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->text), true);
-  } else if (event->keyval == GDK_KEY_R || event->keyval == GDK_KEY_r) {
-    switch_mode_to_rectangle(state);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->rectangle),
-                                 true);
-  } else if (event->keyval == GDK_KEY_O || event->keyval == GDK_KEY_o) {
-    switch_mode_to_ellipse(state);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->ellipse),
-                                 true);
-  } else if (event->keyval == GDK_KEY_A || event->keyval == GDK_KEY_a) {
-    switch_mode_to_arrow(state);
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->arrow),
-                                 true);
-  } else if (event->keyval == GDK_KEY_c && event->state & GDK_CONTROL_MASK) {
-    clipboard_copy_drawing_area_to_selection(state);
-  } else if (event->keyval == GDK_KEY_s && event->state & GDK_CONTROL_MASK) {
-    action_save_area_to_file(state);
+  g_debug("keypress_handler key pressed: keyval: %d - state: %d\n",
+          event->keyval, event->state);
+
+  switch (event->state) {
+    case 0:
+      switch (event->keyval) {
+        case GDK_KEY_Escape:
+          g_debug("keypress_handler: escape key pressed, ciao bye\n");
+          gtk_window_close(state->window);
+          break;
+        case GDK_KEY_b:
+          switch_mode_to_brush(state);
+          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->brush),
+                                       true);
+          break;
+        case GDK_KEY_t:
+          switch_mode_to_text(state);
+          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->text),
+                                       true);
+          break;
+        case GDK_KEY_r:
+          switch_mode_to_rectangle(state);
+          gtk_toggle_button_set_active(
+              GTK_TOGGLE_BUTTON(state->popover->rectangle), true);
+          break;
+        case GDK_KEY_o:
+          switch_mode_to_ellipse(state);
+          gtk_toggle_button_set_active(
+              GTK_TOGGLE_BUTTON(state->popover->ellipse), true);
+          break;
+        case GDK_KEY_a:
+          switch_mode_to_arrow(state);
+          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->arrow),
+                                       true);
+          break;
+        default:
+          break;
+      }
+      break;
+    case GDK_CONTROL_MASK:
+      switch (event->keyval) {
+        case GDK_KEY_c:
+          clipboard_copy_drawing_area_to_selection(state);
+          break;
+        case GDK_KEY_s:
+          action_save_area_to_file(state);
+          break;
+        default:
+          break;
+      }
+      break;
+    default:
+      break;
   }
 }
 
