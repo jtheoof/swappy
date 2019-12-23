@@ -15,12 +15,6 @@
 
 #define GEOMETRY_PATTERN "xx,yy wwxhh"
 
-enum swappy_brush_point_kind {
-  SWAPPY_BRUSH_POINT_FIRST = 0, /* A first point of new brush batch */
-  SWAPPY_BRUSH_POINT_WITHIN,    /* A point within a brush batch */
-  SWAPPY_BRUSH_POINT_LAST,      /* A point at the end of brush batch */
-};
-
 enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
@@ -100,9 +94,6 @@ struct swappy_state {
   struct wl_list outputs;  // mako_output::link
   struct wl_list seats;    // mako_seat::link
 
-  struct wl_surface *surface;
-  struct zwlr_layer_surface_v1 *layer_surface;
-
   size_t n_done;
 
   char *storage_path;
@@ -111,7 +102,6 @@ struct swappy_state {
 
   int width;
   int height;
-  char image[255];
 
   /* Options */
   char *geometry_str;

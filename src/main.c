@@ -21,11 +21,6 @@ int main(int argc, char *argv[]) {
   state.argv = argv;
   state.mode = SWAPPY_PAINT_MODE_BRUSH;
 
-  char *path = "/home/jattali/Desktop/sway.png";
-
-  g_debug("Loading: %s", path);
-  sprintf(state.image, "%s", path);
-
   if (!config_get_storage_path(&state)) {
     g_critical("could not find a valid pictures path in your env variables");
     exit(1);
