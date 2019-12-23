@@ -39,7 +39,7 @@ executable(
 		'src/box.c',
 		'src/config.c',
 		'src/clipboard.c',
-		'src/draw.c',
+		'src/render.c',
 		'src/screencopy.c',
 		'src/wayland.c',
 		'src/application.c',

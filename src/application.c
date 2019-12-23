@@ -5,8 +5,8 @@
 #include <time.h>
 
 #include "clipboard.h"
-#include "draw.h"
 #include "notification.h"
+#include "render.h"
 #include "screencopy.h"
 #include "swappy.h"
 #include "wayland.h"
@@ -113,7 +113,7 @@ static gboolean configure_event_handler(GtkWidget *area,
       gtk_widget_get_allocated_width(area),
       gtk_widget_get_allocated_height(area));
 
-  draw_state(state);
+  render_state(state);
 
   return TRUE;
 }
@@ -160,7 +160,7 @@ static void tools_menu_button_save_clicked_handler(GtkButton *button,
 static void tools_menu_button_clear_clicked_handler(
     GtkWidget *widget, struct swappy_state *state) {
   paint_free_all(state);
-  draw_state(state);
+  render_state(state);
 }
 
 static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
@@ -355,7 +355,7 @@ static void draw_area_button_press_handler(GtkWidget *widget,
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
         paint_add_temporary(state, event->x, event->y, state->mode);
-        draw_state(state);
+        render_state(state);
         break;
       default:
         return;
@@ -377,7 +377,7 @@ static void draw_area_button_release_handler(GtkWidget *widget,
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
       paint_commit_temporary(state);
-      draw_state(state);
+      render_state(state);
       break;
     default:
       return;
@@ -401,7 +401,7 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
     case SWAPPY_PAINT_MODE_ARROW:
       if (is_button1_pressed) {
         paint_update_temporary(state, event->x, event->y);
-        draw_state(state);
+        render_state(state);
       }
       break;
     default:
