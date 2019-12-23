@@ -208,6 +208,8 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
     switch_mode_to_arrow(state);
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->popover->arrow),
                                  true);
+  } else if (event->keyval == GDK_KEY_c && event->state & GDK_CONTROL_MASK) {
+    clipboard_copy_drawing_area_to_selection(state);
   }
 }
 
