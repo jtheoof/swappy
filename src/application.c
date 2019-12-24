@@ -69,30 +69,6 @@ void application_finish(struct swappy_state *state) {
   g_object_unref(state->app);
 }
 
-static gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
-                                  struct swappy_state *state) {
-  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
-  cairo_paint(cr);
-
-  return FALSE;
-}
-
-static gboolean configure_event_handler(GtkWidget *area,
-                                        GdkEventConfigure *event,
-                                        struct swappy_state *state) {
-  g_debug("received configure_event handler");
-  cairo_surface_destroy(state->cairo_surface);
-
-  state->cairo_surface = gdk_window_create_similar_surface(
-      gtk_widget_get_window(area), CAIRO_CONTENT_COLOR,
-      gtk_widget_get_allocated_width(area),
-      gtk_widget_get_allocated_height(area));
-
-  render_state(state);
-
-  return TRUE;
-}
-
 static void action_save_area_to_file(struct swappy_state *state) {
   g_debug("saving area to file");
 
@@ -127,39 +103,21 @@ static void action_save_area_to_file(struct swappy_state *state) {
   notification_send("Swappy", message);
 }
 
-static void tools_menu_button_save_clicked_handler(GtkButton *button,
-                                                   struct swappy_state *state) {
+void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_save_area_to_file(state);
 }
 
-static void tools_menu_button_clear_clicked_handler(
-    GtkWidget *widget, struct swappy_state *state) {
+void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   paint_free_all(state);
   render_state(state);
 }
 
-static void tools_menu_button_brush_toggle_handler(GtkToggleButton *source,
-                                                   struct swappy_state *state) {
-  state->mode = SWAPPY_PAINT_MODE_BRUSH;
-}
-
-static void tools_menu_button_text_toggle_handler(GtkToggleButton *source,
-                                                  struct swappy_state *state) {
-  state->mode = SWAPPY_PAINT_MODE_TEXT;
-}
-
-static void tools_menu_button_shape_toggle_handler(GtkToggleButton *source,
-                                                   struct swappy_state *state) {
-  state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
-}
-
-static void tools_menu_button_copy_clicked_handler(GtkToggleButton *source,
-                                                   struct swappy_state *state) {
+void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   clipboard_copy_drawing_area_to_selection(state);
 }
 
-static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                             struct swappy_state *state) {
+void keypress_handler(GtkWidget *widget, GdkEventKey *event,
+                      struct swappy_state *state) {
   g_debug("keypress_handler key pressed: keyval: %d - state: %d\n",
           event->keyval, event->state);
 
@@ -168,7 +126,7 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
       switch (event->keyval) {
         case GDK_KEY_Escape:
           g_debug("keypress_handler: escape key pressed, ciao bye\n");
-          gtk_window_close(state->window);
+          gtk_main_quit();
           break;
         case GDK_KEY_b:
           switch_mode_to_brush(state);
@@ -216,9 +174,30 @@ static void keypress_handler(GtkWidget *widget, GdkEventKey *event,
   }
 }
 
-static void draw_area_button_press_handler(GtkWidget *widget,
-                                           GdkEventButton *event,
-                                           struct swappy_state *state) {
+gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
+                           struct swappy_state *state) {
+  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
+  cairo_paint(cr);
+
+  return FALSE;
+}
+gboolean draw_area_configure_handler(GtkWidget *widget,
+                                     GdkEventConfigure *event,
+                                     struct swappy_state *state) {
+  g_debug("received configure_event handler");
+  cairo_surface_destroy(state->cairo_surface);
+
+  state->cairo_surface = gdk_window_create_similar_surface(
+      gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR,
+      gtk_widget_get_allocated_width(widget),
+      gtk_widget_get_allocated_height(widget));
+
+  render_state(state);
+
+  return TRUE;
+}
+void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
+                                    struct swappy_state *state) {
   g_debug("press event: state: %d, button: %d", event->state, event->button);
   if (event->button == 3) {
     gtk_popover_popup(state->popover->container);
@@ -238,31 +217,8 @@ static void draw_area_button_press_handler(GtkWidget *widget,
     }
   }
 }
-
-static void draw_area_button_release_handler(GtkWidget *widget,
-                                             GdkEventButton *event,
-                                             struct swappy_state *state) {
-  g_debug("releasing button in state: %d", event->state);
-  if (!(event->state & GDK_BUTTON1_MASK)) {
-    return;
-  }
-
-  switch (state->mode) {
-    case SWAPPY_PAINT_MODE_BRUSH:
-    case SWAPPY_PAINT_MODE_RECTANGLE:
-    case SWAPPY_PAINT_MODE_ELLIPSE:
-    case SWAPPY_PAINT_MODE_ARROW:
-      paint_commit_temporary(state);
-      render_state(state);
-      break;
-    default:
-      return;
-  }
-}
-
-static void draw_area_motion_notify_handler(GtkWidget *widget,
-                                            GdkEventMotion *event,
-                                            struct swappy_state *state) {
+void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
+                                     struct swappy_state *state) {
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = event->window;
   GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
@@ -285,6 +241,25 @@ static void draw_area_motion_notify_handler(GtkWidget *widget,
   }
   g_object_unref(crosshair);
 }
+void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
+                                      struct swappy_state *state) {
+  g_debug("releasing button in state: %d", event->state);
+  if (!(event->state & GDK_BUTTON1_MASK)) {
+    return;
+  }
+
+  switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_ARROW:
+      paint_commit_temporary(state);
+      render_state(state);
+      break;
+    default:
+      return;
+  }
+}
 
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
@@ -304,22 +279,11 @@ static void load_css(struct swappy_state *state) {
 }
 
 static bool load_layout(struct swappy_state *state) {
-  GtkBuilder *builder;
-  GObject *container;
-  GtkWidget *area;
-  GObject *copy;
-  GObject *save;
-  GObject *clear;
-  GtkPopover *popover;
-  GtkRadioButton *brush;
-  GtkRadioButton *text;
-  GtkRadioButton *rectangle;
-  GtkRadioButton *ellipse;
-  GtkRadioButton *arrow;
+  struct swappy_box *geometry = state->geometry;
   GError *error = NULL;
 
   /* Construct a GtkBuilder instance and load our UI description */
-  builder = gtk_builder_new();
+  GtkBuilder *builder = gtk_builder_new();
   if (gtk_builder_add_from_resource(builder, "/swappy/swappy.ui", &error) ==
       0) {
     g_printerr("Error loading file: %s", error->message);
@@ -327,54 +291,27 @@ static bool load_layout(struct swappy_state *state) {
     return false;
   }
 
-  /* Connect signal handlers to the constructed widgets. */
-  container = gtk_builder_get_object(builder, "container");
-
-  copy = gtk_builder_get_object(builder, "copy");
-  save = gtk_builder_get_object(builder, "save");
-  clear = gtk_builder_get_object(builder, "clear");
-  area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
-
-  popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
-  brush = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "brush"));
-  text = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "text"));
-  rectangle = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "rectangle"));
-  ellipse = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "ellipse"));
-  arrow = GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
-
   gtk_builder_connect_signals(builder, state);
 
-  g_signal_connect(G_OBJECT(state->window), "key_press_event",
-                   G_CALLBACK(keypress_handler), state);
-  g_signal_connect(brush, "toggled",
-                   G_CALLBACK(tools_menu_button_brush_toggle_handler), state);
-  g_signal_connect(text, "toggled",
-                   G_CALLBACK(tools_menu_button_text_toggle_handler), state);
-  g_signal_connect(rectangle, "toggled",
-                   G_CALLBACK(tools_menu_button_shape_toggle_handler), state);
-  g_signal_connect(copy, "clicked",
-                   G_CALLBACK(tools_menu_button_copy_clicked_handler), state);
-  g_signal_connect(save, "clicked",
-                   G_CALLBACK(tools_menu_button_save_clicked_handler), state);
-  g_signal_connect(clear, "clicked",
-                   G_CALLBACK(tools_menu_button_clear_clicked_handler), state);
+  GtkWindow *window =
+      GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
 
-  gtk_widget_set_size_request(area, state->width, state->height);
-  gtk_widget_add_events(area, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
-                                  GDK_BUTTON_RELEASE_MASK |
-                                  GDK_BUTTON1_MOTION_MASK);
-  g_signal_connect(area, "draw", G_CALLBACK(draw_area_handler), state);
-  g_signal_connect(area, "configure-event", G_CALLBACK(configure_event_handler),
-                   state);
-  g_signal_connect(area, "button-press-event",
-                   G_CALLBACK(draw_area_button_press_handler), state);
-  g_signal_connect(area, "button-release-event",
-                   G_CALLBACK(draw_area_button_release_handler), state);
-  g_signal_connect(area, "motion-notify-event",
-                   G_CALLBACK(draw_area_motion_notify_handler), state);
+  GtkWidget *area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
+  GtkPopover *popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
 
-  gtk_container_add(GTK_CONTAINER(state->window), GTK_WIDGET(container));
+  GtkRadioButton *brush =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "brush"));
+  GtkRadioButton *text =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "text"));
+  GtkRadioButton *rectangle =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "rectangle"));
+  GtkRadioButton *ellipse =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "ellipse"));
+  GtkRadioButton *arrow =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
+
   gtk_popover_set_relative_to(popover, area);
+  gtk_widget_set_size_request(area, geometry->width, geometry->height);
 
   state->popover->container = popover;
   state->popover->brush = brush;
@@ -383,45 +320,15 @@ static bool load_layout(struct swappy_state *state) {
   state->popover->ellipse = ellipse;
   state->popover->arrow = arrow;
   state->area = area;
+  state->window = window;
 
   g_object_unref(G_OBJECT(builder));
-  gtk_widget_show_all(GTK_WIDGET(state->window));
 
   return true;
 }
 
-static void init_layer_shell(GtkApplication *app, struct swappy_state *state) {
+static void init_gtk_window(struct swappy_state *state) {
   g_info("activating application ----------");
-
-  // Create a normal GTK vbox however you like
-  GtkWindow *window = GTK_WINDOW(gtk_application_window_new(app));
-  struct swappy_box *geometry = state->geometry;
-  state->window = window;
-
-  // Before the window is first realized, set it up to be a layer surface
-  // gtk_layer_init_for_window(window);
-
-  // Order above normal windows
-  // gtk_layer_set_layer(window, GTK_LAYER_SHELL_LAYER_TOP);
-  gtk_window_set_default_size(window, geometry->width, geometry->height);
-
-  // Need to set keyboard interactivity for key bindings
-  // gtk_layer_set_keyboard_interactivity(window, true);
-
-  // Push other windows out of the way
-  // gtk_layer_auto_exclusive_zone_enable(window);
-
-  // The margins are the gaps around the window's edges
-  // Margins and anchors can be set like this...
-  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_LEFT, 1);
-  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_RIGHT, 1);
-  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_TOP, 1);
-  // gtk_layer_set_margin(window, GTK_LAYER_SHELL_EDGE_BOTTOM, 1);
-
-  gtk_window_get_size(window, &state->width, &state->height);
-  gtk_window_move(window, geometry->x, geometry->y);
-
-  g_debug("window has sizes %dx%d", state->width, state->height);
 
   load_layout(state);
   load_css(state);
@@ -450,7 +357,7 @@ static gint command_line_handler(GtkApplication *app,
     return false;
   }
 
-  init_layer_shell(app, state);
+  init_gtk_window(state);
 
   return EXIT_SUCCESS;
 }

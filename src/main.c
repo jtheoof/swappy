@@ -38,6 +38,8 @@ int main(int argc, char *argv[]) {
 
   application_run(&state);
 
+  gtk_main();
+
   application_finish(&state);
   wayland_finish(&state);
 }

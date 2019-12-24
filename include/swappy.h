@@ -78,6 +78,7 @@ struct swappy_state {
   GtkApplication *app;
 
   GtkWindow *window;
+  GtkWindow *settings_window;
   GtkWidget *area;
 
   struct swappy_state_ui_popover *popover;
@@ -99,9 +100,6 @@ struct swappy_state {
   char *storage_path;
 
   enum swappy_paint_type mode;
-
-  int width;
-  int height;
 
   /* Options */
   char *geometry_str;
