@@ -1,3 +1,19 @@
 .drawing .text-button {
   font-family: "FontAwesome 5 Free Solid";
 }
+
+.color-box image {
+    border-radius: 50px;
+}
+
+.color-box .color-red image {
+    background-color: rgb(255, 0, 0);
+}
+
+.color-box .color-green image {
+    background-color: rgb(0, 255, 0);
+}
+
+.color-box .color-blue image {
+    background-color: rgb(0, 0, 255);
+}

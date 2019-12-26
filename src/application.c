@@ -82,6 +82,13 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ARROW;
 }
 
+static void action_update_color_state(struct swappy_state *state, double r,
+                                      double g, double b) {
+  state->painting.r = r;
+  state->painting.g = g;
+  state->painting.b = b;
+}
+
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_brush(state);
 }
@@ -319,9 +326,47 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
   }
 }
 
+void color_red_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_update_color_state(state, 1, 0, 0);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+}
+
+void color_green_clicked_handler(GtkWidget *widget,
+                                 struct swappy_state *state) {
+  action_update_color_state(state, 0, 1, 0);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+}
+
+void color_blue_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_update_color_state(state, 0, 0, 1);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+}
+
+void color_custom_clicked_handler(GtkWidget *widget,
+                                  struct swappy_state *state) {
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), true);
+}
+
+void color_group_set_inactive(gpointer data, gpointer user_data) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(data);
+
+  gtk_toggle_button_set_active(button, false);
+}
+
+void color_custom_color_set_handler(GtkWidget *widget,
+                                    struct swappy_state *state) {
+  GdkRGBA color;
+  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &color);
+
+  state->painting.r = color.red;
+  state->painting.g = color.green;
+  state->painting.b = color.blue;
+  state->painting.a = color.alpha;
+}
+
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
-                                 1);
+                                 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
   if (GTK_IS_CONTAINER(widget)) {
     gtk_container_forall(GTK_CONTAINER(widget), (GtkCallback)apply_css,
                          provider);
@@ -370,6 +415,11 @@ static bool load_layout(struct swappy_state *state) {
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "ellipse"));
   GtkRadioButton *arrow =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
+
+  state->ui->red =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-red-button"));
+  state->ui->custom =
+      GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
   //  gtk_popover_set_relative_to(ui, area);
   gtk_widget_set_size_request(area, geometry->width, geometry->height);
@@ -461,6 +511,12 @@ bool application_init(struct swappy_state *state) {
 
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
+
+  state->painting.r = 1;
+  state->painting.g = 0;
+  state->painting.b = 0;
+  state->painting.a = 1;
+  state->painting.w = 2;
 
   return true;
 }

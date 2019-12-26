@@ -64,6 +64,14 @@ struct swappy_box {
   int32_t height;
 };
 
+struct swappy_state_painting {
+  double r;
+  double g;
+  double b;
+  double a;
+  double w;
+};
+
 struct swappy_state_ui {
   GtkWindow *window;
   GtkWidget *area;
@@ -79,6 +87,9 @@ struct swappy_state_ui {
   GtkRadioButton *rectangle;
   GtkRadioButton *ellipse;
   GtkRadioButton *arrow;
+
+  GtkRadioButton *red;
+  GtkColorButton *custom;
 };
 
 struct swappy_state {
@@ -113,6 +124,8 @@ struct swappy_state {
   GSList *paints;
   GSList *redo_paints;
   struct swappy_paint *temp_paint;
+
+  struct swappy_state_painting painting;
 
   int argc;
   char **argv;

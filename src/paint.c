@@ -35,17 +35,23 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   struct swappy_paint *paint = g_new(struct swappy_paint, 1);
   struct swappy_point *brush;
 
+  double r = state->painting.r;
+  double g = state->painting.g;
+  double b = state->painting.b;
+  double a = state->painting.a;
+  double w = state->painting.w;
+
   paint->type = type;
 
   switch (type) {
     case SWAPPY_PAINT_MODE_BRUSH:
       paint->can_draw = true;
 
-      paint->content.brush.r = 1;
-      paint->content.brush.g = 0;
-      paint->content.brush.b = 0;
-      paint->content.brush.a = 1;
-      paint->content.brush.w = 2;
+      paint->content.brush.r = r;
+      paint->content.brush.g = g;
+      paint->content.brush.b = b;
+      paint->content.brush.a = a;
+      paint->content.brush.w = w;
 
       brush = g_new(struct swappy_point, 1);
       brush->x = x;
@@ -60,11 +66,11 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 
       paint->content.shape.from.x = x;
       paint->content.shape.from.y = y;
-      paint->content.shape.r = 1;
-      paint->content.shape.g = 0;
-      paint->content.shape.b = 0;
-      paint->content.shape.a = 1;
-      paint->content.shape.w = 2;
+      paint->content.shape.r = r;
+      paint->content.shape.g = g;
+      paint->content.shape.b = b;
+      paint->content.shape.a = a;
+      paint->content.shape.w = w;
       paint->content.shape.type = type;
       break;
     default:
