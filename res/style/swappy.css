@@ -1,5 +1,15 @@
 .drawing .text-button {
   font-family: "FontAwesome 5 Free Solid";
+  padding: 4px;
+}
+
+.drawing .text-button radio,
+.color-box .text-button radio {
+  padding: 0;
+}
+
+.color-box button {
+    padding: 6px 10px;
 }
 
 .color-box image {
