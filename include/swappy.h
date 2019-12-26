@@ -64,7 +64,15 @@ struct swappy_box {
   int32_t height;
 };
 
-struct swappy_state_ui_painting {
+struct swappy_state_ui {
+  GtkWindow *window;
+  GtkWidget *area;
+
+  // Undo / Redo
+  GtkButton *undo;
+  GtkButton *redo;
+
+  // Painting Area
   GtkRadioButton *brush;
   GtkRadioButton *text;
   GtkRadioButton *rectangle;
@@ -76,10 +84,7 @@ struct swappy_state {
   GResource *resource;
   GtkApplication *app;
 
-  GtkWindow *window;
-  GtkWidget *area;
-
-  struct swappy_state_ui_painting *popover;
+  struct swappy_state_ui *ui;
 
   cairo_surface_t *cairo_surface;
 
@@ -105,6 +110,7 @@ struct swappy_state {
   struct swappy_box *geometry;
 
   GSList *paints;
+  GSList *redo_paints;
   struct swappy_paint *temp_paint;
 
   int argc;

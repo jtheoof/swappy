@@ -9,3 +9,4 @@ void paint_commit_temporary(struct swappy_state *state);
 
 void paint_free(gpointer data);
 void paint_free_all(struct swappy_state *state);
+void paint_free_list(GSList **list);

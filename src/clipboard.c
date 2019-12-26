@@ -5,8 +5,8 @@
 bool clipboard_copy_drawing_area_to_selection(struct swappy_state *state) {
   g_debug("generating pixbuf from area");
   GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-  guint width = gtk_widget_get_allocated_width(state->area);
-  guint height = gtk_widget_get_allocated_height(state->area);
+  guint width = gtk_widget_get_allocated_width(state->ui->area);
+  guint height = gtk_widget_get_allocated_height(state->ui->area);
   GdkPixbuf *pixbuf =
       gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
 

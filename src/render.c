@@ -246,7 +246,7 @@ void render_state(struct swappy_state *state) {
   render_paints(cr, state);
 
   // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.
-  gtk_widget_queue_draw(state->area);
+  gtk_widget_queue_draw(state->ui->area);
 
   cairo_destroy(cr);
 }

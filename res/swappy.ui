@@ -2,12 +2,13 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkImage" id="edit-redo1">
+  <object class="GtkAccelGroup" id="accel-group"/>
+  <object class="GtkImage" id="edit-redo">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">edit-redo</property>
   </object>
-  <object class="GtkImage" id="edit-undo1">
+  <object class="GtkImage" id="edit-undo">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo</property>
@@ -18,6 +19,9 @@
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="show_menubar">False</property>
+    <accel-groups>
+      <group name="accel-group"/>
+    </accel-groups>
     <signal name="key-press-event" handler="keypress_handler" swapped="no"/>
     <child type="titlebar">
       <object class="GtkHeaderBar">
@@ -29,12 +33,16 @@
             <property name="can_focus">False</property>
             <property name="layout_style">start</property>
             <child>
-              <object class="GtkButton" id="undo-button1">
+              <object class="GtkButton" id="undo-button">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
                 <property name="receives_default">True</property>
-                <property name="image">edit-undo1</property>
+                <property name="image">edit-undo</property>
                 <property name="always_show_image">True</property>
+                <signal name="clicked" handler="undo_clicked_handler" swapped="no"/>
+                <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -44,12 +52,17 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="redo-button1">
+              <object class="GtkButton" id="redo-button">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
                 <property name="receives_default">True</property>
-                <property name="image">edit-redo1</property>
+                <property name="image">edit-redo</property>
                 <property name="always_show_image">True</property>
+                <signal name="clicked" handler="redo_clicked_handler" swapped="no"/>
+                <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
