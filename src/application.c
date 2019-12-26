@@ -39,6 +39,12 @@ static void action_redo(struct swappy_state *state) {
   }
 }
 
+static void action_toggle_painting_pane(struct swappy_state *state) {
+  GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
+  gboolean is_visible = gtk_widget_get_visible(painting_box);
+  gtk_widget_set_visible(painting_box, !is_visible);
+}
+
 static void switch_mode_to_brush(struct swappy_state *state) {
   g_debug("switching mode to brush");
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
@@ -193,6 +199,9 @@ void keypress_handler(GtkWidget *widget, GdkEventKey *event,
         case GDK_KEY_s:
           action_save_area_to_file(state);
           break;
+        case GDK_KEY_b:
+          action_toggle_painting_pane(state);
+          break;
         default:
           break;
       }
@@ -221,6 +230,7 @@ gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
 
   return FALSE;
 }
+
 gboolean draw_area_configure_handler(GtkWidget *widget,
                                      GdkEventConfigure *event,
                                      struct swappy_state *state) {
@@ -236,6 +246,7 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
 
   return TRUE;
 }
+
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
   g_debug("press event: state: %d, button: %d", event->state, event->button);
@@ -339,6 +350,8 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWidget *area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
 
+  state->ui->painting_box =
+      GTK_BOX(gtk_builder_get_object(builder, "painting-box"));
   GtkRadioButton *brush =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "brush"));
   GtkRadioButton *text =

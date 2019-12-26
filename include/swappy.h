@@ -73,6 +73,7 @@ struct swappy_state_ui {
   GtkButton *redo;
 
   // Painting Area
+  GtkBox *painting_box;
   GtkRadioButton *brush;
   GtkRadioButton *text;
   GtkRadioButton *rectangle;
