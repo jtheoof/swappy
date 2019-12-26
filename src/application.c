@@ -406,7 +406,8 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->undo = GTK_BUTTON(gtk_builder_get_object(builder, "undo-button"));
   state->ui->redo = GTK_BUTTON(gtk_builder_get_object(builder, "redo-button"));
 
-  GtkWidget *area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
+  GtkWidget *area =
+      GTK_WIDGET(gtk_builder_get_object(builder, "painting-area"));
 
   state->ui->painting_box =
       GTK_BOX(gtk_builder_get_object(builder, "painting-box"));
