@@ -27,6 +27,9 @@ static void action_undo(struct swappy_state *state) {
   if (first) {
     state->paints = g_slist_remove_link(state->paints, first);
     state->redo_paints = g_slist_prepend(state->redo_paints, first->data);
+
+    render_state(state);
+    update_ui(state);
   }
 }
 
@@ -36,6 +39,9 @@ static void action_redo(struct swappy_state *state) {
   if (first) {
     state->redo_paints = g_slist_remove_link(state->redo_paints, first);
     state->paints = g_slist_prepend(state->paints, first->data);
+
+    render_state(state);
+    update_ui(state);
   }
 }
 
@@ -150,77 +156,72 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   clipboard_copy_drawing_area_to_selection(state);
 }
 
-void keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                      struct swappy_state *state) {
+void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
+                             struct swappy_state *state) {
   g_debug("keypress_handler key pressed: keyval: %d - state: %d\n",
           event->keyval, event->state);
 
-  switch (event->state) {
-    case 0:
-      switch (event->keyval) {
-        case GDK_KEY_Escape:
-          g_debug("keypress_handler: escape key pressed, ciao bye\n");
-          gtk_main_quit();
-          break;
-        case GDK_KEY_b:
-          switch_mode_to_brush(state);
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush),
-                                       true);
-          break;
-        case GDK_KEY_t:
-          switch_mode_to_text(state);
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text),
-                                       true);
-          break;
-        case GDK_KEY_r:
-          switch_mode_to_rectangle(state);
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
-                                       true);
-          break;
-        case GDK_KEY_o:
-          switch_mode_to_ellipse(state);
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse),
-                                       true);
-          break;
-        case GDK_KEY_a:
-          switch_mode_to_arrow(state);
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow),
-                                       true);
-          break;
-        default:
-          break;
-      }
-      break;
-    case GDK_CONTROL_MASK:
-      switch (event->keyval) {
-        case GDK_KEY_c:
-          clipboard_copy_drawing_area_to_selection(state);
-          break;
-        case GDK_KEY_s:
-          action_save_area_to_file(state);
-          break;
-        case GDK_KEY_b:
-          action_toggle_painting_pane(state);
-          break;
-        default:
-          break;
-      }
-      break;
-    default:
-      break;
+  if (event->state == 0) {
+    switch (event->keyval) {
+      case GDK_KEY_Escape:
+        g_debug("keypress_handler: escape key pressed, ciao bye\n");
+        gtk_main_quit();
+        break;
+      case GDK_KEY_b:
+        switch_mode_to_brush(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush), true);
+        break;
+      case GDK_KEY_t:
+        switch_mode_to_text(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text), true);
+        break;
+      case GDK_KEY_r:
+        switch_mode_to_rectangle(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
+                                     true);
+        break;
+      case GDK_KEY_o:
+        switch_mode_to_ellipse(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse),
+                                     true);
+        break;
+      case GDK_KEY_a:
+        switch_mode_to_arrow(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+        break;
+      default:
+        break;
+    }
+  } else if (event->state & GDK_CONTROL_MASK) {
+    switch (event->keyval) {
+      case GDK_KEY_c:
+        clipboard_copy_drawing_area_to_selection(state);
+        break;
+      case GDK_KEY_s:
+        action_save_area_to_file(state);
+        break;
+      case GDK_KEY_b:
+        action_toggle_painting_pane(state);
+        break;
+      case GDK_KEY_z:
+        action_undo(state);
+        break;
+      case GDK_KEY_Z:
+      case GDK_KEY_y:
+        action_redo(state);
+        break;
+      default:
+        break;
+    }
   }
 }
 
 void undo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_undo(state);
-  render_state(state);
-  update_ui(state);
 }
 
 void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_redo(state);
-  render_state(state);
-  update_ui(state);
 }
 
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
