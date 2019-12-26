@@ -199,9 +199,6 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
   g_debug("press event: state: %d, button: %d", event->state, event->button);
-  if (event->button == 3) {
-    gtk_popover_popup(state->popover->container);
-  }
 
   if (event->button == 1) {
     switch (state->mode) {
@@ -273,8 +270,7 @@ static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
 static void load_css(struct swappy_state *state) {
   GtkCssProvider *provider = gtk_css_provider_new();
   gtk_css_provider_load_from_resource(provider, "/swappy/style/popover.css");
-  apply_css(GTK_WIDGET(state->popover->container),
-            GTK_STYLE_PROVIDER(provider));
+  apply_css(GTK_WIDGET(state->window), GTK_STYLE_PROVIDER(provider));
   g_object_unref(provider);
 }
 
@@ -297,7 +293,6 @@ static bool load_layout(struct swappy_state *state) {
       GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
 
   GtkWidget *area = GTK_WIDGET(gtk_builder_get_object(builder, "paint_area"));
-  GtkPopover *popover = GTK_POPOVER(gtk_builder_get_object(builder, "popover"));
 
   GtkRadioButton *brush =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "brush"));
@@ -310,10 +305,9 @@ static bool load_layout(struct swappy_state *state) {
   GtkRadioButton *arrow =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
 
-  gtk_popover_set_relative_to(popover, area);
+  //  gtk_popover_set_relative_to(popover, area);
   gtk_widget_set_size_request(area, geometry->width, geometry->height);
 
-  state->popover->container = popover;
   state->popover->brush = brush;
   state->popover->text = text;
   state->popover->rectangle = rectangle;
@@ -395,7 +389,7 @@ bool application_init(struct swappy_state *state) {
     g_error_free(error);
   }
 
-  state->popover = g_new(struct swappy_state_ui_popover, 1);
+  state->popover = g_new(struct swappy_state_ui_painting, 1);
 
   g_resources_register(state->resource);
 
