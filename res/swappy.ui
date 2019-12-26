@@ -330,7 +330,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkBox">
                         <property name="visible">True</property>
@@ -412,13 +411,28 @@
                             <property name="position">2</property>
                           </packing>
                         </child>
+                        <style>
+                          <class name="color-box"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_left">50</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkRadioButton" id="color-button-custom">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
-                            <property name="margin_left">20</property>
                             <property name="draw_indicator">False</property>
                             <property name="group">color-red-button</property>
                             <signal name="clicked" handler="color_custom_clicked_handler" swapped="no"/>
@@ -433,7 +447,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -443,22 +457,21 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
+                            <property name="title" translatable="yes"/>
+                            <property name="rgba">rgb(193,125,17)</property>
                             <signal name="color-set" handler="color_custom_color_set_handler" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
-                        <style>
-                          <class name="color-box"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>

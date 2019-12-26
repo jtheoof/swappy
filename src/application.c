@@ -57,6 +57,16 @@ static void action_toggle_painting_pane(struct swappy_state *state) {
   gtk_widget_set_visible(painting_box, !is_visible);
 }
 
+static void action_set_color_from_custom(struct swappy_state *state) {
+  GdkRGBA color;
+  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(state->ui->custom), &color);
+
+  state->painting.r = color.red;
+  state->painting.g = color.green;
+  state->painting.b = color.blue;
+  state->painting.a = color.alpha;
+}
+
 static void switch_mode_to_brush(struct swappy_state *state) {
   g_debug("switching mode to brush");
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
@@ -345,6 +355,7 @@ void color_blue_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 void color_custom_clicked_handler(GtkWidget *widget,
                                   struct swappy_state *state) {
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), true);
+  action_set_color_from_custom(state);
 }
 
 void color_group_set_inactive(gpointer data, gpointer user_data) {
@@ -355,13 +366,7 @@ void color_group_set_inactive(gpointer data, gpointer user_data) {
 
 void color_custom_color_set_handler(GtkWidget *widget,
                                     struct swappy_state *state) {
-  GdkRGBA color;
-  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(widget), &color);
-
-  state->painting.r = color.red;
-  state->painting.g = color.green;
-  state->painting.b = color.blue;
-  state->painting.a = color.alpha;
+  action_set_color_from_custom(state);
 }
 
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
