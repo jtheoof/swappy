@@ -45,6 +45,12 @@ static void action_redo(struct swappy_state *state) {
   }
 }
 
+static void action_clear(struct swappy_state *state) {
+  paint_free_all(state);
+  render_state(state);
+  update_ui(state);
+}
+
 static void action_toggle_painting_pane(struct swappy_state *state) {
   GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
   gboolean is_visible = gtk_widget_get_visible(painting_box);
@@ -147,9 +153,7 @@ void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 }
 
 void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  paint_free_all(state);
-  render_state(state);
-  update_ui(state);
+  action_clear(state);
 }
 
 void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -188,6 +192,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_a:
         switch_mode_to_arrow(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+        break;
+      case GDK_KEY_k:
+        action_clear(state);
         break;
       default:
         break;
