@@ -64,14 +64,23 @@ static void action_toggle_painting_pane(struct swappy_state *state) {
   gtk_widget_set_visible(painting_box, !is_visible);
 }
 
+static void action_update_color_state(struct swappy_state *state, double r,
+                                      double g, double b, double a,
+                                      gboolean custom) {
+  state->painting.r = r;
+  state->painting.g = g;
+  state->painting.b = b;
+  state->painting.a = a;
+
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), custom);
+}
+
 static void action_set_color_from_custom(struct swappy_state *state) {
   GdkRGBA color;
   gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(state->ui->custom), &color);
 
-  state->painting.r = color.red;
-  state->painting.g = color.green;
-  state->painting.b = color.blue;
-  state->painting.a = color.alpha;
+  action_update_color_state(state, color.red, color.green, color.blue,
+                            color.alpha, true);
 }
 
 static void switch_mode_to_brush(struct swappy_state *state) {
@@ -97,13 +106,6 @@ static void switch_mode_to_ellipse(struct swappy_state *state) {
 static void switch_mode_to_arrow(struct swappy_state *state) {
   g_debug("switching mode to arrow");
   state->mode = SWAPPY_PAINT_MODE_ARROW;
-}
-
-static void action_update_color_state(struct swappy_state *state, double r,
-                                      double g, double b) {
-  state->painting.r = r;
-  state->painting.g = g;
-  state->painting.b = b;
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
@@ -218,7 +220,28 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
   g_debug("keypress_handler key pressed: keyval: %d - state: %d\n",
           event->keyval, event->state);
 
-  if (event->state == 0) {
+  if (event->state & GDK_CONTROL_MASK) {
+    switch (event->keyval) {
+      case GDK_KEY_c:
+        clipboard_copy_drawing_area_to_selection(state);
+        break;
+      case GDK_KEY_s:
+        action_save_area_to_file(state);
+        break;
+      case GDK_KEY_b:
+        action_toggle_painting_pane(state);
+        break;
+      case GDK_KEY_z:
+        action_undo(state);
+        break;
+      case GDK_KEY_Z:
+      case GDK_KEY_y:
+        action_redo(state);
+        break;
+      default:
+        break;
+    }
+  } else {
     switch (event->keyval) {
       case GDK_KEY_Escape:
         g_debug("keypress_handler: escape key pressed, ciao bye\n");
@@ -249,26 +272,14 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_k:
         action_clear(state);
         break;
-      default:
+      case GDK_KEY_minus:
+        action_stroke_size_decrease(state);
         break;
-    }
-  } else if (event->state & GDK_CONTROL_MASK) {
-    switch (event->keyval) {
-      case GDK_KEY_c:
-        clipboard_copy_drawing_area_to_selection(state);
+      case GDK_KEY_equal:
+        action_stroke_size_reset(state);
         break;
-      case GDK_KEY_s:
-        action_save_area_to_file(state);
-        break;
-      case GDK_KEY_b:
-        action_toggle_painting_pane(state);
-        break;
-      case GDK_KEY_z:
-        action_undo(state);
-        break;
-      case GDK_KEY_Z:
-      case GDK_KEY_y:
-        action_redo(state);
+      case GDK_KEY_plus:
+        action_stroke_size_increase(state);
         break;
       default:
         break;
@@ -373,31 +384,21 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
 }
 
 void color_red_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  action_update_color_state(state, 1, 0, 0);
-  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+  action_update_color_state(state, 1, 0, 0, 1, false);
 }
 
 void color_green_clicked_handler(GtkWidget *widget,
                                  struct swappy_state *state) {
-  action_update_color_state(state, 0, 1, 0);
-  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+  action_update_color_state(state, 0, 1, 0, 1, false);
 }
 
 void color_blue_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  action_update_color_state(state, 0, 0, 1);
-  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), false);
+  action_update_color_state(state, 0, 0, 1, 1, false);
 }
 
 void color_custom_clicked_handler(GtkWidget *widget,
                                   struct swappy_state *state) {
-  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), true);
   action_set_color_from_custom(state);
-}
-
-void color_group_set_inactive(gpointer data, gpointer user_data) {
-  GtkToggleButton *button = GTK_TOGGLE_BUTTON(data);
-
-  gtk_toggle_button_set_active(button, false);
 }
 
 void color_custom_color_set_handler(GtkWidget *widget,
