@@ -243,7 +243,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
 }
 
 static void render_paints(cairo_t *cr, struct swappy_state *state) {
-  for (GList *elem = state->paints; elem; elem = elem->next) {
+  for (GList *elem = g_list_last(state->paints); elem; elem = elem->prev) {
     struct swappy_paint *paint = elem->data;
     render_paint(cr, paint);
   }
