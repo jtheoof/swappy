@@ -35,40 +35,56 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
   cairo_set_line_width(cr, shape.w);
 
-  cairo_move_to(cr, shape.from.x, shape.from.y);
-  cairo_line_to(cr, shape.to.x, shape.to.y);
-  cairo_stroke(cr);
-  cairo_fill(cr);
-
-  double r = 20;
-
-  double ta = 5 * M_PI / 6;
-  double xa = r * cos(ta);
-  double ya = r * sin(ta);
-  double tb = 7 * M_PI / 6;
-  double xb = r * cos(tb);
-  double yb = r * sin(tb);
-
   double ftx = shape.to.x - shape.from.x;
   double fty = shape.to.y - shape.from.y;
-  double ftz = sqrt(ftx * ftx + fty * fty);
+  double ftn = sqrt(ftx * ftx + fty * fty);
 
-  if (ftz == 0) {
+  double r = 20;
+  double scaling_factor = shape.w / 4;
+
+  double alpha = M_PI / 6;
+  double ta = 5 * alpha;
+  double tb = 7 * alpha;
+  double xa = r * cos(ta);
+  double ya = r * sin(ta);
+  double xb = r * cos(tb);
+  double yb = r * sin(tb);
+  double xc = ftn - fabs(xa) * scaling_factor;
+
+  if (xc < DBL_EPSILON) {
+    xc = 0;
+  }
+
+  if (ftn < DBL_EPSILON) {
     return;
   }
 
   double theta = atan(fty / ftx);
+
   if (ftx < DBL_EPSILON) {
     theta = M_PI + theta;
   }
 
+  // Draw line
+  cairo_save(cr);
+  cairo_translate(cr, shape.from.x, shape.from.y);
+  cairo_rotate(cr, theta);
+  cairo_move_to(cr, 0, 0);
+  cairo_line_to(cr, xc, 0);
+  cairo_stroke(cr);
+  cairo_restore(cr);
+
+  // Draw arrow
+  cairo_save(cr);
   cairo_translate(cr, shape.to.x, shape.to.y);
   cairo_rotate(cr, theta);
+  cairo_scale(cr, scaling_factor, scaling_factor);
   cairo_move_to(cr, 0, 0);
   cairo_line_to(cr, xa, ya);
   cairo_line_to(cr, xb, yb);
   cairo_line_to(cr, 0, 0);
   cairo_fill(cr);
+  cairo_restore(cr);
 }
 
 static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
