@@ -12,13 +12,20 @@
 #include "swappy.h"
 #include "wayland.h"
 
-static void update_ui(struct swappy_state *state) {
+static void update_ui_undo_redo(struct swappy_state *state) {
   GtkWidget *undo = GTK_WIDGET(state->ui->undo);
   GtkWidget *redo = GTK_WIDGET(state->ui->redo);
   gboolean undo_sensitive = g_slist_length(state->paints) > 0;
   gboolean redo_sensitive = g_slist_length(state->redo_paints) > 0;
   gtk_widget_set_sensitive(undo, undo_sensitive);
   gtk_widget_set_sensitive(redo, redo_sensitive);
+}
+
+static void update_ui_stroke_size_widget(struct swappy_state *state) {
+  GtkButton *button = GTK_BUTTON(state->ui->stroke_size);
+  char label[255];
+  snprintf(label, 255, "%.0lf", state->painting.w);
+  gtk_button_set_label(button, label);
 }
 
 static void action_undo(struct swappy_state *state) {
@@ -29,7 +36,7 @@ static void action_undo(struct swappy_state *state) {
     state->redo_paints = g_slist_prepend(state->redo_paints, first->data);
 
     render_state(state);
-    update_ui(state);
+    update_ui_undo_redo(state);
   }
 }
 
@@ -41,14 +48,14 @@ static void action_redo(struct swappy_state *state) {
     state->paints = g_slist_prepend(state->paints, first->data);
 
     render_state(state);
-    update_ui(state);
+    update_ui_undo_redo(state);
   }
 }
 
 static void action_clear(struct swappy_state *state) {
   paint_free_all(state);
   render_state(state);
-  update_ui(state);
+  update_ui_undo_redo(state);
 }
 
 static void action_toggle_painting_pane(struct swappy_state *state) {
@@ -97,6 +104,35 @@ static void action_update_color_state(struct swappy_state *state, double r,
   state->painting.r = r;
   state->painting.g = g;
   state->painting.b = b;
+}
+
+static void action_stroke_size_decrease(struct swappy_state *state) {
+  guint step = state->painting.w <= 10 ? 1 : 5;
+
+  state->painting.w -= step;
+
+  if (state->painting.w < SWAPPY_STROKE_SIZE_MIN) {
+    state->painting.w = SWAPPY_STROKE_SIZE_MIN;
+  }
+
+  update_ui_stroke_size_widget(state);
+}
+
+static void action_stroke_size_reset(struct swappy_state *state) {
+  state->painting.w = SWAPPY_STROKE_SIZE_DEFAULT;
+
+  update_ui_stroke_size_widget(state);
+}
+
+static void action_stroke_size_increase(struct swappy_state *state) {
+  guint step = state->painting.w >= 10 ? 5 : 1;
+  state->painting.w += step;
+
+  if (state->painting.w > SWAPPY_STROKE_SIZE_MAX) {
+    state->painting.w = SWAPPY_STROKE_SIZE_MAX;
+  }
+
+  update_ui_stroke_size_widget(state);
 }
 
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -329,7 +365,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
       paint_commit_temporary(state);
       paint_free_list(&state->redo_paints);
       render_state(state);
-      update_ui(state);
+      update_ui_undo_redo(state);
       break;
     default:
       return;
@@ -367,6 +403,19 @@ void color_group_set_inactive(gpointer data, gpointer user_data) {
 void color_custom_color_set_handler(GtkWidget *widget,
                                     struct swappy_state *state) {
   action_set_color_from_custom(state);
+}
+
+void stroke_size_decrease_handler(GtkWidget *widget,
+                                  struct swappy_state *state) {
+  action_stroke_size_decrease(state);
+}
+
+void stroke_size_reset_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_stroke_size_reset(state);
+}
+void stroke_size_increase_handler(GtkWidget *widget,
+                                  struct swappy_state *state) {
+  action_stroke_size_increase(state);
 }
 
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
@@ -427,6 +476,9 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->custom =
       GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
+  state->ui->stroke_size =
+      GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
+
   //  gtk_popover_set_relative_to(ui, area);
   gtk_widget_set_size_request(area, geometry->width, geometry->height);
 
@@ -448,6 +500,9 @@ static void init_gtk_window(struct swappy_state *state) {
 
   load_layout(state);
   load_css(state);
+
+  update_ui_stroke_size_widget(state);
+  update_ui_undo_redo(state);
 }
 
 static gboolean is_geometry_valid(struct swappy_state *state) {
@@ -522,7 +577,7 @@ bool application_init(struct swappy_state *state) {
   state->painting.g = 0;
   state->painting.b = 0;
   state->painting.a = 1;
-  state->painting.w = 2;
+  state->painting.w = SWAPPY_STROKE_SIZE_DEFAULT;
 
   return true;
 }

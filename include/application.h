@@ -43,3 +43,9 @@ void color_custom_clicked_handler(GtkWidget *widget,
                                   struct swappy_state *state);
 void color_custom_color_set_handler(GtkWidget *widget,
                                     struct swappy_state *state);
+
+void stroke_size_decrease_handler(GtkWidget *widget,
+                                  struct swappy_state *state);
+void stroke_size_reset_handler(GtkWidget *widget, struct swappy_state *state);
+void stroke_size_increase_handler(GtkWidget *widget,
+                                  struct swappy_state *state);

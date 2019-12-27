@@ -15,6 +15,10 @@
 
 #define GEOMETRY_PATTERN "xx,yy wwxhh"
 
+#define SWAPPY_STROKE_SIZE_MIN 1
+#define SWAPPY_STROKE_SIZE_DEFAULT 5
+#define SWAPPY_STROKE_SIZE_MAX 50
+
 enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
@@ -90,6 +94,8 @@ struct swappy_state_ui {
 
   GtkRadioButton *red;
   GtkColorButton *custom;
+
+  GtkButton *stroke_size;
 };
 
 struct swappy_state {
