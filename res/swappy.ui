@@ -66,8 +66,8 @@
                 <property name="image">edit-redo</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="redo_clicked_handler" swapped="no"/>
-                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                 <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -440,7 +440,7 @@
                         <property name="margin_left">12</property>
                         <property name="spacing">5</property>
                         <child>
-                          <object class="GtkRadioButton" id="color-button-custom">
+                          <object class="GtkRadioButton" id="color-custom-button">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>

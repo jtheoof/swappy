@@ -72,12 +72,12 @@ static void action_update_color_state(struct swappy_state *state, double r,
   state->painting.b = b;
   state->painting.a = a;
 
-  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->custom), custom);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->color), custom);
 }
 
 static void action_set_color_from_custom(struct swappy_state *state) {
   GdkRGBA color;
-  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(state->ui->custom), &color);
+  gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(state->ui->color), &color);
 
   action_update_color_state(state, color.red, color.green, color.blue,
                             color.alpha, true);
@@ -271,6 +271,23 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
       case GDK_KEY_k:
         action_clear(state);
+        break;
+      case GDK_KEY_R:
+        action_update_color_state(state, 1, 0, 0, 1, false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->red), true);
+        break;
+      case GDK_KEY_G:
+        action_update_color_state(state, 0, 1, 0, 1, false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->green), true);
+        break;
+      case GDK_KEY_B:
+        action_update_color_state(state, 0, 0, 1, 1, false);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blue), true);
+        break;
+      case GDK_KEY_C:
+        action_set_color_from_custom(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->custom),
+                                     true);
         break;
       case GDK_KEY_minus:
         action_stroke_size_decrease(state);
@@ -474,7 +491,13 @@ static bool load_layout(struct swappy_state *state) {
 
   state->ui->red =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-red-button"));
+  state->ui->green =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-green-button"));
+  state->ui->blue =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-blue-button"));
   state->ui->custom =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-custom-button"));
+  state->ui->color =
       GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
   state->ui->stroke_size =
