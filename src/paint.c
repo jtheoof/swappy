@@ -9,16 +9,16 @@ void paint_free(gpointer data) {
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BRUSH:
-      g_slist_free_full(paint->content.brush.points, g_free);
+      g_list_free_full(paint->content.brush.points, g_free);
       break;
     default:
       g_free(paint);
   }
 }
 
-void paint_free_list(GSList **list) {
+void paint_free_list(GList **list) {
   if (*list) {
-    g_slist_free_full(*list, paint_free);
+    g_list_free_full(*list, paint_free);
     *list = NULL;
   }
 }
@@ -57,7 +57,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       brush->x = x;
       brush->y = y;
 
-      paint->content.brush.points = g_slist_prepend(NULL, brush);
+      paint->content.brush.points = g_list_prepend(NULL, brush);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -88,7 +88,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 void paint_update_temporary(struct swappy_state *state, double x, double y) {
   struct swappy_paint *paint = state->temp_paint;
   struct swappy_point *brush;
-  GSList *points;
+  GList *points;
 
   if (!paint) {
     return;
@@ -101,7 +101,7 @@ void paint_update_temporary(struct swappy_state *state, double x, double y) {
       brush->x = x;
       brush->y = y;
 
-      paint->content.brush.points = g_slist_prepend(points, brush);
+      paint->content.brush.points = g_list_prepend(points, brush);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -126,10 +126,10 @@ void paint_commit_temporary(struct swappy_state *state) {
   if (!paint->can_draw) {
     paint_free(paint);
   } else {
-    state->paints = g_slist_prepend(state->paints, paint);
+    state->paints = g_list_prepend(state->paints, paint);
   }
 
   // Set the temporary paint to NULL but keep the content in memory
-  // because it's now part of the GSList.
+  // because it's now part of the GList.
   state->temp_paint = NULL;
 }

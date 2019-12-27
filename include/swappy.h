@@ -49,7 +49,7 @@ struct swappy_paint_brush {
   double b;
   double a;
   double w;
-  GSList *points;
+  GList *points;
 };
 
 struct swappy_paint {
@@ -127,8 +127,8 @@ struct swappy_state {
 
   struct swappy_box *geometry;
 
-  GSList *paints;
-  GSList *redo_paints;
+  GList *paints;
+  GList *redo_paints;
   struct swappy_paint *temp_paint;
 
   struct swappy_state_painting painting;

@@ -15,8 +15,8 @@
 static void update_ui_undo_redo(struct swappy_state *state) {
   GtkWidget *undo = GTK_WIDGET(state->ui->undo);
   GtkWidget *redo = GTK_WIDGET(state->ui->redo);
-  gboolean undo_sensitive = g_slist_length(state->paints) > 0;
-  gboolean redo_sensitive = g_slist_length(state->redo_paints) > 0;
+  gboolean undo_sensitive = g_list_length(state->paints) > 0;
+  gboolean redo_sensitive = g_list_length(state->redo_paints) > 0;
   gtk_widget_set_sensitive(undo, undo_sensitive);
   gtk_widget_set_sensitive(redo, redo_sensitive);
 }
@@ -29,11 +29,11 @@ static void update_ui_stroke_size_widget(struct swappy_state *state) {
 }
 
 static void action_undo(struct swappy_state *state) {
-  GSList *first = state->paints;
+  GList *first = state->paints;
 
   if (first) {
-    state->paints = g_slist_remove_link(state->paints, first);
-    state->redo_paints = g_slist_prepend(state->redo_paints, first->data);
+    state->paints = g_list_remove_link(state->paints, first);
+    state->redo_paints = g_list_prepend(state->redo_paints, first->data);
 
     render_state(state);
     update_ui_undo_redo(state);
@@ -41,11 +41,11 @@ static void action_undo(struct swappy_state *state) {
 }
 
 static void action_redo(struct swappy_state *state) {
-  GSList *first = state->redo_paints;
+  GList *first = state->redo_paints;
 
   if (first) {
-    state->redo_paints = g_slist_remove_link(state->redo_paints, first);
-    state->paints = g_slist_prepend(state->paints, first->data);
+    state->redo_paints = g_list_remove_link(state->redo_paints, first);
+    state->paints = g_list_prepend(state->paints, first->data);
 
     render_state(state);
     update_ui_undo_redo(state);

@@ -207,14 +207,14 @@ static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   cairo_set_line_width(cr, brush.w);
   cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
 
-  guint l = g_slist_length(brush.points);
+  guint l = g_list_length(brush.points);
 
   if (l == 1) {
-    struct swappy_point *point = g_slist_nth_data(brush.points, 0);
+    struct swappy_point *point = g_list_nth_data(brush.points, 0);
     cairo_rectangle(cr, point->x, point->y, brush.w, brush.w);
     cairo_fill(cr);
   } else {
-    for (GSList *elem = brush.points; elem; elem = elem->next) {
+    for (GList *elem = brush.points; elem; elem = elem->next) {
       struct swappy_point *point = elem->data;
       cairo_line_to(cr, point->x, point->y);
     }
@@ -243,7 +243,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
 }
 
 static void render_paints(cairo_t *cr, struct swappy_state *state) {
-  for (GSList *elem = state->paints; elem; elem = elem->next) {
+  for (GList *elem = state->paints; elem; elem = elem->next) {
     struct swappy_paint *paint = elem->data;
     render_paint(cr, paint);
   }
