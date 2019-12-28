@@ -24,7 +24,7 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)"
 ```
 
-## Package manager installation
+## Installation
 
 ### Arch Linux User Repository
 
