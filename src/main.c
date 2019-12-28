@@ -16,6 +16,7 @@
 
 int main(int argc, char *argv[]) {
   struct swappy_state state = {0};
+  int status;
 
   state.argc = argc;
   state.argv = argv;
@@ -36,10 +37,14 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  application_run(&state);
+  status = application_run(&state);
 
-  gtk_main();
+  if (status == 0) {
+    gtk_main();
+  }
 
   application_finish(&state);
   wayland_finish(&state);
+
+  return status;
 }

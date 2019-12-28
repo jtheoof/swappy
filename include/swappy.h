@@ -102,7 +102,6 @@ struct swappy_state_ui {
 };
 
 struct swappy_state {
-  GResource *resource;
   GtkApplication *app;
 
   struct swappy_state_ui *ui;

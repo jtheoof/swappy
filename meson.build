@@ -41,6 +41,7 @@ subdir('protocol')
 
 executable(
 	'swappy',
+	swappy_resources,
 	files([
 		'src/main.c',
 		'src/notification.c',

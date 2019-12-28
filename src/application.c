@@ -164,7 +164,6 @@ void application_finish(struct swappy_state *state) {
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
-  g_resources_unregister(state->resource);
   g_free(state->ui);
   g_object_unref(state->app);
 }
@@ -447,11 +446,13 @@ static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   }
 }
 
-static void load_css(struct swappy_state *state) {
+static bool load_css(struct swappy_state *state) {
   GtkCssProvider *provider = gtk_css_provider_new();
-  gtk_css_provider_load_from_resource(provider, "/swappy/style/swappy.css");
+  gtk_css_provider_load_from_resource(provider,
+                                      "/me/jtheoof/swappy/style/swappy.css");
   apply_css(GTK_WIDGET(state->ui->window), GTK_STYLE_PROVIDER(provider));
   g_object_unref(provider);
+  return true;
 }
 
 static bool load_layout(struct swappy_state *state) {
@@ -460,8 +461,8 @@ static bool load_layout(struct swappy_state *state) {
 
   /* Construct a GtkBuilder instance and load our UI description */
   GtkBuilder *builder = gtk_builder_new();
-  if (gtk_builder_add_from_resource(builder, "/swappy/swappy.ui", &error) ==
-      0) {
+  if (gtk_builder_add_from_resource(builder, "/me/jtheoof/swappy/swappy.ui",
+                                    &error) == 0) {
     g_printerr("Error loading file: %s", error->message);
     g_clear_error(&error);
     return false;
@@ -521,14 +522,21 @@ static bool load_layout(struct swappy_state *state) {
   return true;
 }
 
-static void init_gtk_window(struct swappy_state *state) {
+static bool init_gtk_window(struct swappy_state *state) {
   g_info("activating application ----------");
 
-  load_layout(state);
-  load_css(state);
+  if (!load_layout(state)) {
+    return false;
+  }
+
+  if (!load_css(state)) {
+    return false;
+  }
 
   update_ui_stroke_size_widget(state);
   update_ui_undo_redo(state);
+
+  return true;
 }
 
 static gboolean is_geometry_valid(struct swappy_state *state) {
@@ -539,7 +547,7 @@ static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
   if (!is_geometry_valid(state)) {
-    g_warning("geometry parameter is missing");
+    g_printerr("geometry parameter is missing\n");
     return EXIT_FAILURE;
   }
 
@@ -550,17 +558,18 @@ static gint command_line_handler(GtkApplication *app,
   }
 
   if (!screencopy_init(state)) {
-    g_warning("unable to initialize zwlr_screencopy_v1");
+    g_printerr("unable to initialize zwlr_screencopy_v1\n");
     return false;
   }
 
-  init_gtk_window(state);
+  if (!init_gtk_window(state)) {
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
 
 bool application_init(struct swappy_state *state) {
-  GError *error = NULL;
   const GOptionEntry cli_options[] = {
       {
           .long_name = "geometry",
@@ -582,16 +591,7 @@ bool application_init(struct swappy_state *state) {
 
   g_application_add_main_option_entries(G_APPLICATION(state->app), cli_options);
 
-  state->resource = g_resource_load("build/meson-out/swappy.gresource", &error);
-
-  if (error != NULL) {
-    g_critical("unable to load swappy resource file: %s", error->message);
-    g_error_free(error);
-  }
-
   state->ui = g_new(struct swappy_state_ui, 1);
-
-  g_resources_register(state->resource);
 
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
