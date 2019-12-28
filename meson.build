@@ -12,21 +12,29 @@ project(
 )
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
-#add_project_arguments('-Wno-format-truncation', language: 'c')
 
 swappy_inc = include_directories('include')
 
 cc = meson.get_compiler('c')
 
+if cc.get_id() == 'clang'
+    message('clang')
+    add_global_arguments('-Wno-missing-field-initializers', language: 'c')
+endif
+
 cairo = dependency('cairo')
 math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-wayland-3.0', version: '>=3.22.0')
-gtk_layer_shell = dependency('gtk-layer-shell-0', version: '>= 0.1.0')
-libnotify = dependency('libnotify')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
+
+libnotify = dependency('libnotify', required: false)
+
+if libnotify.found()
+	add_project_arguments('-DHAVE_LIBNOTIFY', language: 'c')
+endif
 
 subdir('res')
 subdir('protocol')
@@ -49,7 +57,6 @@ executable(
 		cairo,
 		client_protos,
 		gtk,
-		gtk_layer_shell,
 		libnotify,
 		math,
 		realtime,

@@ -1,6 +1,3 @@
-#ifndef _NOTIFICATION_H
-#define _NOTIFICATION_H
+#pragma once
 
 void notification_send(char *title, char *message);
-
-#endif

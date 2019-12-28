@@ -190,17 +190,19 @@ static void action_save_area_to_file(struct swappy_state *state) {
   char path[MAX_PATH];
   snprintf(path, MAX_PATH, "%s/%s %s", state->storage_path, "Swappshot",
            c_time_string);
-  g_info("saving swappshot to: \"%s\"", path);
   gdk_pixbuf_savev(pixbuf, path, "png", NULL, NULL, &error);
 
   if (error != NULL) {
-    g_error("unable to save drawing area to pixbuf: %s", error->message);
+    g_critical("unable to save drawing area to pixbuf: %s", error->message);
     g_error_free(error);
   }
 
-  char message[MAX_PATH];
-  snprintf(message, MAX_PATH, "Saved Swappshot to: %s\n", path);
+  char *msg = "Saved Swappshot to: ";
+  size_t len = strlen(msg) + strlen(path) + 1;
+  char *message = g_new(char, len);
+  snprintf(message, len, "%s%s", msg, path);
   notification_send("Swappy", message);
+  g_free(message);
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -559,8 +561,6 @@ static gint command_line_handler(GtkApplication *app,
 
 bool application_init(struct swappy_state *state) {
   GError *error = NULL;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
   const GOptionEntry cli_options[] = {
       {
           .long_name = "geometry",
@@ -571,7 +571,6 @@ bool application_init(struct swappy_state *state) {
               "Set the region to capture. (Can be an output of slurp)",
       },
       {NULL}};
-#pragma clang diagnostic pop
 
   state->app = gtk_application_new("me.jtheoof.swappy",
                                    G_APPLICATION_HANDLES_COMMAND_LINE);
