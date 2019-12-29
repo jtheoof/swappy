@@ -44,8 +44,9 @@ If *$XDG_CONFIG_HOME* is not set, it will revert to: *$HOME/Desktop*.
 
 - *Ctrl+z*: Undo
 - *Ctrl+Shift+z* or *Ctrl+y*: Redo
-- *Ctrl+s*: Save to file (see man page).
+- *Ctrl+s*: Save to file (see man page)
 - *Ctrl+c*: Copy to clipboard
+- *Escape* or *q*: Quit swappy
 
 # OPTIONS
 
