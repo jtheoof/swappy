@@ -12,5 +12,6 @@ jobs:
     - name: Build
       run: |
         sudo apt-get install ninja-build
+        sudo pip3 install meson
         meson build
         ninja -C build
