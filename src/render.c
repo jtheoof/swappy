@@ -152,8 +152,7 @@ static void render_buffer(cairo_t *cr, struct swappy_state *state) {
     struct swappy_buffer *buffer = output->buffer;
 
     if (output->buffer == NULL) {
-      g_warning(
-          "screencopy buffer is empty, cannot draw it onto the paint area");
+      // screencopy buffer is empty, cannot draw it onto the paint area"
       continue;
     }
 
