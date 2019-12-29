@@ -1,6 +1,5 @@
 #include <gdk/gdk.h>
 #include <glib-2.0/glib.h>
-#include <gtk-layer-shell/gtk-layer-shell.h>
 #include <gtk/gtk.h>
 #include <time.h>
 

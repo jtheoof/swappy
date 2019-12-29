@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <wayland-client.h>
 
-#include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
@@ -112,7 +111,6 @@ struct swappy_state {
   struct wl_registry *registry;
   struct wl_compositor *compositor;
   struct wl_shm *shm;
-  struct zwlr_layer_shell_v1 *layer_shell;
   struct zxdg_output_manager_v1 *xdg_output_manager;
   struct zwlr_screencopy_manager_v1 *zwlr_screencopy_manager;
   struct wl_list outputs;  // mako_output::link

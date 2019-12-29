@@ -6,7 +6,6 @@
 
 #include "screencopy.h"
 #include "swappy.h"
-#include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
@@ -136,10 +135,6 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     wl_output_add_listener(output->wl_output, &output_listener, output);
     wl_list_insert(&state->outputs, &output->link);
     bound = true;
-  } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
-    state->layer_shell = wl_registry_bind(
-        registry, name, &zwlr_layer_shell_v1_interface, version);
-    bound = true;
   } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
     state->xdg_output_manager = wl_registry_bind(
         registry, name, &zxdg_output_manager_v1_interface, version);
@@ -216,10 +211,6 @@ bool wayland_init(struct swappy_state *state) {
       return false;
     }
   }
-  if (state->layer_shell == NULL) {
-    g_warning("compositor doesn't support zwlr_layer_shell_v1");
-    return false;
-  }
 
   if (state->zwlr_screencopy_manager == NULL) {
     g_warning("compositor does not support zwlr_screencopy_v1");
@@ -248,10 +239,6 @@ void wayland_finish(struct swappy_state *state) {
 
   if (state->compositor != NULL) {
     wl_compositor_destroy(state->compositor);
-  }
-
-  if (state->layer_shell != NULL) {
-    zwlr_layer_shell_v1_destroy(state->layer_shell);
   }
 
   if (state->zwlr_screencopy_manager != NULL) {
