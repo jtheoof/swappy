@@ -209,6 +209,11 @@ static void render_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static void render_background(cairo_t *cr) {
+  cairo_set_source_rgb(cr, 0, 0, 0);
+  cairo_paint(cr);
+}
+
 static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   cairo_set_source_rgba(cr, brush.r, brush.g, brush.b, brush.a);
   cairo_set_line_width(cr, brush.w);
@@ -263,11 +268,7 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
 void render_state(struct swappy_state *state) {
   cairo_t *cr = cairo_create(state->cairo_surface);
 
-  cairo_set_source_rgb(cr, 1, 1, 1);
-
-  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-  cairo_paint(cr);
-
+  render_background(cr);
   render_buffer(cr, state);
   render_paints(cr, state);
 
