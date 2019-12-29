@@ -3,12 +3,12 @@
 #include <gtk/gtk.h>
 #include <time.h>
 
+#include "buffer.h"
 #include "clipboard.h"
 #include "file.h"
 #include "notification.h"
 #include "paint.h"
 #include "render.h"
-#include "screencopy.h"
 #include "swappy.h"
 #include "wayland.h"
 
@@ -548,11 +548,11 @@ static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
   if (has_option_geometry(state)) {
-    if (!screencopy_parse_geometry(state)) {
+    if (!buffer_parse_geometry(state)) {
       return EXIT_FAILURE;
     }
 
-    if (!screencopy_init(state)) {
+    if (!buffer_init_from_screencopy(state)) {
       return EXIT_FAILURE;
     }
   }

@@ -1,4 +1,4 @@
-#include "screencopy.h"
+#include "buffer.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -132,7 +132,7 @@ void screencopy_frame_handle_failed(void *data,
   exit(EXIT_FAILURE);
 }
 
-bool screencopy_init(struct swappy_state *state) {
+bool buffer_init_from_screencopy(struct swappy_state *state) {
   int32_t with_cursor = 0;
   size_t n_pending = 0;
   struct swappy_output *output;
@@ -174,7 +174,7 @@ bool screencopy_init(struct swappy_state *state) {
   return true;
 }
 
-bool screencopy_parse_geometry(struct swappy_state *state) {
+bool buffer_parse_geometry(struct swappy_state *state) {
   struct swappy_box *geometry = g_new(struct swappy_box, 1);
   char *geometry_str = state->geometry_str;
   state->geometry = geometry;

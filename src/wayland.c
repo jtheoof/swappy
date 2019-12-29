@@ -4,7 +4,7 @@
 #include <string.h>
 #include <wayland-client.h>
 
-#include "screencopy.h"
+#include "buffer.h"
 #include "swappy.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
