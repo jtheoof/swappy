@@ -80,6 +80,7 @@ Install dependencies:
 
 * meson
 * wayland
+* wayland-protocols
 * cairo
 * gtk
 
