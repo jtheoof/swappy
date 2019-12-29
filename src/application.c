@@ -491,7 +491,6 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->stroke_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
 
-  //  gtk_popover_set_relative_to(ui, area);
   gtk_widget_set_size_request(area, geometry->width, geometry->height);
 
   state->ui->brush = brush;
