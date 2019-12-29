@@ -174,6 +174,29 @@ bool buffer_init_from_screencopy(struct swappy_state *state) {
   return true;
 }
 
+bool buffer_init_from_file(struct swappy_state *state) {
+  char *file = state->file_str;
+
+  cairo_surface_t *surface = cairo_image_surface_create_from_png(file);
+
+  g_assert(surface);
+
+  int width = cairo_image_surface_get_width(surface);
+  int height = cairo_image_surface_get_height(surface);
+
+  struct swappy_box *geometry = g_new(struct swappy_box, 1);
+
+  geometry->x = 0;
+  geometry->y = 0;
+  geometry->width = (int32_t)width;
+  geometry->height = (int32_t)height;
+
+  state->geometry = geometry;
+  state->image_surface = surface;
+
+  return true;
+}
+
 bool buffer_parse_geometry(struct swappy_state *state) {
   struct swappy_box *geometry = g_new(struct swappy_box, 1);
   char *geometry_str = state->geometry_str;

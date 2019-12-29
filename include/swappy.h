@@ -106,6 +106,7 @@ struct swappy_state {
   struct swappy_state_ui *ui;
 
   cairo_surface_t *cairo_surface;
+  cairo_surface_t *image_surface;
 
   struct wl_display *display;
   struct wl_registry *registry;

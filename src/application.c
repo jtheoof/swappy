@@ -155,6 +155,7 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
+  cairo_surface_destroy(state->image_surface);
   g_free(state->storage_path);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -541,6 +542,8 @@ static gboolean is_file_valid(const char *file) {
     return false;
   }
 
+  cairo_surface_destroy(surface);
+
   return true;
 }
 
@@ -559,6 +562,10 @@ static gint command_line_handler(GtkApplication *app,
 
   if (has_option_file(state)) {
     if (!is_file_valid(state->file_str)) {
+      return EXIT_FAILURE;
+    }
+
+    if (!buffer_init_from_file(state)) {
       return EXIT_FAILURE;
     }
   }

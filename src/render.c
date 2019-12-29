@@ -209,6 +209,18 @@ static void render_buffer(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static void render_image(cairo_t *cr, struct swappy_state *state) {
+  if (!state->image_surface) {
+    return;
+  }
+
+  cairo_pattern_t *output_pattern =
+      cairo_pattern_create_for_surface(state->image_surface);
+  cairo_set_source(cr, output_pattern);
+  cairo_pattern_destroy(output_pattern);
+  cairo_paint(cr);
+}
+
 static void render_background(cairo_t *cr) {
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_paint(cr);
@@ -270,6 +282,7 @@ void render_state(struct swappy_state *state) {
 
   render_background(cr);
   render_buffer(cr, state);
+  render_image(cr, state);
   render_paints(cr, state);
 
   // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.
