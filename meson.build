@@ -25,7 +25,7 @@ endif
 cairo = dependency('cairo')
 math = cc.find_library('m')
 realtime = cc.find_library('rt')
-gtk = dependency('gtk+-wayland-3.0', version: '>=3.22.0')
+gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14')
