@@ -123,6 +123,7 @@ struct swappy_state {
 
   /* Options */
   char *geometry_str;
+  char *file_str;
 
   struct swappy_box *geometry;
 

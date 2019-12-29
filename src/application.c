@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "clipboard.h"
+#include "file.h"
 #include "notification.h"
 #include "paint.h"
 #include "render.h"
@@ -522,27 +523,44 @@ static bool init_gtk_window(struct swappy_state *state) {
   return true;
 }
 
-static gboolean is_geometry_valid(struct swappy_state *state) {
+static gboolean has_option_geometry(struct swappy_state *state) {
   return (state->geometry_str != NULL);
+}
+
+static gboolean has_option_file(struct swappy_state *state) {
+  return (state->file_str != NULL);
+}
+
+static gboolean is_file_valid(const char *file) {
+  cairo_surface_t *surface = cairo_image_surface_create_from_png(file);
+  cairo_status_t status = cairo_surface_status(surface);
+
+  if (status) {
+    g_warning("error while loading: %s - cairo status: %s", file,
+              cairo_status_to_string(status));
+    return false;
+  }
+
+  return true;
 }
 
 static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
-  if (!is_geometry_valid(state)) {
-    g_printerr("geometry parameter is missing\n");
-    return EXIT_FAILURE;
+  if (has_option_geometry(state)) {
+    if (!screencopy_parse_geometry(state)) {
+      return EXIT_FAILURE;
+    }
+
+    if (!screencopy_init(state)) {
+      return EXIT_FAILURE;
+    }
   }
 
-  g_debug("geometry is: %s", state->geometry_str);
-
-  if (!screencopy_parse_geometry(state)) {
-    return EXIT_FAILURE;
-  }
-
-  if (!screencopy_init(state)) {
-    g_printerr("unable to initialize zwlr_screencopy_v1\n");
-    return false;
+  if (has_option_file(state)) {
+    if (!is_file_valid(state->file_str)) {
+      return EXIT_FAILURE;
+    }
   }
 
   if (!init_gtk_window(state)) {
@@ -561,6 +579,13 @@ bool application_init(struct swappy_state *state) {
           .arg_data = &state->geometry_str,
           .description =
               "Set the region to capture. (Can be an output of slurp)",
+      },
+      {
+          .long_name = "file",
+          .short_name = 'f',
+          .arg = G_OPTION_ARG_STRING,
+          .arg_data = &state->file_str,
+          .description = "Load a file at a specific path.",
       },
       {NULL}};
 
