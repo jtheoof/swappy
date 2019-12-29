@@ -3,6 +3,5 @@
 gnome = import('gnome')
 
 swappy_resources = gnome.compile_resources('swappy',
-  'swappy.gresource.xml',
-  cname: 'swappy_resources'
+  'swappy.gresource.xml'
 )
