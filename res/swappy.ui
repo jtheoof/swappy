@@ -66,8 +66,8 @@
                 <property name="image">edit-redo</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="redo_clicked_handler" swapped="no"/>
-                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                 <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -166,6 +166,10 @@
             <child>
               <object class="GtkBox" id="painting-box">
                 <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox">
@@ -569,34 +573,31 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="container">
-                <property name="width_request">100</property>
-                <property name="height_request">80</property>
+              <object class="GtkFixed">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="border_width">10</property>
-                <property name="orientation">vertical</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
                 <child>
                   <object class="GtkDrawingArea" id="painting-area">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                    <property name="margin_left">10</property>
+                    <property name="margin_right">10</property>
+                    <property name="margin_top">10</property>
+                    <property name="margin_bottom">10</property>
                     <signal name="button-press-event" handler="draw_area_button_press_handler" swapped="no"/>
                     <signal name="button-release-event" handler="draw_area_button_release_handler" swapped="no"/>
                     <signal name="configure-event" handler="draw_area_configure_handler" swapped="no"/>
                     <signal name="draw" handler="draw_area_handler" swapped="no"/>
                     <signal name="motion-notify-event" handler="draw_area_motion_notify_handler" swapped="no"/>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
               <packing>
-                <property name="resize">False</property>
-                <property name="shrink">False</property>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
               </packing>
             </child>
           </object>
