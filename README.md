@@ -33,6 +33,7 @@ swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .re
 
 * `Ctrl+b`: Toggle Paint Panel
 
+<hr>
 
 * `b`: Switch to Brush
 * `t`: Switch to Text
@@ -40,6 +41,7 @@ swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .re
 * `o`: Switch to Ellipse
 * `a`: Switch to Arrow
 
+<hr>
 
 * `R`: Use Red Color
 * `G`: Use Green Color
@@ -48,10 +50,9 @@ swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .re
 * `Minus`: Reduce Stroke Size
 * `Plus`: Increase Stroke Size
 * `Equal`: Reset Stroke Size
-
-
 * `k`: Clear Paints (cannot be undone)
 
+<hr>
 
 * `Ctrl+z`: Undo
 * `Ctrl+Shift+z` or `Ctrl+y`: Redo
