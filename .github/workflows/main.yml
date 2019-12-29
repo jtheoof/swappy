@@ -11,5 +11,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build
       run: |
+        sudo apt-get install ninja-build
         meson build
         ninja -C build
