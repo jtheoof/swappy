@@ -150,6 +150,13 @@ static void render_buffer(cairo_t *cr, struct swappy_state *state) {
 
   wl_list_for_each(output, &state->outputs, link) {
     struct swappy_buffer *buffer = output->buffer;
+
+    if (output->buffer == NULL) {
+      g_warning(
+          "screencopy buffer is empty, cannot draw it onto the paint area");
+      continue;
+    }
+
     cairo_format_t format = get_cairo_format(buffer->format);
 
     g_assert(format != CAIRO_FORMAT_INVALID);
@@ -257,6 +264,9 @@ void render_state(struct swappy_state *state) {
   cairo_t *cr = cairo_create(state->cairo_surface);
 
   cairo_set_source_rgb(cr, 1, 1, 1);
+
+  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+  cairo_paint(cr);
 
   render_buffer(cr, state);
   render_paints(cr, state);
