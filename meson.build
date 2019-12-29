@@ -48,6 +48,7 @@ executable(
 		'src/box.c',
 		'src/config.c',
 		'src/clipboard.c',
+		'src/file.c',
 		'src/paint.c',
 		'src/render.c',
 		'src/screencopy.c',

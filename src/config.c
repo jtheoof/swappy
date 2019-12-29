@@ -1,19 +1,10 @@
-#define _POSIX_C_SOURCE 200112L
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <wordexp.h>
 
+#include "file.h"
 #include "swappy.h"
-
-static bool folder_exists(const char *path) {
-  struct stat sb;
-
-  stat(path, &sb);
-
-  return (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode));
-}
 
 bool config_get_storage_path(struct swappy_state *state) {
   static const char *storage_paths[] = {
