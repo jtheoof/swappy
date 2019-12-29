@@ -158,8 +158,7 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
 
 static void global_registry_remove_handler(void *data,
                                            struct wl_registry *wl_registry,
-                                           uint32_t name) {
-}
+                                           uint32_t name) {}
 
 static struct wl_registry_listener registry_listener = {
     .global = global_registry_handler,

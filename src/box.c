@@ -6,25 +6,25 @@ static int32_t lmin(int32_t a, int32_t b) { return a < b ? a : b; }
 
 bool box_parse(struct swappy_box *box, const char *str) {
   char *end = NULL;
-  box->x = (int32_t) strtol(str, &end, 10);
+  box->x = (int32_t)strtol(str, &end, 10);
   if (end[0] != ',') {
     return false;
   }
 
   char *next = end + 1;
-  box->y = (int32_t) strtol(next, &end, 10);
+  box->y = (int32_t)strtol(next, &end, 10);
   if (end[0] != ' ') {
     return false;
   }
 
   next = end + 1;
-  box->width = (int32_t) strtol(next, &end, 10);
+  box->width = (int32_t)strtol(next, &end, 10);
   if (end[0] != 'x') {
     return false;
   }
 
   next = end + 1;
-  box->height = (int32_t) strtol(next, &end, 10);
+  box->height = (int32_t)strtol(next, &end, 10);
   if (end[0] != '\0') {
     return false;
   }
