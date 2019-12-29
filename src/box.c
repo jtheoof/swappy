@@ -1,28 +1,30 @@
 #include "box.h"
 
-#include "swappy.h"
+static int32_t lmax(int32_t a, int32_t b) { return a > b ? a : b; }
+
+static int32_t lmin(int32_t a, int32_t b) { return a < b ? a : b; }
 
 bool box_parse(struct swappy_box *box, const char *str) {
   char *end = NULL;
-  box->x = strtol(str, &end, 10);
+  box->x = (int32_t) strtol(str, &end, 10);
   if (end[0] != ',') {
     return false;
   }
 
   char *next = end + 1;
-  box->y = strtol(next, &end, 10);
+  box->y = (int32_t) strtol(next, &end, 10);
   if (end[0] != ' ') {
     return false;
   }
 
   next = end + 1;
-  box->width = strtol(next, &end, 10);
+  box->width = (int32_t) strtol(next, &end, 10);
   if (end[0] != 'x') {
     return false;
   }
 
   next = end + 1;
-  box->height = strtol(next, &end, 10);
+  box->height = (int32_t) strtol(next, &end, 10);
   if (end[0] != '\0') {
     return false;
   }
@@ -39,10 +41,10 @@ bool intersect_box(struct swappy_box *a, struct swappy_box *b) {
     return false;
   }
 
-  int x1 = fmax(a->x, b->x);
-  int y1 = fmax(a->y, b->y);
-  int x2 = fmin(a->x + a->width, b->x + b->width);
-  int y2 = fmin(a->y + a->height, b->y + b->height);
+  int32_t x1 = lmax(a->x, b->x);
+  int32_t y1 = lmax(a->y, b->y);
+  int32_t x2 = lmin(a->x + a->width, b->x + b->width);
+  int32_t y2 = lmin(a->y + a->height, b->y + b->height);
 
   struct swappy_box box = {
       .x = x1,

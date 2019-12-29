@@ -2,15 +2,9 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/mman.h>
-#include <wayland-client.h>
 
 #include "box.h"
-#include "swappy.h"
-#include "wlr-screencopy-unstable-v1-client-protocol.h"
 
 static void randname(char *buf) {
   struct timespec ts;
@@ -173,7 +167,7 @@ bool screencopy_init(struct swappy_state *state) {
     done = (state->n_done == n_pending);
   }
   if (!done) {
-    g_warning("failed to screenshoot all outputs");
+    g_warning("failed to screenshot all outputs");
     return EXIT_FAILURE;
   }
 
