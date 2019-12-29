@@ -56,8 +56,9 @@ swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .re
 
 * `Ctrl+z`: Undo
 * `Ctrl+Shift+z` or `Ctrl+y`: Redo
-* `Ctrl+s`: Save to file (see man page).
+* `Ctrl+s`: Save to file (see man page)
 * `Ctrl+c`: Copy to clipboard
+* `Escape` or `q`: Quit swappy
 
 ## Limitations
 

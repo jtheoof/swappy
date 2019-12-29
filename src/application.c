@@ -84,27 +84,22 @@ static void action_set_color_from_custom(struct swappy_state *state) {
 }
 
 static void switch_mode_to_brush(struct swappy_state *state) {
-  g_debug("switching mode to brush");
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
 }
 
 static void switch_mode_to_text(struct swappy_state *state) {
-  g_debug("switching mode to arrow");
   state->mode = SWAPPY_PAINT_MODE_TEXT;
 }
 
 static void switch_mode_to_rectangle(struct swappy_state *state) {
-  g_debug("switching mode to rectangle");
   state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
 }
 
 static void switch_mode_to_ellipse(struct swappy_state *state) {
-  g_debug("switching mode to ellipse");
   state->mode = SWAPPY_PAINT_MODE_ELLIPSE;
 }
 
 static void switch_mode_to_arrow(struct swappy_state *state) {
-  g_debug("switching mode to arrow");
   state->mode = SWAPPY_PAINT_MODE_ARROW;
 }
 
@@ -158,7 +153,6 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 }
 
 void application_finish(struct swappy_state *state) {
-  g_debug("application is shutting down");
   paint_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
   g_free(state->storage_path);
@@ -169,12 +163,9 @@ void application_finish(struct swappy_state *state) {
 }
 
 static void action_save_area_to_file(struct swappy_state *state) {
-  g_debug("saving area to file");
-
   guint width = gtk_widget_get_allocated_width(state->ui->area);
   guint height = gtk_widget_get_allocated_height(state->ui->area);
   // GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->area));
-  g_debug("generating pixbuf from area");
   GdkPixbuf *pixbuf =
       gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
   GError *error = NULL;
@@ -218,9 +209,6 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
-  g_debug("keypress_handler key pressed: keyval: %d - state: %d\n",
-          event->keyval, event->state);
-
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
       case GDK_KEY_c:
@@ -245,7 +233,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
   } else {
     switch (event->keyval) {
       case GDK_KEY_Escape:
-        g_debug("keypress_handler: escape key pressed, ciao bye\n");
+      case GDK_KEY_q:
         gtk_main_quit();
         break;
       case GDK_KEY_b:
@@ -339,8 +327,6 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
 
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
-  g_debug("press event: state: %d, button: %d", event->state, event->button);
-
   if (event->button == 1) {
     switch (state->mode) {
       case SWAPPY_PAINT_MODE_BRUSH:
@@ -381,7 +367,6 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
 }
 void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
                                       struct swappy_state *state) {
-  g_debug("releasing button in state: %d", event->state);
   if (!(event->state & GDK_BUTTON1_MASK)) {
     return;
   }

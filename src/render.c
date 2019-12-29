@@ -137,7 +137,7 @@ static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
       render_shape_arrow(cr, shape);
       break;
     default:
-      g_debug("unknown shape type: %d", shape.type);
+      break;
   }
   cairo_restore(cr);
 }

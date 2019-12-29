@@ -60,9 +60,6 @@ static struct swappy_buffer *create_buffer(struct wl_shm *shm,
                                            int32_t width, int32_t height,
                                            int32_t stride) {
   size_t size = stride * height;
-  g_debug(
-      "creating buffer with dimensions: %dx%d - format: 0x%08x - stride: %d",
-      width, height, format, stride);
 
   int fd = create_shm_file(size);
   if (fd == -1) {
@@ -107,7 +104,6 @@ void screencopy_frame_handle_buffer(void *data,
                                     struct zwlr_screencopy_frame_v1 *frame,
                                     uint32_t format, uint32_t width,
                                     uint32_t height, uint32_t stride) {
-  g_debug("screencopy: frame handler buffer: %dx%d", width, height);
   struct swappy_output *output = data;
 
   output->buffer =
@@ -123,7 +119,6 @@ void screencopy_frame_handle_buffer(void *data,
 void screencopy_frame_handle_flags(void *data,
                                    struct zwlr_screencopy_frame_v1 *frame,
                                    uint32_t flags) {
-  g_debug("screencopy: frame flags: %d", flags);
   struct swappy_output *output = data;
   output->screencopy_frame_flags = flags;
 }
@@ -133,7 +128,6 @@ void screencopy_frame_handle_ready(void *data,
                                    uint32_t tv_sec_hi, uint32_t tv_sec_lo,
                                    uint32_t tv_nsec) {
   struct swappy_output *output = data;
-  g_debug("screencopy: frame handler is ready");
   ++output->state->n_done;
 }
 

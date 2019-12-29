@@ -29,9 +29,6 @@ static void xdg_output_handle_logical_position(
     void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
   struct swappy_output *output = data;
 
-  g_debug("xdg_output: logical position: received x,y: %d,%d for output %s", x,
-          y, output->name);
-
   output->logical_geometry.x = x;
   output->logical_geometry.y = y;
 }
@@ -59,16 +56,13 @@ static void xdg_output_handle_done(void *data,
 static void xdg_output_handle_name(void *data,
                                    struct zxdg_output_v1 *xdg_output,
                                    const char *name) {
-  g_debug("xdg_output_v1: name: %s", name);
   struct swappy_output *output = data;
   output->name = strdup(name);
 }
 
 static void xdg_output_handle_description(void *data,
                                           struct zxdg_output_v1 *xdg_output,
-                                          const char *name) {
-  g_debug("xdg_output_v1: description: %s", name);
-}
+                                          const char *name) {}
 
 static const struct zxdg_output_v1_listener xdg_output_listener = {
     .logical_position = xdg_output_handle_logical_position,
@@ -165,7 +159,6 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
 static void global_registry_remove_handler(void *data,
                                            struct wl_registry *wl_registry,
                                            uint32_t name) {
-  g_debug("got a registry remove event for name: %d", name);
 }
 
 static struct wl_registry_listener registry_listener = {
@@ -179,8 +172,6 @@ bool wayland_init(struct swappy_state *state) {
     g_warning("cannot connect to wayland display");
     return false;
   }
-
-  g_debug("connected to wayland display");
 
   wl_list_init(&state->outputs);
   state->registry = wl_display_get_registry(state->display);
@@ -240,8 +231,6 @@ bool wayland_init(struct swappy_state *state) {
 }
 
 void wayland_finish(struct swappy_state *state) {
-  g_debug("cleaning up wayland resources");
-
   struct swappy_output *output;
   struct swappy_output *output_tmp;
   wl_list_for_each_safe(output, output_tmp, &state->outputs, link) {

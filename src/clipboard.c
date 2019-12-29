@@ -3,7 +3,6 @@
 #include "notification.h"
 
 bool clipboard_copy_drawing_area_to_selection(struct swappy_state *state) {
-  g_debug("generating pixbuf from area");
   GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
   guint width = gtk_widget_get_allocated_width(state->ui->area);
   guint height = gtk_widget_get_allocated_height(state->ui->area);
