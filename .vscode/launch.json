@@ -51,6 +51,30 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "name": "swappy - stdin",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/meson-out/swappy",
+      "args": ["-f", "-"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "G_MESSAGES_DEBUG",
+          "value": "all"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }

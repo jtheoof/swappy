@@ -178,8 +178,13 @@ bool buffer_init_from_file(struct swappy_state *state) {
   char *file = state->file_str;
 
   cairo_surface_t *surface = cairo_image_surface_create_from_png(file);
+  cairo_status_t status = cairo_surface_status(surface);
 
-  g_assert(surface);
+  if (status) {
+    g_warning("error while loading png file: %s - cairo status: %s", file,
+              cairo_status_to_string(status));
+    return false;
+  }
 
   int width = cairo_image_surface_get_width(surface);
   int height = cairo_image_surface_get_height(surface);

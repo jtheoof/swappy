@@ -157,6 +157,7 @@ void application_finish(struct swappy_state *state) {
   cairo_surface_destroy(state->cairo_surface);
   cairo_surface_destroy(state->image_surface);
   g_free(state->storage_path);
+  g_free(state->file_str);
   g_free(state->geometry_str);
   g_free(state->geometry);
   g_free(state->ui);
@@ -531,19 +532,8 @@ static gboolean has_option_file(struct swappy_state *state) {
   return (state->file_str != NULL);
 }
 
-static gboolean is_file_valid(const char *file) {
-  cairo_surface_t *surface = cairo_image_surface_create_from_png(file);
-  cairo_status_t status = cairo_surface_status(surface);
-
-  if (status) {
-    g_warning("error while loading: %s - cairo status: %s", file,
-              cairo_status_to_string(status));
-    return false;
-  }
-
-  cairo_surface_destroy(surface);
-
-  return true;
+static gboolean is_file_from_stdin(const char *file) {
+  return (strcmp(file, "-") == 0);
 }
 
 static gint command_line_handler(GtkApplication *app,
@@ -560,8 +550,10 @@ static gint command_line_handler(GtkApplication *app,
   }
 
   if (has_option_file(state)) {
-    if (!is_file_valid(state->file_str)) {
-      return EXIT_FAILURE;
+    if (is_file_from_stdin(state->file_str)) {
+      char *new_file_str = file_dump_stdin_into_a_temp_file();
+      g_free(state->file_str);
+      state->file_str = new_file_str;
     }
 
     if (!buffer_init_from_file(state)) {
