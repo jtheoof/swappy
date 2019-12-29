@@ -1,8 +1,13 @@
 # swappy
 
-A Wayland native snapshot tool, inspired by Snappy on macOS. Works great with [slurp] and [sway].
+A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [slurp] and [sway].
 
-Code was largely inspired by [grim].
+Wayland code was largely taken from [grim].
+
+## Screenshot
+
+![Swappy Screenshot](docs/images/screenshot.png) 
+
 
 ## Example usage
 
@@ -24,14 +29,48 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)"
 ```
 
+## Keyboard Shortcuts
+
+* `Ctrl+b`: Toggle Paint Panel
+
+
+* `b`: Switch to Brush
+* `t`: Switch to Text
+* `r`: Switch to Rectangle
+* `o`: Switch to Ellipse
+* `a`: Switch to Arrow
+
+
+* `R`: Use Red Color
+* `G`: Use Green Color
+* `B`: Use Blue Color
+* `C`: Use Custom Color
+* `Minus`: Reduce Stroke Size
+* `Plus`: Increase Stroke Size
+* `Equal`: Reset Stroke Size
+
+
+* `k`: Clear Paints (cannot be undone)
+
+
+* `Ctrl+z`: Undo
+* `Ctrl+Shift+z` or `Ctrl+y`: Redo
+* `Ctrl+s`: Save to file (see man page).
+* `Ctrl+c`: Copy to clipboard
+
+## Limitations
+
+* **Mutli-Monitor**: I don't have a multi-monitor setup at home. Most likely it won't work properly. Pull requests are welcome.
+* **Copy**: Copy to clipboard won't work if you close swappy (the content of the clipboard is lost). This because GTK 3.24 [has not implemented persistent storage](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4.
+
 ## Installation
 
 ### Arch Linux User Repository
 
-Assuming [yay](https://aur.archlinux.org/packages/yay/) as your AUR package manager.
+Assuming [yay](https://aur.archlinux.org/packages/yay/) as your AUR package manager:
 
-* stable version: `yay -S swappy`
-* git version: `yay -S swappy-git`
+* **stable**: `yay -S swappy`
+* **latest**: `yay -S swappy-git`
 
 ## Building from source
 
@@ -53,9 +92,6 @@ meson build
 ninja -C build
 ```
 
-To run directly, use `build/swappy`, or if you would like to do a system
-installation (in `/usr/local` by default), run `ninja -C build install`.
-
 ## Contributing
 
 Pull requests are welcome.
@@ -64,6 +100,7 @@ Pull requests are welcome.
 
 MIT
 
+[Snappy]: http://snappy-app.com/
 [slurp]: https://github.com/emersion/slurp
 [grim]: https://github.com/emersion/grim
 [sway]: https://github.com/swaywm/sway
