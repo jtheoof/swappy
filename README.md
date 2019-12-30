@@ -2,7 +2,7 @@
 
 A Wayland and X11 native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [grim], [slurp] and [sway]. But can also work for with other screenshot tools if you use the `-f` option. See below.
 
-Wayland code was largely taken from [grim], needs a compositor that implements the [wlr-screencopy-unstable-v1.xml]
+Wayland code was largely taken from [grim], needs a compositor that implements the [wlr-screencopy-unstable-v1.xml] protocol.
 
 You can use this tool in two ways, either use it as the output of `grim` (**recommended**) or grab the geometry yourself (will probably have some issues).
 
