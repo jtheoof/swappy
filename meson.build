@@ -28,13 +28,18 @@ realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
-wayland_protos = dependency('wayland-protocols', version: '>=1.14')
+wayland_protos = dependency('wayland-protocols', version: '>=1.14', required: false)
 
 libnotify = dependency('libnotify', required: false)
 
 if libnotify.found()
 	add_project_arguments('-DHAVE_LIBNOTIFY', language: 'c')
 endif
+
+if wayland_protos.found()
+	add_project_arguments('-DHAVE_WAYLAND_PROTOCOLS', language: 'c')
+endif
+
 
 subdir('res')
 subdir('protocol')

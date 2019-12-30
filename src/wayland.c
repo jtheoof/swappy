@@ -7,11 +7,14 @@
 #include "buffer.h"
 #include "swappy.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
+
+#ifdef HAVE_WAYLAND_PROTOCOLS
 #include "xdg-output-unstable-v1-client-protocol.h"
+#endif
 
 static bool guess_output_logical_geometry(struct swappy_output *output) {
   // TODO Implement
-  g_critical("guessing output is not yet implemented");
+  g_warning("guessing output is not yet implemented");
   return false;
 }
 
@@ -24,6 +27,7 @@ void apply_output_transform(enum wl_output_transform transform, int32_t *width,
   }
 }
 
+#ifdef HAVE_WAYLAND_PROTOCOLS
 static void xdg_output_handle_logical_position(
     void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
   struct swappy_output *output = data;
@@ -70,6 +74,7 @@ static const struct zxdg_output_v1_listener xdg_output_listener = {
     .name = xdg_output_handle_name,
     .description = xdg_output_handle_description,
 };
+#endif
 
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t physical_width,
@@ -120,11 +125,12 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
   bool bound = false;
 
   if (strcmp(interface, wl_compositor_interface.name) == 0) {
-    state->compositor =
+    state->wl->compositor =
         wl_registry_bind(registry, name, &wl_compositor_interface, version);
     bound = true;
   } else if (strcmp(interface, wl_shm_interface.name) == 0) {
-    state->shm = wl_registry_bind(registry, name, &wl_shm_interface, version);
+    state->wl->shm =
+        wl_registry_bind(registry, name, &wl_shm_interface, version);
     bound = true;
   } else if (strcmp(interface, wl_output_interface.name) == 0) {
     struct swappy_output *output = calloc(1, sizeof(struct swappy_output));
@@ -133,17 +139,21 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     output->wl_output =
         wl_registry_bind(registry, name, &wl_output_interface, 3);
     wl_output_add_listener(output->wl_output, &output_listener, output);
-    wl_list_insert(&state->outputs, &output->link);
-    bound = true;
-  } else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
-    state->xdg_output_manager = wl_registry_bind(
-        registry, name, &zxdg_output_manager_v1_interface, version);
+    wl_list_insert(&state->wl->outputs, &output->link);
     bound = true;
   } else if (strcmp(interface, zwlr_screencopy_manager_v1_interface.name) ==
              0) {
-    state->zwlr_screencopy_manager = wl_registry_bind(
+    state->wl->zwlr_screencopy_manager = wl_registry_bind(
         registry, name, &zwlr_screencopy_manager_v1_interface, version);
     bound = true;
+  } else {
+#ifdef HAVE_WAYLAND_PROTOCOLS
+    if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
+      state->wl->xdg_output_manager = wl_registry_bind(
+          registry, name, &zxdg_output_manager_v1_interface, version);
+      bound = true;
+    }
+#endif
   }
 
   if (bound) {
@@ -161,49 +171,56 @@ static struct wl_registry_listener registry_listener = {
 };
 
 bool wayland_init(struct swappy_state *state) {
-  state->display = wl_display_connect(NULL);
-  if (state->display == NULL) {
+  state->wl = g_new(struct swappy_wayland, 1);
+
+  state->wl->display = wl_display_connect(NULL);
+  if (state->wl->display == NULL) {
     g_warning("cannot connect to wayland display");
     return false;
   }
 
-  wl_list_init(&state->outputs);
-  state->registry = wl_display_get_registry(state->display);
-  wl_registry_add_listener(state->registry, &registry_listener, state);
-  wl_display_roundtrip(state->display);
+  wl_list_init(&state->wl->outputs);
+  state->wl->registry = wl_display_get_registry(state->wl->display);
+  wl_registry_add_listener(state->wl->registry, &registry_listener, state);
+  wl_display_roundtrip(state->wl->display);
 
-  if (state->compositor == NULL) {
+  if (state->wl->compositor == NULL) {
     g_warning("compositor doesn't support wl_compositor");
     return false;
   }
-  if (state->shm == NULL) {
+  if (state->wl->shm == NULL) {
     g_warning("compositor doesn't support wl_shm");
     return false;
   }
 
-  if (wl_list_empty(&state->outputs)) {
+  if (wl_list_empty(&state->wl->outputs)) {
     g_warning("no wl_output found");
     return false;
   }
 
-  if (state->xdg_output_manager != NULL) {
+  bool found_output_layout = false;
+#ifdef HAVE_WAYLAND_PROTOCOLS
+  if (state->wl->xdg_output_manager != NULL) {
     struct swappy_output *output;
-    wl_list_for_each(output, &state->outputs, link) {
+    wl_list_for_each(output, &state->wl->outputs, link) {
       output->xdg_output = zxdg_output_manager_v1_get_xdg_output(
-          state->xdg_output_manager, output->wl_output);
+          state->wl->xdg_output_manager, output->wl_output);
       zxdg_output_v1_add_listener(output->xdg_output, &xdg_output_listener,
                                   output);
     }
 
-    wl_display_dispatch(state->display);
-    wl_display_roundtrip(state->display);
-  } else {
+    wl_display_dispatch(state->wl->display);
+    wl_display_roundtrip(state->wl->display);
+    found_output_layout = true;
+  }
+#endif
+  if (!found_output_layout) {
     g_warning(
         "zxdg_output_manager_v1 isn't available, guessing the output layout");
 
     struct swappy_output *output;
     bool output_guessed = false;
-    wl_list_for_each(output, &state->outputs, link) {
+    wl_list_for_each(output, &state->wl->outputs, link) {
       output_guessed = guess_output_logical_geometry(output);
     }
     if (!output_guessed) {
@@ -212,7 +229,7 @@ bool wayland_init(struct swappy_state *state) {
     }
   }
 
-  if (state->zwlr_screencopy_manager == NULL) {
+  if (state->wl->zwlr_screencopy_manager == NULL) {
     g_warning("compositor does not support zwlr_screencopy_v1");
     return false;
   }
@@ -223,41 +240,53 @@ bool wayland_init(struct swappy_state *state) {
 void wayland_finish(struct swappy_state *state) {
   struct swappy_output *output;
   struct swappy_output *output_tmp;
-  wl_list_for_each_safe(output, output_tmp, &state->outputs, link) {
+
+  if (!state->wl) {
+    return;
+  }
+
+  wl_list_for_each_safe(output, output_tmp, &state->wl->outputs, link) {
     wl_list_remove(&output->link);
     free(output->name);
     if (output->screencopy_frame != NULL) {
       zwlr_screencopy_frame_v1_destroy(output->screencopy_frame);
     }
+#ifdef HAVE_WAYLAND_PROTOCOLS
     if (output->xdg_output != NULL) {
       zxdg_output_v1_destroy(output->xdg_output);
     }
+#endif
     wl_output_release(output->wl_output);
-    screencopy_destroy_buffer(output->buffer);
+    buffer_wayland_destroy(output->buffer);
     free(output);
   }
 
-  if (state->compositor != NULL) {
-    wl_compositor_destroy(state->compositor);
+  if (state->wl->compositor != NULL) {
+    wl_compositor_destroy(state->wl->compositor);
   }
 
-  if (state->zwlr_screencopy_manager != NULL) {
-    zwlr_screencopy_manager_v1_destroy(state->zwlr_screencopy_manager);
+  if (state->wl->zwlr_screencopy_manager != NULL) {
+    zwlr_screencopy_manager_v1_destroy(state->wl->zwlr_screencopy_manager);
   }
 
-  if (state->xdg_output_manager != NULL) {
-    zxdg_output_manager_v1_destroy(state->xdg_output_manager);
+#ifdef HAVE_WAYLAND_PROTOCOLS
+  if (state->wl->xdg_output_manager != NULL) {
+    zxdg_output_manager_v1_destroy(state->wl->xdg_output_manager);
+  }
+#endif
+
+  if (state->wl->shm != NULL) {
+    wl_shm_destroy(state->wl->shm);
   }
 
-  if (state->shm != NULL) {
-    wl_shm_destroy(state->shm);
+  if (state->wl->registry != NULL) {
+    wl_registry_destroy(state->wl->registry);
   }
 
-  if (state->registry != NULL) {
-    wl_registry_destroy(state->registry);
+  if (state->wl->display) {
+    wl_display_disconnect(state->wl->display);
   }
 
-  if (state->display) {
-    wl_display_disconnect(state->display);
-  }
+  g_free(state->wl);
+  state->wl = NULL;
 }

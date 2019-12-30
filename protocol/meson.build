@@ -1,5 +1,3 @@
-wl_protocol_dir = wayland_protos.get_pkgconfig_variable('pkgdatadir')
-
 wayland_scanner = find_program('wayland-scanner')
 
 # should check wayland_scanner's version, but it is hard to get
@@ -21,11 +19,19 @@ wayland_scanner_client = generator(
 	arguments: ['client-header', '@INPUT@', '@OUTPUT@'],
 )
 
-client_protocols = [
-	[wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
-	[wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
-	['wlr-screencopy-unstable-v1.xml'],
-]
+if wayland_protos.found()
+	wl_protocol_dir = wayland_protos.get_pkgconfig_variable('pkgdatadir')
+	client_protocols = [
+		[wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
+		[wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
+		['wlr-screencopy-unstable-v1.xml'],
+	]
+else
+	client_protocols = [
+		['wlr-screencopy-unstable-v1.xml'],
+	]
+endif
+
 
 client_protos_src = []
 client_protos_headers = []

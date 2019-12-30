@@ -154,14 +154,16 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
+  buffer_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
-  cairo_surface_destroy(state->image_surface);
   g_free(state->storage_path);
   g_free(state->file_str);
   g_free(state->geometry_str);
   g_free(state->geometry);
   g_free(state->ui);
   g_object_unref(state->app);
+
+  wayland_finish(state);
 }
 
 static void action_save_area_to_file(struct swappy_state *state) {
@@ -544,6 +546,12 @@ static gboolean is_file_from_stdin(const char *file) {
 static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
+  if (!wayland_init(state)) {
+    g_warning(
+        "error while initializing wayland objects, can only be used in file "
+        "mode");
+  }
+
   if (has_option_geometry(state)) {
     if (!buffer_parse_geometry(state)) {
       return EXIT_FAILURE;

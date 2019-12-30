@@ -94,13 +94,14 @@ Install dependencies:
 
 - meson
 - wayland
-- wayland-protocols
 - cairo
 - gtk
 
 Optional dependencies:
 
-- libnotify
+- wayland-protocols (for the `-g` option to work with `screencopy` protocol).
+- libnotify (not get notified when swappshot is copied or saved).
+- scdoc to generate the man page
 
 Then run:
 

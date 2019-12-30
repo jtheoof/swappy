@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 
 #include "box.h"
+#include "wayland.h"
 
 static void randname(char *buf) {
   struct timespec ts;
@@ -49,6 +50,30 @@ static int create_shm_file(off_t size) {
   return fd;
 }
 
+static cairo_format_t get_cairo_format(enum wl_shm_format wl_fmt) {
+  switch (wl_fmt) {
+    case WL_SHM_FORMAT_ARGB8888:
+      return CAIRO_FORMAT_ARGB32;
+    case WL_SHM_FORMAT_XRGB8888:
+      return CAIRO_FORMAT_RGB24;
+    default:
+      return CAIRO_FORMAT_INVALID;
+  }
+}
+
+static int get_output_flipped(enum wl_output_transform transform) {
+  return transform & WL_OUTPUT_TRANSFORM_FLIPPED ? -1 : 1;
+}
+
+static void apply_output_transform(enum wl_output_transform transform,
+                                   int32_t *width, int32_t *height) {
+  if (transform & WL_OUTPUT_TRANSFORM_90) {
+    int32_t tmp = *width;
+    *width = *height;
+    *height = tmp;
+  }
+}
+
 static struct swappy_buffer *create_buffer(struct wl_shm *shm,
                                            enum wl_shm_format format,
                                            int32_t width, int32_t height,
@@ -85,23 +110,13 @@ static struct swappy_buffer *create_buffer(struct wl_shm *shm,
   return buffer;
 }
 
-void screencopy_destroy_buffer(struct swappy_buffer *buffer) {
-  if (buffer == NULL) {
-    return;
-  }
-  munmap(buffer->data, buffer->size);
-  wl_buffer_destroy(buffer->wl_buffer);
-  free(buffer);
-}
-
-void screencopy_frame_handle_buffer(void *data,
-                                    struct zwlr_screencopy_frame_v1 *frame,
-                                    uint32_t format, uint32_t width,
-                                    uint32_t height, uint32_t stride) {
+static void screencopy_frame_handle_buffer(
+    void *data, struct zwlr_screencopy_frame_v1 *frame, uint32_t format,
+    uint32_t width, uint32_t height, uint32_t stride) {
   struct swappy_output *output = data;
 
   output->buffer =
-      create_buffer(output->state->shm, format, width, height, stride);
+      create_buffer(output->state->wl->shm, format, width, height, stride);
   if (output->buffer == NULL) {
     g_warning("failed to create buffer");
     exit(EXIT_FAILURE);
@@ -110,29 +125,28 @@ void screencopy_frame_handle_buffer(void *data,
   zwlr_screencopy_frame_v1_copy(frame, output->buffer->wl_buffer);
 }
 
-void screencopy_frame_handle_flags(void *data,
-                                   struct zwlr_screencopy_frame_v1 *frame,
-                                   uint32_t flags) {
+static void screencopy_frame_handle_flags(
+    void *data, struct zwlr_screencopy_frame_v1 *frame, uint32_t flags) {
   struct swappy_output *output = data;
   output->screencopy_frame_flags = flags;
 }
 
-void screencopy_frame_handle_ready(void *data,
-                                   struct zwlr_screencopy_frame_v1 *frame,
-                                   uint32_t tv_sec_hi, uint32_t tv_sec_lo,
-                                   uint32_t tv_nsec) {
+static void screencopy_frame_handle_ready(
+    void *data, struct zwlr_screencopy_frame_v1 *frame, uint32_t tv_sec_hi,
+    uint32_t tv_sec_lo, uint32_t tv_nsec) {
   struct swappy_output *output = data;
-  ++output->state->n_done;
+  ++output->state->wl->n_done;
 }
 
-void screencopy_frame_handle_failed(void *data,
-                                    struct zwlr_screencopy_frame_v1 *frame) {
+static void screencopy_frame_handle_failed(
+    void *data, struct zwlr_screencopy_frame_v1 *frame) {
   struct swappy_output *output = data;
   g_warning("screencopy: failed to copy output %s", output->name);
   exit(EXIT_FAILURE);
 }
 
 bool buffer_init_from_screencopy(struct swappy_state *state) {
+  struct swappy_box *geometry = state->geometry;
   int32_t with_cursor = 0;
   size_t n_pending = 0;
   struct swappy_output *output;
@@ -144,14 +158,14 @@ bool buffer_init_from_screencopy(struct swappy_state *state) {
       .failed = screencopy_frame_handle_failed,
   };
 
-  wl_list_for_each(output, &state->outputs, link) {
+  wl_list_for_each(output, &state->wl->outputs, link) {
     if (state->geometry != NULL &&
         !intersect_box(state->geometry, &output->logical_geometry)) {
       continue;
     }
 
     output->screencopy_frame = zwlr_screencopy_manager_v1_capture_output(
-        state->zwlr_screencopy_manager, with_cursor, output->wl_output);
+        state->wl->zwlr_screencopy_manager, with_cursor, output->wl_output);
     zwlr_screencopy_frame_v1_add_listener(output->screencopy_frame,
                                           &screencopy_frame_listener, output);
 
@@ -163,12 +177,68 @@ bool buffer_init_from_screencopy(struct swappy_state *state) {
   }
 
   bool done = false;
-  while (!done && wl_display_dispatch(state->display) != -1) {
-    done = (state->n_done == n_pending);
+  while (!done && wl_display_dispatch(state->wl->display) != -1) {
+    done = (state->wl->n_done == n_pending);
   }
   if (!done) {
     g_warning("failed to screenshot all outputs");
     return EXIT_FAILURE;
+  }
+
+  wl_list_for_each(output, &state->wl->outputs, link) {
+    struct swappy_buffer *buffer = output->buffer;
+
+    if (output->buffer == NULL) {
+      // screencopy buffer is empty, cannot draw it onto the paint area"
+      continue;
+    }
+
+    cairo_format_t format = get_cairo_format(buffer->format);
+
+    g_assert(format != CAIRO_FORMAT_INVALID);
+
+    int32_t output_x = output->logical_geometry.x - geometry->x;
+    int32_t output_y = output->logical_geometry.y - geometry->y;
+    int32_t output_width = output->logical_geometry.width;
+    int32_t output_height = output->logical_geometry.height;
+    int32_t scale = output->scale;
+
+    int32_t raw_output_width = output->geometry.width;
+    int32_t raw_output_height = output->geometry.height;
+    apply_output_transform(output->transform, &raw_output_width,
+                           &raw_output_height);
+
+    int output_flipped_x = get_output_flipped(output->transform);
+    int output_flipped_y =
+        output->screencopy_frame_flags & ZWLR_SCREENCOPY_FRAME_V1_FLAGS_Y_INVERT
+            ? -1
+            : 1;
+
+    cairo_surface_t *output_surface = cairo_image_surface_create_for_data(
+        buffer->data, format, buffer->width, buffer->height, buffer->stride);
+    cairo_pattern_t *output_pattern =
+        cairo_pattern_create_for_surface(output_surface);
+
+    // All transformations are in pattern-local coordinates
+    cairo_matrix_t matrix;
+    cairo_matrix_init_identity(&matrix);
+    cairo_matrix_translate(&matrix, (double)output->geometry.width / 2,
+                           (double)output->geometry.height / 2);
+    //    cairo_matrix_rotate(&matrix, -get_output_rotation(output->transform));
+    cairo_matrix_scale(
+        &matrix, (double)raw_output_width / output_width * output_flipped_x,
+        (double)raw_output_height / output_height * output_flipped_y);
+    cairo_matrix_translate(&matrix, -(double)output_width / 2,
+                           -(double)output_height / 2);
+    cairo_matrix_translate(&matrix, -output_x, -output_y);
+    cairo_matrix_scale(&matrix, 1 / scale, 1 / scale);
+    cairo_pattern_set_matrix(output_pattern, &matrix);
+
+    cairo_pattern_set_filter(output_pattern, CAIRO_FILTER_BEST);
+
+    state->patterns = g_list_append(state->patterns, output_pattern);
+
+    cairo_surface_destroy(output_surface);
   }
 
   return true;
@@ -197,7 +267,11 @@ bool buffer_init_from_file(struct swappy_state *state) {
   geometry->height = (int32_t)height;
 
   state->geometry = geometry;
-  state->image_surface = surface;
+
+  cairo_pattern_t *output_pattern = cairo_pattern_create_for_surface(surface);
+  state->patterns = g_list_append(state->patterns, output_pattern);
+
+  cairo_surface_destroy(surface);
 
   return true;
 }
@@ -213,4 +287,25 @@ bool buffer_parse_geometry(struct swappy_state *state) {
     return false;
   }
   return true;
+}
+
+void buffer_wayland_destroy(struct swappy_buffer *buffer) {
+  if (buffer == NULL) {
+    return;
+  }
+  munmap(buffer->data, buffer->size);
+  wl_buffer_destroy(buffer->wl_buffer);
+  free(buffer);
+}
+
+static void free_pattern(gpointer data) {
+  cairo_pattern_t *pattern = data;
+  cairo_pattern_destroy(pattern);
+}
+
+void buffer_free_all(struct swappy_state *state) {
+  if (state->patterns) {
+    g_list_free_full(state->patterns, free_pattern);
+    state->patterns = NULL;
+  }
 }

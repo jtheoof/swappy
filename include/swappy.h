@@ -6,9 +6,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <wayland-client.h>
+#ifdef HAVE_WAYLAND_PROTOCOLS
+#include <xdg-output-unstable-v1-client-protocol.h>
+#endif
 
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
-#include "xdg-output-unstable-v1-client-protocol.h"
 
 #define MAX_PATH 4096
 
@@ -100,23 +102,56 @@ struct swappy_state_ui {
   GtkButton *stroke_size;
 };
 
-struct swappy_state {
-  GtkApplication *app;
+struct swappy_buffer {
+  struct wl_buffer *wl_buffer;
+  void *data;
+  int32_t width, height, stride;
+  size_t size;
+  enum wl_shm_format format;
+};
 
-  struct swappy_state_ui *ui;
+struct swappy_output {
+  struct swappy_state *state;
+  struct swappy_box geometry;
+  struct swappy_box logical_geometry;
+  struct wl_output *wl_output;
+  struct wl_list link;
+  int32_t scale;
+  struct swappy_buffer *buffer;
 
-  cairo_surface_t *cairo_surface;
-  cairo_surface_t *image_surface;
+  double logical_scale;  // guessed from the logical size
+  char *name;
 
+  enum wl_output_transform transform;
+  struct zwlr_screencopy_frame_v1 *screencopy_frame;
+  uint32_t screencopy_frame_flags;  // enum zwlr_screencopy_frame_v1_flags
+
+#ifdef HAVE_WAYLAND_PROTOCOLS
+  struct zxdg_output_v1 *xdg_output;
+#endif
+};
+
+struct swappy_wayland {
   struct wl_display *display;
   struct wl_registry *registry;
   struct wl_compositor *compositor;
   struct wl_shm *shm;
-  struct zxdg_output_manager_v1 *xdg_output_manager;
+  struct wl_list outputs;
   struct zwlr_screencopy_manager_v1 *zwlr_screencopy_manager;
-  struct wl_list outputs;  // mako_output::link
-
   size_t n_done;
+#ifdef HAVE_WAYLAND_PROTOCOLS
+  struct zxdg_output_manager_v1 *xdg_output_manager;
+#endif
+};
+
+struct swappy_state {
+  GtkApplication *app;
+
+  struct swappy_state_ui *ui;
+  struct swappy_wayland *wl;
+
+  cairo_surface_t *cairo_surface;
+  GList *patterns;  // List of cairo_pattern_t
 
   char *storage_path;
 
@@ -136,31 +171,4 @@ struct swappy_state {
 
   int argc;
   char **argv;
-};
-
-struct swappy_buffer {
-  struct wl_buffer *wl_buffer;
-  void *data;
-  int32_t width, height, stride;
-  size_t size;
-  enum wl_shm_format format;
-};
-
-struct swappy_output {
-  struct swappy_state *state;
-  struct wl_output *wl_output;
-  struct zxdg_output_v1 *xdg_output;
-  struct wl_list link;
-
-  struct swappy_box geometry;
-  enum wl_output_transform transform;
-  int32_t scale;
-
-  struct swappy_box logical_geometry;
-  double logical_scale;  // guessed from the logical size
-  char *name;
-
-  struct swappy_buffer *buffer;
-  struct zwlr_screencopy_frame_v1 *screencopy_frame;
-  uint32_t screencopy_frame_flags;  // enum zwlr_screencopy_frame_v1_flags
 };

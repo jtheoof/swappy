@@ -2,7 +2,6 @@
 
 #include "application.h"
 #include "config.h"
-#include "wayland.h"
 
 int main(int argc, char *argv[]) {
   struct swappy_state state = {0};
@@ -22,11 +21,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (!wayland_init(&state)) {
-    g_critical("failed to initialize wayland");
-    exit(1);
-  }
-
   status = application_run(&state);
 
   if (status == 0) {
@@ -34,7 +28,6 @@ int main(int argc, char *argv[]) {
   }
 
   application_finish(&state);
-  wayland_finish(&state);
 
   return status;
 }

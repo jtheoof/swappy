@@ -4,24 +4,12 @@
 #include <wayland-client.h>
 
 #include "swappy.h"
-#include "wlr-screencopy-unstable-v1-client-protocol.h"
 
-void screencopy_frame_handle_buffer(void *data,
-                                    struct zwlr_screencopy_frame_v1 *frame,
-                                    uint32_t format, uint32_t width,
-                                    uint32_t height, uint32_t stride);
-void screencopy_frame_handle_flags(void *data,
-                                   struct zwlr_screencopy_frame_v1 *frame,
-                                   uint32_t flags);
-void screencopy_frame_handle_ready(void *data,
-                                   struct zwlr_screencopy_frame_v1 *frame,
-                                   uint32_t tv_sec_hi, uint32_t tv_sec_lo,
-                                   uint32_t tv_nsec);
-void screencopy_frame_handle_failed(void *data,
-                                    struct zwlr_screencopy_frame_v1 *frame);
-void screencopy_destroy_buffer(struct swappy_buffer *buffer);
+void buffer_wayland_destroy(struct swappy_buffer *buffer);
 
 bool buffer_init_from_screencopy(struct swappy_state *state);
 bool buffer_init_from_file(struct swappy_state *state);
 
 bool buffer_parse_geometry(struct swappy_state *state);
+
+void buffer_free_all(struct swappy_state *state);
