@@ -10,6 +10,7 @@ void paint_free(gpointer data) {
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BRUSH:
       g_list_free_full(paint->content.brush.points, g_free);
+      g_free(paint);
       break;
     default:
       g_free(paint);
@@ -106,9 +107,10 @@ void paint_update_temporary(struct swappy_state *state, double x, double y) {
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+      paint->can_draw = true;  // all set
+
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
-      paint->can_draw = true;  // all set
       break;
     default:
       g_info("unable to update temporary paint: %d", paint->type);
