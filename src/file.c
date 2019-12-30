@@ -29,7 +29,12 @@ char *file_dump_stdin_into_a_temp_file() {
   }
 
   // Reopen stdin as binary mode
-  g_freopen(NULL, "rb", stdin);
+  FILE *input_file = g_freopen(NULL, "rb", stdin);
+
+  if (!input_file) {
+    g_warning("unable to reopen stdin in binary mode: %s", g_strerror(errno));
+    return NULL;
+  }
 
   const gchar *tempdir = g_get_tmp_dir();
   gchar filename[] = "swappy-stdin-XXXXXX.png";
@@ -46,7 +51,10 @@ char *file_dump_stdin_into_a_temp_file() {
   size_t count = 1;
   while (count > 0) {
     count = fread(buf, 1, sizeof(buf), stdin);
-    write(fd, &buf, count);
+    if (write(fd, &buf, count) == -1) {
+      g_warning("error while writing stdin to temporary file: %s - %s", ret,
+                g_strerror(errno));
+    }
   }
 
   g_close(fd, &error);
