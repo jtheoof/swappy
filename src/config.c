@@ -18,7 +18,7 @@ bool config_get_storage_path(struct swappy_state *state) {
     if (wordexp(storage_paths[i], &p, 0) == 0) {
       char *path = g_strdup(p.we_wordv[0]);
       wordfree(&p);
-      if (folder_exists(path)) {
+      if (path && folder_exists(path)) {
         g_info("storage path is: %s", path);
         state->storage_path = path;
         return true;

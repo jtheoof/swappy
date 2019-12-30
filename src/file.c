@@ -12,19 +12,11 @@
 #define BLOCK_SIZE 1024
 
 bool folder_exists(const char *path) {
-  struct stat sb;
-
-  stat(path, &sb);
-
-  return (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode));
+  return g_file_test(path, G_FILE_TEST_IS_DIR);
 }
 
 bool file_exists(const char *path) {
-  struct stat sb;
-
-  stat(path, &sb);
-
-  return (stat(path, &sb) == 0 && S_ISREG(sb.st_mode));
+  return g_file_test(path, G_FILE_TEST_EXISTS);
 }
 
 char *file_dump_stdin_into_a_temp_file() {
