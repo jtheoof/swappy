@@ -4,15 +4,14 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Build
-      run: |
-        sudo apt-get install python3-setuptools ninja-build libgtk-3-dev wayland-protocols
-        pkg-config --list-all
-        sudo pip3 install meson
-        meson build
-        ninja -C build
+      - uses: actions/checkout@v1
+      - name: Build
+        run: |
+          sudo apt-get install python3-setuptools ninja-build libgtk-3-dev wayland-protocols
+          pkg-config --list-all
+          sudo pip3 install meson
+          meson build
+          ninja -C build
