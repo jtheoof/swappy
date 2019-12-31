@@ -10,8 +10,9 @@ jobs:
       - uses: actions/checkout@v1
       - name: Build
         run: |
-          sudo apt-get install python3-setuptools ninja-build libgtk-3-dev wayland-protocols
+          sudo apt-get install -y python3-setuptools ninja-build libgtk-3-dev wayland-protocols clang-format clang-format-6.0
           pkg-config --list-all
           sudo pip3 install meson
+          ./script/run-clang-format -r src include res protocol
           meson build
           ninja -C build
