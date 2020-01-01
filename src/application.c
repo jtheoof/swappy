@@ -24,7 +24,7 @@ static void update_ui_undo_redo(struct swappy_state *state) {
 static void update_ui_stroke_size_widget(struct swappy_state *state) {
   GtkButton *button = GTK_BUTTON(state->ui->stroke_size);
   char label[255];
-  snprintf(label, 255, "%.0lf", state->painting.w);
+  snprintf(label, 255, "%.0lf", state->settings.w);
   gtk_button_set_label(button, label);
 }
 
@@ -67,10 +67,10 @@ static void action_toggle_painting_pane(struct swappy_state *state) {
 static void action_update_color_state(struct swappy_state *state, double r,
                                       double g, double b, double a,
                                       gboolean custom) {
-  state->painting.r = r;
-  state->painting.g = g;
-  state->painting.b = b;
-  state->painting.a = a;
+  state->settings.r = r;
+  state->settings.g = g;
+  state->settings.b = b;
+  state->settings.a = a;
 
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->color), custom);
 }
@@ -104,29 +104,29 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
-  guint step = state->painting.w <= 10 ? 1 : 5;
+  guint step = state->settings.w <= 10 ? 1 : 5;
 
-  state->painting.w -= step;
+  state->settings.w -= step;
 
-  if (state->painting.w < SWAPPY_STROKE_SIZE_MIN) {
-    state->painting.w = SWAPPY_STROKE_SIZE_MIN;
+  if (state->settings.w < SWAPPY_STROKE_SIZE_MIN) {
+    state->settings.w = SWAPPY_STROKE_SIZE_MIN;
   }
 
   update_ui_stroke_size_widget(state);
 }
 
 static void action_stroke_size_reset(struct swappy_state *state) {
-  state->painting.w = SWAPPY_STROKE_SIZE_DEFAULT;
+  state->settings.w = SWAPPY_STROKE_SIZE_DEFAULT;
 
   update_ui_stroke_size_widget(state);
 }
 
 static void action_stroke_size_increase(struct swappy_state *state) {
-  guint step = state->painting.w >= 10 ? 5 : 1;
-  state->painting.w += step;
+  guint step = state->settings.w >= 10 ? 5 : 1;
+  state->settings.w += step;
 
-  if (state->painting.w > SWAPPY_STROKE_SIZE_MAX) {
-    state->painting.w = SWAPPY_STROKE_SIZE_MAX;
+  if (state->settings.w > SWAPPY_STROKE_SIZE_MAX) {
+    state->settings.w = SWAPPY_STROKE_SIZE_MAX;
   }
 
   update_ui_stroke_size_widget(state);
@@ -615,11 +615,11 @@ bool application_init(struct swappy_state *state) {
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
 
-  state->painting.r = 1;
-  state->painting.g = 0;
-  state->painting.b = 0;
-  state->painting.a = 1;
-  state->painting.w = SWAPPY_STROKE_SIZE_DEFAULT;
+  state->settings.r = 1;
+  state->settings.g = 0;
+  state->settings.b = 0;
+  state->settings.a = 1;
+  state->settings.w = SWAPPY_STROKE_SIZE_DEFAULT;
 
   return true;
 }

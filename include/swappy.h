@@ -69,7 +69,7 @@ struct swappy_box {
   int32_t height;
 };
 
-struct swappy_state_painting {
+struct swappy_state_settings {
   double r;
   double g;
   double b;
@@ -167,7 +167,7 @@ struct swappy_state {
   GList *redo_paints;
   struct swappy_paint *temp_paint;
 
-  struct swappy_state_painting painting;
+  struct swappy_state_settings settings;
 
   int argc;
   char **argv;

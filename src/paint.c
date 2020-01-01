@@ -36,11 +36,11 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   struct swappy_paint *paint = g_new(struct swappy_paint, 1);
   struct swappy_point *brush;
 
-  double r = state->painting.r;
-  double g = state->painting.g;
-  double b = state->painting.b;
-  double a = state->painting.a;
-  double w = state->painting.w;
+  double r = state->settings.r;
+  double g = state->settings.g;
+  double b = state->settings.b;
+  double a = state->settings.a;
+  double w = state->settings.w;
 
   paint->type = type;
 
