@@ -23,6 +23,7 @@ if cc.get_id() == 'clang'
 endif
 
 cairo = dependency('cairo')
+pango = dependency('pango')
 math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
@@ -58,10 +59,12 @@ executable(
 		'src/paint.c',
 		'src/render.c',
 		'src/notification.c',
+		'src/util.c',
 		'src/wayland.c',
 	]),
 	dependencies: [
 		cairo,
+		pango,
 		client_protos,
 		gtk,
 		libnotify,

@@ -18,6 +18,8 @@
 
 #define SWAPPY_STROKE_SIZE_MIN 1
 #define SWAPPY_STROKE_SIZE_DEFAULT 5
+#define SWAPPY_TEXT_FONT_DEFAULT "serif"
+#define SWAPPY_TEXT_SIZE_DEFAULT 21
 #define SWAPPY_STROKE_SIZE_MAX 50
 
 enum swappy_paint_type {
@@ -28,9 +30,27 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
 };
 
+enum swappy_text_mode {
+  SWAPPY_TEXT_MODE_EDIT = 0,
+  SWAPPY_TEXT_MODE_DONE,
+};
+
 struct swappy_point {
   gdouble x;
   gdouble y;
+};
+
+struct swappy_paint_text {
+  double r;
+  double g;
+  double b;
+  double a;
+  double s;
+  gchar *text;
+  int cursor;
+  struct swappy_point from;
+  struct swappy_point to;
+  enum swappy_text_mode mode;
 };
 
 struct swappy_paint_shape {
@@ -59,6 +79,7 @@ struct swappy_paint {
   union {
     struct swappy_paint_brush brush;
     struct swappy_paint_shape shape;
+    struct swappy_paint_text text;
   } content;
 };
 
@@ -75,6 +96,7 @@ struct swappy_state_settings {
   double b;
   double a;
   double w;
+  double t;
 };
 
 struct swappy_state_ui {

@@ -212,6 +212,11 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
+  if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
+    paint_update_temporary_text(state, event);
+    render_state(state);
+    return;
+  }
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
       case GDK_KEY_c:
@@ -336,8 +341,10 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
       case SWAPPY_PAINT_MODE_RECTANGLE:
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
+      case SWAPPY_PAINT_MODE_TEXT:
         paint_add_temporary(state, event->x, event->y, state->mode);
         render_state(state);
+        update_ui_undo_redo(state);
         break;
       default:
         return;
@@ -346,6 +353,8 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
 }
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state) {
+  gdouble x = event->x;
+  gdouble y = event->y;
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = event->window;
   GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
@@ -359,7 +368,13 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
       if (is_button1_pressed) {
-        paint_update_temporary(state, event->x, event->y);
+        paint_update_temporary_shape(state, x, y);
+        render_state(state);
+      }
+      break;
+    case SWAPPY_PAINT_MODE_TEXT:
+      if (is_button1_pressed) {
+        paint_update_temporary_text_clip(state, x, y);
         render_state(state);
       }
       break;
@@ -383,6 +398,12 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
       paint_free_list(&state->redo_paints);
       render_state(state);
       update_ui_undo_redo(state);
+      break;
+    case SWAPPY_PAINT_MODE_TEXT:
+      if (state->temp_paint && !state->temp_paint->can_draw) {
+        paint_free(state->temp_paint);
+        state->temp_paint = NULL;
+      }
       break;
     default:
       return;
@@ -620,6 +641,7 @@ bool application_init(struct swappy_state *state) {
   state->settings.b = 0;
   state->settings.a = 1;
   state->settings.w = SWAPPY_STROKE_SIZE_DEFAULT;
+  state->settings.t = SWAPPY_TEXT_SIZE_DEFAULT;
 
   return true;
 }

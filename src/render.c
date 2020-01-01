@@ -1,11 +1,81 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include <pango/pangocairo.h>
 
 #include "swappy.h"
+#include "util.h"
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
 #endif
+
+#define RENDER_PANGO_FONT SWAPPY_TEXT_FONT_DEFAULT SWAPPY_TEXT_SIZE_DEFAULT
+
+#define pango_layout_t PangoLayout
+#define pango_font_description_t PangoFontDescription
+#define pango_rectangle_t PangoRectangle
+
+static void convert_pango_rectangle_to_swappy_box(pango_rectangle_t rectangle,
+                                                  struct swappy_box *box) {
+  if (!box) {
+    return;
+  }
+
+  box->x = (double)rectangle.x / PANGO_SCALE;
+  box->y = (double)rectangle.y / PANGO_SCALE;
+  box->width = (double)rectangle.width / PANGO_SCALE;
+  box->height = (double)rectangle.height / PANGO_SCALE;
+}
+
+static void render_text(cairo_t *cr, struct swappy_paint_text text) {
+  char pango_font[255];
+  double x = fmin(text.from.x, text.to.x);
+  double y = fmin(text.from.y, text.to.y);
+  double w = fabs(text.from.x - text.to.x);
+  double h = fabs(text.from.y - text.to.y);
+
+  cairo_surface_t *surface =
+      cairo_image_surface_create(CAIRO_FORMAT_ARGB32, w, h);
+  cairo_t *crt = cairo_create(surface);
+
+  pango_layout_t *layout = pango_cairo_create_layout(crt);
+  pango_layout_set_text(layout, text.text, -1);
+  snprintf(pango_font, 255, "%s %d", SWAPPY_TEXT_FONT_DEFAULT, (int)text.s);
+  pango_font_description_t *desc =
+      pango_font_description_from_string(pango_font);
+  pango_layout_set_width(layout, pango_units_from_double(w));
+  pango_layout_set_font_description(layout, desc);
+  pango_layout_set_wrap(layout, PANGO_WRAP_WORD_CHAR);
+  pango_font_description_free(desc);
+
+  if (text.mode == SWAPPY_TEXT_MODE_EDIT) {
+    pango_rectangle_t strong_pos;
+    pango_rectangle_t weak_pos;
+    struct swappy_box cursor_box;
+    cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
+    cairo_set_line_width(cr, 5);
+    cairo_rectangle(cr, x, y, w, h);
+    cairo_stroke(cr);
+    pango_layout_get_cursor_pos(layout, text.cursor, &strong_pos, &weak_pos);
+    convert_pango_rectangle_to_swappy_box(strong_pos, &cursor_box);
+    cairo_move_to(crt, cursor_box.x, cursor_box.y);
+    cairo_set_source_rgba(crt, 0.3, 0.3, 0.3, 1);
+    cairo_line_to(crt, cursor_box.x, cursor_box.y + cursor_box.height);
+    cairo_stroke(crt);
+  }
+
+  cairo_rectangle(crt, 0, 0, w, h);
+  cairo_set_source_rgba(crt, text.r, text.g, text.b, text.a);
+  cairo_move_to(crt, 0, 0);
+  pango_cairo_show_layout(crt, layout);
+
+  cairo_set_source_surface(cr, surface, x, y);
+  cairo_paint(cr);
+
+  cairo_destroy(crt);
+  cairo_surface_destroy(surface);
+  g_object_unref(layout);
+}
 
 static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
@@ -170,6 +240,9 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
       render_shape(cr, paint->content.shape);
+      break;
+    case SWAPPY_PAINT_MODE_TEXT:
+      render_text(cr, paint->content.text);
       break;
     default:
       g_info("unable to draw paint with type: %d", paint->type);

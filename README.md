@@ -95,6 +95,7 @@ Install dependencies:
 - meson
 - wayland
 - cairo
+- pango
 - gtk
 
 Optional dependencies:
