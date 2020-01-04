@@ -1,23 +1,7 @@
 {
-    "mesonbuild.configureOnOpen": true,
-    "files.associations": {
-        "swappy.h": "c",
-        "wayland.h": "c",
-        "gtk.h": "c",
-        "gdkevents.h": "c",
-        "glib.h": "c",
-        "notification.h": "c",
-        "stdbool.h": "c",
-        "box.h": "c",
-        "*.tcc": "c",
-        "memory_resource": "c",
-        "memory": "c",
-        "fstream": "c",
-        "istream": "c",
-        "ostream": "c",
-        "sstream": "c",
-        "streambuf": "c",
-        "clipboard.h": "c",
-        "buffer.h": "c"
-    }
+  "mesonbuild.configureOnOpen": true,
+  "files.associations": {
+    "*.h": "c",
+    "*.c": "c"
+  }
 }
