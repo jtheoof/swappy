@@ -2,6 +2,18 @@
 
 #include "util.h"
 
+static void cursor_move_backward(struct swappy_paint_text *text) {
+  if (text->cursor > 0) {
+    text->cursor--;
+  }
+}
+
+static void cursor_move_forward(struct swappy_paint_text *text) {
+  if (text->cursor < strlen(text->text)) {
+    text->cursor++;
+  }
+}
+
 void paint_free(gpointer data) {
   struct swappy_paint *paint = (struct swappy_paint *)data;
 
@@ -167,7 +179,7 @@ void paint_update_temporary_text(struct swappy_state *state,
     case GDK_KEY_BackSpace:
       if (strlen(text->text) > 0) {
         string_remove_at(text->text, text->cursor - 1);
-        text->cursor--;
+        cursor_move_backward(text);
       }
       break;
     case GDK_KEY_Delete:
@@ -176,10 +188,10 @@ void paint_update_temporary_text(struct swappy_state *state,
       }
       break;
     case GDK_KEY_Left:
-      text->cursor--;
+      cursor_move_backward(text);
       break;
     case GDK_KEY_Right:
-      text->cursor++;
+      cursor_move_forward(text);
       break;
     default:
       unicode = gdk_keyval_to_unicode(event->keyval);
@@ -187,7 +199,7 @@ void paint_update_temporary_text(struct swappy_state *state,
         int ll = g_unichar_to_utf8(unicode, buffer);
         buffer[ll] = '\0';
         g_debug("received unicode: %d - utf8: %s (%d)", unicode, buffer, ll);
-        g_debug("text before: %s - cursor: %d", text->text, text->cursor);
+        g_debug("text before: %s - cursor: %ld", text->text, text->cursor);
         char *new_text =
             string_insert_chars_at(text->text, buffer, text->cursor);
         g_free(text->text);
@@ -197,12 +209,7 @@ void paint_update_temporary_text(struct swappy_state *state,
       break;
   }
 
-  if (text->cursor < 0) {
-    text->cursor = 0;
-  } else if (text->cursor > (int)strlen(text->text)) {
-    text->cursor = (int)strlen(text->text);
-  }
-
+  g_debug("text->cursor: %ld", text->cursor);
   g_debug("text is now: %s", text->text);
 }
 
