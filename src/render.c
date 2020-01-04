@@ -52,7 +52,7 @@ static void render_text(cairo_t *cr, struct swappy_paint_text text) {
     pango_rectangle_t strong_pos;
     pango_rectangle_t weak_pos;
     struct swappy_box cursor_box;
-    cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
+    cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.3);
     cairo_set_line_width(cr, 5);
     cairo_rectangle(cr, x, y, w, h);
     cairo_stroke(cr);
