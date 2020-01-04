@@ -66,8 +66,8 @@
                 <property name="image">edit-redo</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="redo_clicked_handler" swapped="no"/>
-                <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                 <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+                <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -254,7 +254,7 @@
                       <object class="GtkRadioButton" id="brush">
                         <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">False</property>
@@ -270,7 +270,7 @@
                       <object class="GtkRadioButton" id="text">
                         <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">False</property>
                         <property name="group">brush</property>
@@ -286,7 +286,7 @@
                       <object class="GtkRadioButton" id="rectangle">
                         <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">False</property>
                         <property name="group">brush</property>
@@ -302,7 +302,7 @@
                       <object class="GtkRadioButton" id="ellipse">
                         <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">False</property>
                         <property name="group">brush</property>
@@ -318,7 +318,7 @@
                       <object class="GtkRadioButton" id="arrow">
                         <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">False</property>
                         <property name="group">brush</property>
@@ -356,7 +356,8 @@
                         <child>
                           <object class="GtkRadioButton" id="color-red-button">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
                             <property name="draw_indicator">False</property>
@@ -380,7 +381,8 @@
                         <child>
                           <object class="GtkRadioButton" id="color-green-button">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
                             <property name="draw_indicator">False</property>
@@ -405,7 +407,8 @@
                         <child>
                           <object class="GtkRadioButton" id="color-blue-button">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
                             <property name="draw_indicator">False</property>
@@ -446,7 +449,8 @@
                         <child>
                           <object class="GtkRadioButton" id="color-custom-button">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="focus_on_click">False</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
                             <property name="draw_indicator">False</property>
@@ -470,7 +474,7 @@
                           <object class="GtkColorButton" id="custom-color-button">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
                             <property name="receives_default">True</property>
                             <property name="valign">center</property>
                             <property name="title" translatable="yes"/>
@@ -518,7 +522,7 @@
                     <child>
                       <object class="GtkButton" id="minus-button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="image">zoom-out</property>
                         <property name="always_show_image">True</property>
@@ -533,7 +537,7 @@
                     <child>
                       <object class="GtkButton" id="stroke-size-button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="always_show_image">True</property>
                         <signal name="clicked" handler="stroke_size_reset_handler" swapped="no"/>
@@ -547,7 +551,7 @@
                     <child>
                       <object class="GtkButton" id="plus-button">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="image">zoom-in</property>
                         <property name="always_show_image">True</property>
