@@ -21,10 +21,10 @@ static void convert_pango_rectangle_to_swappy_box(pango_rectangle_t rectangle,
     return;
   }
 
-  box->x = (double)rectangle.x / PANGO_SCALE;
-  box->y = (double)rectangle.y / PANGO_SCALE;
-  box->width = (double)rectangle.width / PANGO_SCALE;
-  box->height = (double)rectangle.height / PANGO_SCALE;
+  box->x = pango_units_to_double(rectangle.x);
+  box->y = pango_units_to_double(rectangle.y);
+  box->width = pango_units_to_double(rectangle.width);
+  box->height = pango_units_to_double(rectangle.height);
 }
 
 static void render_text(cairo_t *cr, struct swappy_paint_text text) {
