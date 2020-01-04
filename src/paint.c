@@ -198,8 +198,6 @@ void paint_update_temporary_text(struct swappy_state *state,
       if (unicode != 0) {
         int ll = g_unichar_to_utf8(unicode, buffer);
         buffer[ll] = '\0';
-        g_debug("received unicode: %d - utf8: %s (%d)", unicode, buffer, ll);
-        g_debug("text before: %s - cursor: %ld", text->text, text->cursor);
         char *new_text =
             string_insert_chars_at(text->text, buffer, text->cursor);
         g_free(text->text);
@@ -208,9 +206,6 @@ void paint_update_temporary_text(struct swappy_state *state,
       }
       break;
   }
-
-  g_debug("text->cursor: %ld", text->cursor);
-  g_debug("text is now: %s", text->text);
 }
 
 void paint_update_temporary_text_clip(struct swappy_state *state, gdouble x,
