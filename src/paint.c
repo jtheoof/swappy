@@ -189,7 +189,7 @@ void paint_update_temporary_text(struct swappy_state *state,
         g_debug("received unicode: %d - utf8: %s (%d)", unicode, buffer, ll);
         g_debug("text before: %s - cursor: %d", text->text, text->cursor);
         char *new_text =
-            string_insert_char_at(text->text, buffer[0], text->cursor);
+            string_insert_chars_at(text->text, buffer, text->cursor);
         g_free(text->text);
         text->text = new_text;
         text->cursor++;
