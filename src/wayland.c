@@ -6,7 +6,6 @@
 
 #include "buffer.h"
 #include "swappy.h"
-#include "wlr-data-control-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 
 #ifdef HAVE_WAYLAND_PROTOCOLS
@@ -77,13 +76,6 @@ static const struct zxdg_output_v1_listener xdg_output_listener = {
 };
 #endif
 
-static void seat_capabilities(void *data, struct wl_seat *wl_seat,
-                              uint32_t capabilities) {}
-
-static void seat_name(void *data, struct wl_seat *wl_seat, const char *name) {
-  g_debug("received seat name: %s", name);
-}
-
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t physical_width,
                                    int32_t physical_height, int32_t subpixel,
@@ -124,16 +116,10 @@ static const struct wl_output_listener output_listener = {
     .scale = output_handle_scale,
 };
 
-static const struct wl_seat_listener seat_listener = {
-    .capabilities = seat_capabilities,
-    .name = seat_name,
-};
-
 static void global_registry_handler(void *data, struct wl_registry *registry,
                                     uint32_t name, const char *interface,
                                     uint32_t version) {
-  g_debug("got a registry event for interface: %s, name: %d, version: %d",
-          interface, name, version);
+  g_debug("got a registry event for interface: %s, name: %d", interface, name);
 
   struct swappy_state *state = data;
   bool bound = false;
@@ -155,23 +141,10 @@ static void global_registry_handler(void *data, struct wl_registry *registry,
     wl_output_add_listener(output->wl_output, &output_listener, output);
     wl_list_insert(&state->wl->outputs, &output->link);
     bound = true;
-  } else if (strcmp(interface, wl_seat_interface.name) == 0) {
-    struct swappy_wl_seat *seat = calloc(1, sizeof(struct swappy_wl_seat));
-    seat->state = state;
-    seat->wl_seat =
-        wl_registry_bind(registry, name, &wl_seat_interface, version);
-    wl_seat_add_listener(seat->wl_seat, &seat_listener, seat);
-    wl_list_insert(&state->wl->seats, &seat->link);
-    bound = true;
   } else if (strcmp(interface, zwlr_screencopy_manager_v1_interface.name) ==
              0) {
     state->wl->zwlr_screencopy_manager = wl_registry_bind(
         registry, name, &zwlr_screencopy_manager_v1_interface, version);
-    bound = true;
-  } else if (strcmp(interface, zwlr_data_control_manager_v1_interface.name) ==
-             0) {
-    state->wl->zwlr_data_control_manager = wl_registry_bind(
-        registry, name, &zwlr_data_control_manager_v1_interface, version);
     bound = true;
   } else {
 #ifdef HAVE_WAYLAND_PROTOCOLS
@@ -208,7 +181,6 @@ bool wayland_init(struct swappy_state *state) {
   }
 
   wl_list_init(&state->wl->outputs);
-  wl_list_init(&state->wl->seats);
   state->wl->registry = wl_display_get_registry(state->wl->display);
   wl_registry_add_listener(state->wl->registry, &registry_listener, state);
   wl_display_roundtrip(state->wl->display);
@@ -224,11 +196,6 @@ bool wayland_init(struct swappy_state *state) {
 
   if (wl_list_empty(&state->wl->outputs)) {
     g_warning("no wl_output found");
-    return false;
-  }
-
-  if (wl_list_empty(&state->wl->seats)) {
-    g_warning("no wl_seats found");
     return false;
   }
 
@@ -264,13 +231,8 @@ bool wayland_init(struct swappy_state *state) {
   }
 
   if (state->wl->zwlr_screencopy_manager == NULL) {
-    g_warning(
-        "compositor does not support zwlr_screencopy_v1, -g option will not "
-        "work");
-  } else if (state->wl->zwlr_data_control_manager == NULL) {
-    g_warning(
-        "compositor does not support zwlr_data_control_v1, copy will fallback "
-        "to gdk clipboard");
+    g_warning("compositor does not support zwlr_screencopy_v1");
+    return false;
   }
 
   return true;
@@ -279,8 +241,6 @@ bool wayland_init(struct swappy_state *state) {
 void wayland_finish(struct swappy_state *state) {
   struct swappy_output *output;
   struct swappy_output *output_tmp;
-  struct swappy_wl_seat *seat;
-  struct swappy_wl_seat *seat_tmp;
 
   if (!state->wl) {
     return;
@@ -302,22 +262,12 @@ void wayland_finish(struct swappy_state *state) {
     free(output);
   }
 
-  wl_list_for_each_safe(seat, seat_tmp, &state->wl->seats, link) {
-    wl_list_remove(&seat->link);
-    wl_seat_release(seat->wl_seat);
-    free(seat);
-  }
-
   if (state->wl->compositor != NULL) {
     wl_compositor_destroy(state->wl->compositor);
   }
 
   if (state->wl->zwlr_screencopy_manager != NULL) {
     zwlr_screencopy_manager_v1_destroy(state->wl->zwlr_screencopy_manager);
-  }
-
-  if (state->wl->zwlr_data_control_manager != NULL) {
-    zwlr_data_control_manager_v1_destroy(state->wl->zwlr_data_control_manager);
   }
 
 #ifdef HAVE_WAYLAND_PROTOCOLS

@@ -24,12 +24,10 @@ if wayland_protos.found()
 	client_protocols = [
 		[wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
 		[wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
-		['wlr-data-control-unstable-v1.xml'],
 		['wlr-screencopy-unstable-v1.xml'],
 	]
 else
 	client_protocols = [
-		['wlr-data-control-unstable-v1.xml'],
 		['wlr-screencopy-unstable-v1.xml'],
 	]
 endif
