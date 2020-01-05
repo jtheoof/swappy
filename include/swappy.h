@@ -10,6 +10,7 @@
 #include <xdg-output-unstable-v1-client-protocol.h>
 #endif
 
+#include "wlr-data-control-unstable-v1-client-protocol.h"
 #include "wlr-screencopy-unstable-v1-client-protocol.h"
 
 #define MAX_PATH 4096
@@ -132,6 +133,12 @@ struct swappy_buffer {
   enum wl_shm_format format;
 };
 
+struct swappy_wl_seat {
+  struct swappy_state *state;
+  struct wl_seat *wl_seat;
+  struct wl_list link;
+};
+
 struct swappy_output {
   struct swappy_state *state;
   struct swappy_box geometry;
@@ -159,7 +166,9 @@ struct swappy_wayland {
   struct wl_compositor *compositor;
   struct wl_shm *shm;
   struct wl_list outputs;
+  struct wl_list seats;
   struct zwlr_screencopy_manager_v1 *zwlr_screencopy_manager;
+  struct zwlr_data_control_manager_v1 *zwlr_data_control_manager;
   size_t n_done;
 #ifdef HAVE_WAYLAND_PROTOCOLS
   struct zxdg_output_manager_v1 *xdg_output_manager;
