@@ -301,6 +301,12 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
   }
 }
 
+gboolean window_delete_handler(GtkWidget *widget, GdkEvent *event,
+                               struct swappy_state *state) {
+  gtk_main_quit();
+  return FALSE;
+}
+
 void undo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_undo(state);
 }
