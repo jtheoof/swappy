@@ -51,3 +51,7 @@ void stroke_size_decrease_handler(GtkWidget *widget,
 void stroke_size_reset_handler(GtkWidget *widget, struct swappy_state *state);
 void stroke_size_increase_handler(GtkWidget *widget,
                                   struct swappy_state *state);
+
+void text_size_decrease_handler(GtkWidget *widget, struct swappy_state *state);
+void text_size_reset_handler(GtkWidget *widget, struct swappy_state *state);
+void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state);

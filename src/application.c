@@ -28,6 +28,13 @@ static void update_ui_stroke_size_widget(struct swappy_state *state) {
   gtk_button_set_label(button, label);
 }
 
+static void update_ui_text_size_widget(struct swappy_state *state) {
+  GtkButton *button = GTK_BUTTON(state->ui->text_size);
+  char label[255];
+  snprintf(label, 255, "%.0lf", state->settings.t);
+  gtk_button_set_label(button, label);
+}
+
 static void action_undo(struct swappy_state *state) {
   GList *first = state->paints;
 
@@ -130,6 +137,31 @@ static void action_stroke_size_increase(struct swappy_state *state) {
   }
 
   update_ui_stroke_size_widget(state);
+}
+
+static void action_text_size_decrease(struct swappy_state *state) {
+  guint step = state->settings.t <= 20 ? 1 : 5;
+  state->settings.t -= step;
+
+  if (state->settings.t < SWAPPY_TEXT_SIZE_MIN) {
+    state->settings.t = SWAPPY_TEXT_SIZE_MIN;
+  }
+
+  update_ui_text_size_widget(state);
+}
+static void action_text_size_reset(struct swappy_state *state) {
+  state->settings.t = SWAPPY_TEXT_SIZE_DEFAULT;
+  update_ui_text_size_widget(state);
+}
+static void action_text_size_increase(struct swappy_state *state) {
+  guint step = state->settings.t >= 20 ? 5 : 1;
+  state->settings.t += step;
+
+  if (state->settings.t > SWAPPY_TEXT_SIZE_MAX) {
+    state->settings.t = SWAPPY_TEXT_SIZE_MAX;
+  }
+
+  update_ui_text_size_widget(state);
 }
 
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -452,6 +484,16 @@ void stroke_size_increase_handler(GtkWidget *widget,
   action_stroke_size_increase(state);
 }
 
+void text_size_decrease_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_text_size_decrease(state);
+}
+void text_size_reset_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_text_size_reset(state);
+}
+void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_text_size_increase(state);
+}
+
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -520,6 +562,8 @@ static bool load_layout(struct swappy_state *state) {
 
   state->ui->stroke_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
+  state->ui->text_size =
+      GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
 
   gtk_widget_set_size_request(area, geometry->width, geometry->height);
 
@@ -553,6 +597,7 @@ static bool init_gtk_window(struct swappy_state *state) {
   }
 
   update_ui_stroke_size_widget(state);
+  update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
 
   return true;

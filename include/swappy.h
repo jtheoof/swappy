@@ -17,11 +17,14 @@
 
 #define GEOMETRY_PATTERN "xx,yy wwxhh"
 
-#define SWAPPY_STROKE_SIZE_MIN 1
 #define SWAPPY_STROKE_SIZE_DEFAULT 5
-#define SWAPPY_TEXT_FONT_DEFAULT "serif"
-#define SWAPPY_TEXT_SIZE_DEFAULT 21
+#define SWAPPY_STROKE_SIZE_MIN 1
 #define SWAPPY_STROKE_SIZE_MAX 50
+
+#define SWAPPY_TEXT_FONT_DEFAULT "serif"
+#define SWAPPY_TEXT_SIZE_DEFAULT 20
+#define SWAPPY_TEXT_SIZE_MIN 10
+#define SWAPPY_TEXT_SIZE_MAX 50
 
 enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
@@ -123,6 +126,7 @@ struct swappy_state_ui {
   GtkColorButton *color;
 
   GtkButton *stroke_size;
+  GtkButton *text_size;
 };
 
 struct swappy_buffer {
