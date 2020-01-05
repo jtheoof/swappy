@@ -174,6 +174,7 @@ bool wayland_init(struct swappy_state *state) {
   state->wl = g_new(struct swappy_wayland, 1);
 
   state->wl->display = wl_display_connect(NULL);
+  state->wl->n_done = 0;
   if (state->wl->display == NULL) {
     g_warning("cannot connect to wayland display");
     return false;
