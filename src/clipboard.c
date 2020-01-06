@@ -14,6 +14,7 @@ static gboolean send_pixbuf_to_wl_copy(gdk_pixbuf_t *pixbuf) {
   pid_t clipboard_process = 0;
   int pipefd[2];
   int status;
+  ssize_t written;
   gsize size;
   gchar *buffer = NULL;
   GError *error = NULL;
@@ -47,7 +48,13 @@ static gboolean send_pixbuf_to_wl_copy(gdk_pixbuf_t *pixbuf) {
     return false;
   }
 
-  write(pipefd[1], buffer, size);
+  written = write(pipefd[1], buffer, size);
+  if (written == -1) {
+    g_warning("unable to write to pipe fd for copy");
+    g_free(buffer);
+    return false;
+  }
+
   close(pipefd[1]);
   g_free(buffer);
   waitpid(clipboard_process, &status, 0);
