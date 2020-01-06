@@ -213,7 +213,7 @@ static void action_save_area_to_file(struct swappy_state *state) {
   c_time_string = ctime(&current_time);
   c_time_string[strlen(c_time_string) - 1] = '\0';
   char path[MAX_PATH];
-  snprintf(path, MAX_PATH, "%s/%s %s", state->storage_path, "Swappshot",
+  snprintf(path, MAX_PATH, "%s/%s %s.png", state->storage_path, "Swappshot",
            c_time_string);
   gdk_pixbuf_savev(pixbuf, path, "png", NULL, NULL, &error);
 
