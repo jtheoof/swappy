@@ -40,8 +40,6 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 
 ```sh
 grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | swappy -f -
-# Or
-swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)"
 ```
 
 ## Keyboard Shortcuts
@@ -95,8 +93,9 @@ Install dependencies:
 
 Optional dependencies:
 
-- wayland-protocols (for the `-g` option to work with [wlr-screencopy-unstable-v1] protocol).
-- libnotify (not get notified when swappshot is copied or saved).
+- wayland-protocols (for the `-g` option to work with [wlr-screencopy-unstable-v1] protocol)
+- wl-clipboard (to make sure the copy is saved if you close swappy)
+- libnotify (not get notified when swappshot is copied or saved)
 - scdoc to generate the man page
 
 Then run:
