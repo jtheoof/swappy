@@ -228,6 +228,7 @@ static void action_save_area_to_file(struct swappy_state *state) {
   snprintf(message, len, "%s%s", msg, path);
   notification_send("Swappy", message);
   g_free(message);
+  g_object_unref(pixbuf);
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
