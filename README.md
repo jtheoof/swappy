@@ -77,7 +77,7 @@ swappy -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .re
 
 ## Limitations
 
-- **Copy**: Copy to clipboard won't work if you close swappy (the content of the clipboard is lost). This because GTK 3.24 [has not implemented persistent storage](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4. For now, Paste your Swappshot where you want to before you close the app.
+- **Copy**: If you don't have [wl-clipboard] installed, copy to clipboard won't work if you close swappy (the content of the clipboard is lost). This because GTK 3.24 [has not implemented persistent storage on wayland backend yet](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4. For now, we use `wl-copy` if installed and revert to `gtk` clipboard if not found.
 
 ## Installation
 
@@ -118,4 +118,5 @@ MIT
 [slurp]: https://github.com/emersion/slurp
 [grim]: https://github.com/emersion/grim
 [sway]: https://github.com/swaywm/sway
+[wl-clipboard]: https://github.com/bugaevc/wl-clipboard
 [wlr-screencopy-unstable-v1]: https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-screencopy-unstable-v1.xml
