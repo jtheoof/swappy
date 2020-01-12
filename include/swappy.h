@@ -16,12 +16,9 @@
 
 #define GEOMETRY_PATTERN "xx,yy wwxhh"
 
-#define SWAPPY_STROKE_SIZE_DEFAULT 5
-#define SWAPPY_STROKE_SIZE_MIN 1
-#define SWAPPY_STROKE_SIZE_MAX 50
+#define SWAPPY_LINE_SIZE_MIN 1
+#define SWAPPY_LINE_SIZE_MAX 50
 
-#define SWAPPY_TEXT_FONT_DEFAULT "serif"
-#define SWAPPY_TEXT_SIZE_DEFAULT 20
 #define SWAPPY_TEXT_SIZE_MIN 10
 #define SWAPPY_TEXT_SIZE_MAX 50
 
@@ -49,6 +46,7 @@ struct swappy_paint_text {
   double b;
   double a;
   double s;
+  gchar *font;
   gchar *text;
   size_t cursor;
   struct swappy_point from;
@@ -124,7 +122,7 @@ struct swappy_state_ui {
   GtkRadioButton *custom;
   GtkColorButton *color;
 
-  GtkButton *stroke_size;
+  GtkButton *line_size;
   GtkButton *text_size;
 };
 
@@ -170,16 +168,23 @@ struct swappy_wayland {
 #endif
 };
 
+struct swappy_config {
+  char *config_file;
+  char *save_dir;
+  guint32 line_size;
+  guint32 text_size;
+  char *text_font;
+};
+
 struct swappy_state {
   GtkApplication *app;
 
   struct swappy_state_ui *ui;
+  struct swappy_config *config;
   struct swappy_wayland *wl;
 
   cairo_surface_t *cairo_surface;
   GList *patterns;  // List of cairo_pattern_t
-
-  char *storage_path;
 
   enum swappy_paint_type mode;
 

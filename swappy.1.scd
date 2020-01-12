@@ -13,13 +13,15 @@ swappy - grab and edit on the fly snapshots of a Wayland compositor
 swappy is a command-line utility to take and edit screenshots of Wayland
 desktops. It can also work on regular X11 desktops if using the *-f* option.
 
-swappy will save the swappshot images to a timestamped file name in
-*$XDG_DESKTOP_DIR*. If this variable is not set, it will revert to:
-*$XDG_CONFIG_HOME/Desktop*. If *$XDG_CONFIG_HOME* is not set, it will revert
-to: *$HOME/Desktop*.
-
 Can be used in two ways, either as the output of grim (recommended) or by
 grabbing the geometry (if the compositor supports the screencopy protocol).
+
+swappy will save the swappshot images to the config *save_dir*, see below.
+
+If absent, then if it will try to default to a *Desktop* folder following this
+pattern: *$XDG\_DESKTOP\_DIR*. If this variable is not set, it will revert to:
+*$XDG\_CONFIG\_HOME/Desktop*. If *$XDG\_CONFIG\_HOME* is not set, it will revert
+to: *$HOME/Desktop*.
 
 # OPTIONS
 
@@ -36,6 +38,31 @@ grabbing the geometry (if the compositor supports the screencopy protocol).
 
 	If set to *-*, read the file from standard input instead. This is grim
 	friendly.
+
+# CONFIG FILE
+
+The config file is located at *$XDG\_CONFIG\_HOME/swappy/config* or at
+*$HOME/.config/swappy/config*. The file follows the GLib *conf* format.
+
+```
+	[Section]
+	key=value
+```
+
+The following lines can be used as swappy's default:
+
+```
+	[Default]
+	save_dir=$HOME/Desktop
+	line_size=5
+	text_size=20
+	text_font=sans-serif
+```
+
+- *save_dir* is where swappshots will be saved, can contain env variables and must exist in your filesystem
+- *line_size* is the default line size (must be between 1 and 50)
+- *text_size* is the default text size (must be between 10 and 50)
+- *text_font* is the font used to render text, its format is pango friendly
 
 # KEY BINDINGS
 

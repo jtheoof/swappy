@@ -42,6 +42,27 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | swappy -f -
 ```
 
+## Config
+
+The config file is located at `$XDG_CONFIG_HOME/swappy/config` or at `$HOME/.config/swappy/config`.
+
+The file follows the GLib `conf` format. See the `man` page for details. There is example config file [here](example/config).
+
+The following lines can be used as swappy's default:
+
+```
+	[Default]
+	save_dir=$HOME/Desktop
+	line_size=5
+	text_size=20
+	text_font=sans-serif
+```
+
+- `save_dir` is where swappshots will be saved, can contain env variables and must exist in your filesystem
+- `line_size` is the default line size (must be between 1 and 50)
+- `text_size` is the default text size (must be between 10 and 50)
+- `text_font` is the font used to render text, its format is pango friendly
+
 ## Keyboard Shortcuts
 
 - `Ctrl+b`: Toggle Paint Panel

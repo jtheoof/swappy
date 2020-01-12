@@ -27,6 +27,7 @@ void paint_free(gpointer data) {
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       g_free(paint->content.text.text);
+      g_free(paint->content.text.font);
       break;
     default:
       break;
@@ -111,6 +112,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.text.b = b;
       paint->content.text.a = a;
       paint->content.text.s = t;
+      paint->content.text.font = g_strdup(state->config->text_font);
       paint->content.text.cursor = 0;
       paint->content.text.mode = SWAPPY_TEXT_MODE_EDIT;
       paint->content.text.text = g_new(gchar, 1);
