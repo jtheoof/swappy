@@ -11,11 +11,6 @@ int main(int argc, char *argv[]) {
   state.argv = argv;
   state.mode = SWAPPY_PAINT_MODE_BRUSH;
 
-  if (!config_get_storage_path(&state)) {
-    g_critical("could not find a valid pictures path in your env variables");
-    exit(1);
-  }
-
   if (!application_init(&state)) {
     g_critical("failed to initialize gtk application");
     exit(1);

@@ -5,6 +5,7 @@
 
 #include "buffer.h"
 #include "clipboard.h"
+#include "config.h"
 #include "file.h"
 #include "notification.h"
 #include "paint.h"
@@ -22,7 +23,7 @@ static void update_ui_undo_redo(struct swappy_state *state) {
 }
 
 static void update_ui_stroke_size_widget(struct swappy_state *state) {
-  GtkButton *button = GTK_BUTTON(state->ui->stroke_size);
+  GtkButton *button = GTK_BUTTON(state->ui->line_size);
   char label[255];
   snprintf(label, 255, "%.0lf", state->settings.w);
   gtk_button_set_label(button, label);
@@ -115,15 +116,15 @@ static void action_stroke_size_decrease(struct swappy_state *state) {
 
   state->settings.w -= step;
 
-  if (state->settings.w < SWAPPY_STROKE_SIZE_MIN) {
-    state->settings.w = SWAPPY_STROKE_SIZE_MIN;
+  if (state->settings.w < SWAPPY_LINE_SIZE_MIN) {
+    state->settings.w = SWAPPY_LINE_SIZE_MIN;
   }
 
   update_ui_stroke_size_widget(state);
 }
 
 static void action_stroke_size_reset(struct swappy_state *state) {
-  state->settings.w = SWAPPY_STROKE_SIZE_DEFAULT;
+  state->settings.w = state->config->line_size;
 
   update_ui_stroke_size_widget(state);
 }
@@ -132,8 +133,8 @@ static void action_stroke_size_increase(struct swappy_state *state) {
   guint step = state->settings.w >= 10 ? 5 : 1;
   state->settings.w += step;
 
-  if (state->settings.w > SWAPPY_STROKE_SIZE_MAX) {
-    state->settings.w = SWAPPY_STROKE_SIZE_MAX;
+  if (state->settings.w > SWAPPY_LINE_SIZE_MAX) {
+    state->settings.w = SWAPPY_LINE_SIZE_MAX;
   }
 
   update_ui_stroke_size_widget(state);
@@ -150,7 +151,7 @@ static void action_text_size_decrease(struct swappy_state *state) {
   update_ui_text_size_widget(state);
 }
 static void action_text_size_reset(struct swappy_state *state) {
-  state->settings.t = SWAPPY_TEXT_SIZE_DEFAULT;
+  state->settings.t = state->config->text_size;
   update_ui_text_size_widget(state);
 }
 static void action_text_size_increase(struct swappy_state *state) {
@@ -188,7 +189,6 @@ void application_finish(struct swappy_state *state) {
   paint_free_all(state);
   buffer_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
-  g_free(state->storage_path);
   g_free(state->file_str);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -196,6 +196,7 @@ void application_finish(struct swappy_state *state) {
   g_object_unref(state->app);
 
   wayland_finish(state);
+  config_free(state);
 }
 
 static void action_save_area_to_file(struct swappy_state *state) {
@@ -213,7 +214,7 @@ static void action_save_area_to_file(struct swappy_state *state) {
   c_time_string = ctime(&current_time);
   c_time_string[strlen(c_time_string) - 1] = '\0';
   char path[MAX_PATH];
-  snprintf(path, MAX_PATH, "%s/%s %s.png", state->storage_path, "Swappshot",
+  snprintf(path, MAX_PATH, "%s/%s %s.png", state->config->save_dir, "Swappshot",
            c_time_string);
   gdk_pixbuf_savev(pixbuf, path, "png", NULL, NULL, &error);
 
@@ -561,7 +562,7 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->color =
       GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
-  state->ui->stroke_size =
+  state->ui->line_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
@@ -616,9 +617,21 @@ static gboolean is_file_from_stdin(const char *file) {
   return (strcmp(file, "-") == 0);
 }
 
+static void init_settings(struct swappy_state *state) {
+  state->settings.r = 1;
+  state->settings.g = 0;
+  state->settings.b = 0;
+  state->settings.a = 1;
+  state->settings.w = state->config->line_size;
+  state->settings.t = state->config->text_size;
+}
+
 static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
+  config_load(state);
+  init_settings(state);
+
   if (!wayland_init(state)) {
     g_warning(
         "error while initializing wayland objects, can only be used in file "
@@ -687,13 +700,6 @@ bool application_init(struct swappy_state *state) {
 
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
-
-  state->settings.r = 1;
-  state->settings.g = 0;
-  state->settings.b = 0;
-  state->settings.a = 1;
-  state->settings.w = SWAPPY_STROKE_SIZE_DEFAULT;
-  state->settings.t = SWAPPY_TEXT_SIZE_DEFAULT;
 
   return true;
 }
