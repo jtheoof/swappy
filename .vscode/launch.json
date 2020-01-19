@@ -53,6 +53,30 @@
       ]
     },
     {
+      "name": "swappy - file & stdout",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/swappy",
+      "args": ["-f", "docs/images/screenshot.png", "-o", "-"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "G_MESSAGES_DEBUG",
+          "value": "all"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
       "name": "swappy - stdin",
       "type": "cppdbg",
       "request": "launch",

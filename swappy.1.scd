@@ -39,6 +39,14 @@ to: *$HOME/Desktop*.
 	If set to *-*, read the file from standard input instead. This is grim
 	friendly.
 
+*-o, --output-file <file>*
+	Print the final surface to *<file>* when exiting the application.
+	
+	If set to *-*, prints the final surface to *stdout*.
+
+	Note that the *Save* button will save the image to the config *save_dir*
+	parameter, as described in the SYNOPSIS section.
+
 # CONFIG FILE
 
 The config file is located at *$XDG\_CONFIG\_HOME/swappy/config* or at
@@ -93,7 +101,7 @@ The following lines can be used as swappy's default:
 - *Ctrl+Shift+z* or *Ctrl+y*: Redo
 - *Ctrl+s*: Save to file (see man page)
 - *Ctrl+c*: Copy to clipboard
-- *Escape* or *q*: Quit swappy
+- *Escape* or *q* or *Ctrl+w*: Quit swappy
 
 # AUTHORS
 
