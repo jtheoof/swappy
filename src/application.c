@@ -682,7 +682,7 @@ bool application_init(struct swappy_state *state) {
           .short_name = 'f',
           .arg = G_OPTION_ARG_STRING,
           .arg_data = &state->file_str,
-          .description = "Load a file at a specific path.",
+          .description = "Load a file at a specific path",
       },
       {NULL}};
 
