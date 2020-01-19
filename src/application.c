@@ -166,6 +166,19 @@ static void action_text_size_increase(struct swappy_state *state) {
   update_ui_text_size_widget(state);
 }
 
+static void save_state_to_file_or_folder(struct swappy_state *state,
+                                         char *file) {
+  GdkPixbuf *pixbuf = pixbuf_get_from_state(state);
+
+  if (file == NULL) {
+    pixbuf_save_state_to_folder(pixbuf, state->config->save_dir);
+  } else {
+    pixbuf_save_to_file(pixbuf, file);
+  }
+
+  g_object_unref(pixbuf);
+}
+
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_brush(state);
 }
@@ -187,6 +200,9 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 }
 
 void application_finish(struct swappy_state *state) {
+  if (state->output_file != NULL) {
+    save_state_to_file_or_folder(state, state->output_file);
+  }
   paint_free_all(state);
   buffer_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
@@ -201,7 +217,7 @@ void application_finish(struct swappy_state *state) {
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
-  pixbuf_save_to_file(state);
+  save_state_to_file_or_folder(state, NULL);
 }
 
 void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -225,10 +241,13 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         clipboard_copy_drawing_area_to_selection(state);
         break;
       case GDK_KEY_s:
-        pixbuf_save_to_file(state);
+        save_state_to_file_or_folder(state, NULL);
         break;
       case GDK_KEY_b:
         action_toggle_painting_pane(state);
+        break;
+      case GDK_KEY_w:
+        gtk_main_quit();
         break;
       case GDK_KEY_z:
         action_undo(state);
@@ -651,6 +670,14 @@ bool application_init(struct swappy_state *state) {
           .arg = G_OPTION_ARG_STRING,
           .arg_data = &state->file_str,
           .description = "Load a file at a specific path",
+      },
+      {
+          .long_name = "output-file",
+          .short_name = 'o',
+          .arg = G_OPTION_ARG_STRING,
+          .arg_data = &state->output_file,
+          .description = "Print the final surface to the given file when "
+                         "exiting, use - to print to stdout",
       },
       {NULL}};
 

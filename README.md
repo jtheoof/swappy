@@ -36,6 +36,12 @@ Select a region and swappshot it:
 swappy -g "$(slurp)"
 ```
 
+Print final surface to stdout (useful to pipe with other tools):
+
+```sh
+grim -g "$(slurp)" - | swappy -f - -o - | pngquant -
+```
+
 Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 
 ```sh
@@ -92,7 +98,7 @@ The following lines can be used as swappy's default:
 - `Ctrl+Shift+z` or `Ctrl+y`: Redo
 - `Ctrl+s`: Save to file (see man page)
 - `Ctrl+c`: Copy to clipboard
-- `Escape` or `q`: Quit swappy
+- `Escape` or `q` or `Ctrl+w`: Quit swappy
 
 ## Limitations
 
