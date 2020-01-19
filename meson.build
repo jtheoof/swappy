@@ -57,6 +57,7 @@ executable(
 		'src/clipboard.c',
 		'src/file.c',
 		'src/paint.c',
+		'src/pixbuf.c',
 		'src/render.c',
 		'src/notification.c',
 		'src/util.c',
