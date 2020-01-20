@@ -10,6 +10,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Build
         run: |
+          sudo apt-get update
           sudo apt-get install python3-setuptools ninja-build libgtk-3-dev wayland-protocols
           pkg-config --list-all
           sudo pip3 install meson
