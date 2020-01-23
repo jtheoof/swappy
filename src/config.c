@@ -184,9 +184,11 @@ void config_load(struct swappy_state *state) {
 }
 
 void config_free(struct swappy_state *state) {
-  g_free(state->config->config_file);
-  g_free(state->config->save_dir);
-  g_free(state->config->text_font);
-  g_free(state->config);
-  state->config = NULL;
+  if (state->config) {
+    g_free(state->config->config_file);
+    g_free(state->config->save_dir);
+    g_free(state->config->text_font);
+    g_free(state->config);
+    state->config = NULL;
+  }
 }
