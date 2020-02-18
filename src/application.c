@@ -179,6 +179,13 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
   g_object_unref(pixbuf);
 }
 
+void on_destroy(GtkApplication *application, gpointer data) {
+  struct swappy_state *state = (struct swappy_state *)data;
+  if (state->output_file != NULL) {
+    save_state_to_file_or_folder(state, state->output_file);
+  }
+}
+
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_brush(state);
 }
@@ -200,9 +207,6 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 }
 
 void application_finish(struct swappy_state *state) {
-  if (state->output_file != NULL) {
-    save_state_to_file_or_folder(state, state->output_file);
-  }
   paint_free_all(state);
   buffer_free_all(state);
   cairo_surface_destroy(state->cairo_surface);
@@ -518,6 +522,8 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWindow *window =
       GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
+
+  g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 
   state->ui->undo = GTK_BUTTON(gtk_builder_get_object(builder, "undo-button"));
   state->ui->redo = GTK_BUTTON(gtk_builder_get_object(builder, "redo-button"));
