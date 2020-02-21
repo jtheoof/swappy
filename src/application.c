@@ -179,11 +179,15 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
   g_object_unref(pixbuf);
 }
 
-void on_destroy(GtkApplication *application, gpointer data) {
-  struct swappy_state *state = (struct swappy_state *)data;
+static void maybe_save_output_file(struct swappy_state *state) {
   if (state->output_file != NULL) {
     save_state_to_file_or_folder(state, state->output_file);
   }
+}
+
+void on_destroy(GtkApplication *application, gpointer data) {
+  struct swappy_state *state = (struct swappy_state *)data;
+  maybe_save_output_file(state);
 }
 
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -267,6 +271,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
     switch (event->keyval) {
       case GDK_KEY_Escape:
       case GDK_KEY_q:
+        maybe_save_output_file(state);
         gtk_main_quit();
         break;
       case GDK_KEY_b:
