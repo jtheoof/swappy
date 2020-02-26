@@ -113,6 +113,7 @@ The following lines can be used as swappy's default:
 Install dependencies:
 
 - meson
+- ninja
 - wayland
 - cairo
 - pango
