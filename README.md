@@ -110,7 +110,7 @@ The following lines can be used as swappy's default:
 
 ## Building from source
 
-Install dependencies:
+Install dependencies (on Arch, name can vary for other distros):
 
 - meson
 - ninja
@@ -118,13 +118,14 @@ Install dependencies:
 - cairo
 - pango
 - gtk
+- glib2
+- scdoc
 
 Optional dependencies:
 
 - wayland-protocols (for the `-g` option to work with [wlr-screencopy-unstable-v1] protocol)
 - wl-clipboard (to make sure the copy is saved if you close swappy)
 - libnotify (not get notified when swappshot is copied or saved)
-- scdoc to generate the man page
 
 Then run:
 
