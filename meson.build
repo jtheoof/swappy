@@ -27,6 +27,7 @@ pango = dependency('pango')
 math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
+gio = cc.find_library('gio-2.0')
 wayland_client = dependency('wayland-client')
 wayland_cursor = dependency('wayland-cursor')
 wayland_protos = dependency('wayland-protocols', version: '>=1.14', required: false)
@@ -67,6 +68,7 @@ executable(
 		cairo,
 		pango,
 		client_protos,
+		gio,
 		gtk,
 		libnotify,
 		math,
