@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "box.h"
 #include "wayland.h"
