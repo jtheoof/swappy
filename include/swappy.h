@@ -193,6 +193,7 @@ struct swappy_state {
   char *file_str;
   char *output_file;
 
+  struct swappy_box *window;
   struct swappy_box *geometry;
 
   GList *paints;
