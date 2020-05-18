@@ -268,6 +268,8 @@ bool buffer_init_from_file(struct swappy_state *state) {
   geometry->width = (int32_t)width;
   geometry->height = (int32_t)height;
 
+  g_info("size of image: %dx%d", width, height);
+
   state->geometry = geometry;
 
   cairo_pattern_t *output_pattern = cairo_pattern_create_for_surface(surface);

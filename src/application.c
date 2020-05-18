@@ -217,6 +217,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->file_str);
   g_free(state->geometry_str);
   g_free(state->geometry);
+  g_free(state->window);
   g_free(state->ui);
   g_object_unref(state->app);
 
@@ -492,6 +493,36 @@ void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
   action_text_size_increase(state);
 }
 
+static void compute_window_size(struct swappy_state *state) {
+  GdkRectangle workarea = {0};
+  GdkDisplay *display = gdk_display_get_default();
+  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
+  GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
+  gdk_monitor_get_workarea(monitor, &workarea);
+  g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
+  g_assert(workarea.width > 0);
+  g_assert(workarea.height > 0);
+
+  state->window = g_new(struct swappy_box, 1);
+  state->window->x = workarea.x;
+  state->window->y = workarea.y;
+
+  double threshold = 0.75;
+  double scaling = 1.0;
+
+  if (state->geometry->width > workarea.width * threshold) {
+    scaling = workarea.width * threshold / state->geometry->width;
+  } else if (state->geometry->height > workarea.height * threshold) {
+    scaling = workarea.height * threshold / state->geometry->height;
+  }
+
+  state->window->width = state->geometry->width * scaling;
+  state->window->height = state->geometry->height * scaling;
+
+  g_info("size of window to render: %ux%u", state->window->width,
+         state->window->height);
+}
+
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -511,7 +542,6 @@ static bool load_css(struct swappy_state *state) {
 }
 
 static bool load_layout(struct swappy_state *state) {
-  struct swappy_box *geometry = state->geometry;
   GError *error = NULL;
 
   /* Construct a GtkBuilder instance and load our UI description */
@@ -565,8 +595,6 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
 
-  gtk_widget_set_size_request(area, geometry->width, geometry->height);
-
   state->ui->brush = brush;
   state->ui->text = text;
   state->ui->rectangle = rectangle;
@@ -574,6 +602,11 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->arrow = arrow;
   state->ui->area = area;
   state->ui->window = window;
+
+  compute_window_size(state);
+
+  gtk_widget_set_size_request(area, state->window->width,
+                              state->window->height);
 
   g_object_unref(G_OBJECT(builder));
 

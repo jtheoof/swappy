@@ -193,13 +193,20 @@ static void render_buffers(cairo_t *cr, struct swappy_state *state) {
     return;
   }
 
-  cairo_paint(cr);
+  cairo_save(cr);
+
+  double sx = (double)state->window->width / state->geometry->width;
+  double sy = (double)state->window->height / state->geometry->height;
+
+  cairo_scale(cr, sx, sy);
 
   for (GList *elem = state->patterns; elem; elem = elem->prev) {
     cairo_pattern_t *pattern = elem->data;
     cairo_set_source(cr, pattern);
     cairo_paint(cr);
   }
+
+  cairo_restore(cr);
 }
 
 static void render_background(cairo_t *cr) {
