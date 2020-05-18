@@ -581,8 +581,6 @@ static bool load_layout(struct swappy_state *state) {
 }
 
 static bool init_gtk_window(struct swappy_state *state) {
-  g_info("activating application ----------");
-
   if (!state->geometry) {
     g_critical("no geometry found, did you use -f or -g option?");
     return false;
