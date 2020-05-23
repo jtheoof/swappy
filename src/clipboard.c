@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "notification.h"
+#include "pixbuf.h"
 #include "util.h"
 
 #define gtk_clipboard_t GtkClipboard
@@ -73,10 +74,7 @@ static void send_pixbuf_to_gdk_clipboard(gdk_pixbuf_t *pixbuf) {
 }
 
 bool clipboard_copy_drawing_area_to_selection(struct swappy_state *state) {
-  int width = gtk_widget_get_allocated_width(state->ui->area);
-  int height = gtk_widget_get_allocated_height(state->ui->area);
-  gdk_pixbuf_t *pixbuf =
-      gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
+  gdk_pixbuf_t *pixbuf = pixbuf_get_from_state(state);
 
   // Try `wl-copy` first and fall back to gtk function. See README.md.
   if (!send_pixbuf_to_wl_copy(pixbuf)) {
