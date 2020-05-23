@@ -1,12 +1,13 @@
 #include "pixbuf.h"
 
+#include <cairo/cairo.h>
 #include <gio/gunixoutputstream.h>
 
 #include "notification.h"
 
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
-  guint width = gtk_widget_get_allocated_width(state->ui->area);
-  guint height = gtk_widget_get_allocated_height(state->ui->area);
+  guint width = cairo_image_surface_get_width(state->cairo_surface);
+  guint height = cairo_image_surface_get_height(state->cairo_surface);
   GdkPixbuf *pixbuf =
       gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
 
