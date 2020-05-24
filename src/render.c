@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include <math.h>
 #include <pango/pangocairo.h>
 
 #include "swappy.h"
@@ -105,11 +106,7 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
     return;
   }
 
-  double theta = atan(fty / ftx);
-
-  if (ftx < DBL_EPSILON) {
-    theta = M_PI + theta;
-  }
+  double theta = copysign(1.0, fty) * acos(ftx / ftn);
 
   // Draw line
   cairo_save(cr);
