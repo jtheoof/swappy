@@ -9,7 +9,15 @@
       "intelliSenseMode": "clang-x64",
       "compileCommands": "${workspaceFolder}/build/compile_commands.json",
       "compilerArgs": ["build"],
-      "includePath": []
+      "includePath": [
+        "/usr/include/cairo/",
+        "/usr/include/gdk-pixbuf-2.0/",
+        "/usr/include/gio-unix-2.0/",
+        "/usr/include/glib-2.0/",
+        "/usr/include/gtk-3.0/",
+        "/usr/include/pango-1.0/",
+        "/usr/lib/clang/10.0.0/include/"
+      ]
     }
   ],
   "version": 4
