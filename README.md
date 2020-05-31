@@ -80,6 +80,7 @@ The following lines can be used as swappy's default:
 - `r`: Switch to Rectangle
 - `o`: Switch to Ellipse
 - `a`: Switch to Arrow
+- `d`: Switch to Blur (`d` stands for droplet)
 
 <hr>
 

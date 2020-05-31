@@ -19,6 +19,9 @@
 #define SWAPPY_LINE_SIZE_MIN 1
 #define SWAPPY_LINE_SIZE_MAX 50
 
+#define SWAPPY_BLUR_RADIUS_MIN 1
+#define SWAPPY_BLUR_RADIUS_MAX 50
+
 #define SWAPPY_TEXT_SIZE_MIN 10
 #define SWAPPY_TEXT_SIZE_MAX 50
 
@@ -28,6 +31,7 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
   SWAPPY_PAINT_MODE_ELLIPSE,   /* Ellipse shapes */
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
+  SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
 };
 
 enum swappy_text_mode {
@@ -74,6 +78,11 @@ struct swappy_paint_brush {
   GList *points;
 };
 
+struct swappy_paint_blur {
+  double radius;
+  GList *points;
+};
+
 struct swappy_paint {
   enum swappy_paint_type type;
   bool can_draw;
@@ -81,6 +90,7 @@ struct swappy_paint {
     struct swappy_paint_brush brush;
     struct swappy_paint_shape shape;
     struct swappy_paint_text text;
+    struct swappy_paint_blur blur;
   } content;
 };
 
@@ -98,6 +108,7 @@ struct swappy_state_settings {
   double a;
   double w;
   double t;
+  guint32 blur_radius;
 };
 
 struct swappy_state_ui {
@@ -115,6 +126,7 @@ struct swappy_state_ui {
   GtkRadioButton *rectangle;
   GtkRadioButton *ellipse;
   GtkRadioButton *arrow;
+  GtkRadioButton *blur;
 
   GtkRadioButton *red;
   GtkRadioButton *green;
@@ -122,6 +134,7 @@ struct swappy_state_ui {
   GtkRadioButton *custom;
   GtkColorButton *color;
 
+  GtkButton *blur_radius;
   GtkButton *line_size;
   GtkButton *text_size;
 };
@@ -173,6 +186,7 @@ struct swappy_config {
   char *save_dir;
   guint32 line_size;
   guint32 text_size;
+  guint32 blur_radius;
   char *text_font;
 };
 

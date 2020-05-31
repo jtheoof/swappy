@@ -23,6 +23,13 @@ static void update_ui_undo_redo(struct swappy_state *state) {
   gtk_widget_set_sensitive(redo, redo_sensitive);
 }
 
+static void update_ui_blur_radius_widget(struct swappy_state *state) {
+  GtkButton *button = GTK_BUTTON(state->ui->blur_radius);
+  char label[255];
+  snprintf(label, 255, "%u", state->settings.blur_radius);
+  gtk_button_set_label(button, label);
+}
+
 static void update_ui_stroke_size_widget(struct swappy_state *state) {
   GtkButton *button = GTK_BUTTON(state->ui->line_size);
   char label[255];
@@ -110,6 +117,37 @@ static void switch_mode_to_ellipse(struct swappy_state *state) {
 
 static void switch_mode_to_arrow(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ARROW;
+}
+
+static void switch_mode_to_blur(struct swappy_state *state) {
+  state->mode = SWAPPY_PAINT_MODE_BLUR;
+}
+
+static void action_blur_radius_decrease(struct swappy_state *state) {
+  guint step = state->settings.blur_radius <= 10 ? 1 : 5;
+
+  state->settings.blur_radius -= step;
+
+  if (state->settings.blur_radius < SWAPPY_BLUR_RADIUS_MIN) {
+    state->settings.blur_radius = SWAPPY_BLUR_RADIUS_MIN;
+  }
+
+  update_ui_blur_radius_widget(state);
+}
+static void action_blur_radius_increase(struct swappy_state *state) {
+  guint step = state->settings.blur_radius >= 10 ? 5 : 1;
+  state->settings.blur_radius += step;
+
+  if (state->settings.blur_radius > SWAPPY_BLUR_RADIUS_MAX) {
+    state->settings.blur_radius = SWAPPY_BLUR_RADIUS_MAX;
+  }
+
+  update_ui_blur_radius_widget(state);
+}
+static void action_blur_radius_reset(struct swappy_state *state) {
+  state->settings.blur_radius = state->config->blur_radius;
+
+  update_ui_blur_radius_widget(state);
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
@@ -210,6 +248,10 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_arrow(state);
 }
 
+void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_blur(state);
+}
+
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
   buffer_free_all(state);
@@ -297,6 +339,10 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         switch_mode_to_arrow(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
         break;
+      case GDK_KEY_d:
+        switch_mode_to_blur(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+        break;
       case GDK_KEY_k:
         action_clear(state);
         break;
@@ -374,6 +420,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
   if (event->button == 1) {
     switch (state->mode) {
+      case SWAPPY_PAINT_MODE_BLUR:
       case SWAPPY_PAINT_MODE_BRUSH:
       case SWAPPY_PAINT_MODE_RECTANGLE:
       case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -400,6 +447,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
   gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
 
   switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BLUR:
     case SWAPPY_PAINT_MODE_BRUSH:
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -427,6 +475,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
   }
 
   switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BLUR:
     case SWAPPY_PAINT_MODE_BRUSH:
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -445,6 +494,19 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
     default:
       return;
   }
+}
+
+void blur_radius_decrease_handler(GtkWidget *widget,
+                                  struct swappy_state *state) {
+  action_blur_radius_decrease(state);
+}
+
+void blur_radius_increase_handler(GtkWidget *widget,
+                                  struct swappy_state *state) {
+  action_blur_radius_increase(state);
+}
+void blur_radius_reset_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_blur_radius_reset(state);
 }
 
 void color_red_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -578,6 +640,8 @@ static bool load_layout(struct swappy_state *state) {
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "ellipse"));
   GtkRadioButton *arrow =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
+  GtkRadioButton *blur =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "blur"));
 
   state->ui->red =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-red-button"));
@@ -590,6 +654,8 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->color =
       GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
+  state->ui->blur_radius =
+      GTK_BUTTON(gtk_builder_get_object(builder, "blur-radius-button"));
   state->ui->line_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
   state->ui->text_size =
@@ -600,6 +666,7 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->rectangle = rectangle;
   state->ui->ellipse = ellipse;
   state->ui->arrow = arrow;
+  state->ui->blur = blur;
   state->ui->area = area;
   state->ui->window = window;
 
@@ -627,6 +694,7 @@ static bool init_gtk_window(struct swappy_state *state) {
     return false;
   }
 
+  update_ui_blur_radius_widget(state);
   update_ui_stroke_size_widget(state);
   update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
@@ -653,6 +721,7 @@ static void init_settings(struct swappy_state *state) {
   state->settings.a = 1;
   state->settings.w = state->config->line_size;
   state->settings.t = state->config->text_size;
+  state->settings.blur_radius = state->config->blur_radius;
 }
 
 static gint command_line_handler(GtkApplication *app,

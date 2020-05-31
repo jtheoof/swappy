@@ -22,6 +22,9 @@ void paint_free(gpointer data) {
   }
 
   switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BLUR:
+      g_list_free_full(paint->content.blur.points, g_free);
+      break;
     case SWAPPY_PAINT_MODE_BRUSH:
       g_list_free_full(paint->content.brush.points, g_free);
       break;
@@ -52,7 +55,7 @@ void paint_free_all(struct swappy_state *state) {
 void paint_add_temporary(struct swappy_state *state, double x, double y,
                          enum swappy_paint_type type) {
   struct swappy_paint *paint = g_new(struct swappy_paint, 1);
-  struct swappy_point *brush;
+  struct swappy_point *point;
 
   double r = state->settings.r;
   double g = state->settings.g;
@@ -73,6 +76,16 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   }
 
   switch (type) {
+    case SWAPPY_PAINT_MODE_BLUR:
+      paint->can_draw = true;
+
+      paint->content.blur.radius = state->settings.blur_radius;
+      point = g_new(struct swappy_point, 1);
+      point->x = x;
+      point->y = y;
+
+      paint->content.blur.points = g_list_prepend(NULL, point);
+      break;
     case SWAPPY_PAINT_MODE_BRUSH:
       paint->can_draw = true;
 
@@ -82,11 +95,11 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.brush.a = a;
       paint->content.brush.w = w;
 
-      brush = g_new(struct swappy_point, 1);
-      brush->x = x;
-      brush->y = y;
+      point = g_new(struct swappy_point, 1);
+      point->x = x;
+      point->y = y;
 
-      paint->content.brush.points = g_list_prepend(NULL, brush);
+      paint->content.brush.points = g_list_prepend(NULL, point);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
@@ -130,7 +143,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 void paint_update_temporary_shape(struct swappy_state *state, double x,
                                   double y) {
   struct swappy_paint *paint = state->temp_paint;
-  struct swappy_point *brush;
+  struct swappy_point *point;
   GList *points;
 
   if (!paint) {
@@ -138,13 +151,21 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
   }
 
   switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BLUR:
+      points = paint->content.blur.points;
+      point = g_new(struct swappy_point, 1);
+      point->x = x;
+      point->y = y;
+
+      paint->content.blur.points = g_list_prepend(points, point);
+      break;
     case SWAPPY_PAINT_MODE_BRUSH:
       points = paint->content.brush.points;
-      brush = g_new(struct swappy_point, 1);
-      brush->x = x;
-      brush->y = y;
+      point = g_new(struct swappy_point, 1);
+      point->x = x;
+      point->y = y;
 
-      paint->content.brush.points = g_list_prepend(points, brush);
+      paint->content.brush.points = g_list_prepend(points, point);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
