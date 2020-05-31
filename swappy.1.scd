@@ -62,12 +62,14 @@ The following lines can be used as swappy's default:
 ```
 	[Default]
 	save_dir=$HOME/Desktop
+	blur_radius=15
 	line_size=5
 	text_size=20
 	text_font=sans-serif
 ```
 
 - *save_dir* is where swappshots will be saved, can contain env variables and must exist in your filesystem
+- *blur_raidus* is the default blur radius (must be between 1 and 50)
 - *line_size* is the default line size (must be between 1 and 50)
 - *text_size* is the default text size (must be between 10 and 50)
 - *text_font* is the font used to render text, its format is pango friendly
@@ -85,6 +87,7 @@ The following lines can be used as swappy's default:
 - *r*: Switch to Rectangle
 - *o*: Switch to Ellipse
 - *a*: Switch to Arrow
+- *d*: Switch to Blur (d stands for droplet)
 
 - *R*: Use Red Color
 - *G*: Use Green Color

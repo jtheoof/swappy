@@ -13,6 +13,7 @@ static void print_config(struct swappy_config *config) {
   g_info("printing config:");
   g_info("config_dir: %s", config->config_file);
   g_info("save_dir: %s", config->save_dir);
+  g_info("blur_radius: %d", config->blur_radius);
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
@@ -68,9 +69,8 @@ static void load_config_from_file(struct swappy_config *config,
   const gchar *group = "Default";
   gchar *save_dir = NULL;
   gchar *save_dir_expanded = NULL;
-  guint64 line_size;
+  guint64 line_size, text_size, blur_radius;
   gchar *text_font = NULL;
-  guint64 text_size;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -140,6 +140,23 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  blur_radius = g_key_file_get_uint64(gkf, group, "blur_radius", &error);
+
+  if (error == NULL) {
+    if (blur_radius >= SWAPPY_BLUR_RADIUS_MIN &&
+        blur_radius <= SWAPPY_BLUR_RADIUS_MAX) {
+      config->blur_radius = blur_radius;
+    } else {
+      g_warning(
+          "blur_radius is not a valid value: %ld - see man page for details",
+          blur_radius);
+    }
+  } else {
+    g_info("blur_radius is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   text_font = g_key_file_get_string(gkf, group, "text_font", &error);
 
   if (error == NULL) {
@@ -160,6 +177,7 @@ static void load_default_config(struct swappy_config *config) {
   }
 
   config->save_dir = get_default_save_dir();
+  config->blur_radius = CONFIG_BLUR_RADIUS_DEFAULT;
   config->line_size = CONFIG_LINE_SIZE_DEFAULT;
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;

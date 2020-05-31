@@ -16,6 +16,142 @@
 #define pango_font_description_t PangoFontDescription
 #define pango_rectangle_t PangoRectangle
 
+#define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
+
+static gboolean is_point_within_circle(struct swappy_point *point,
+                                       struct swappy_point *center,
+                                       guint32 radius) {
+  return pow(point->x - center->x, 2) + pow(point->y - center->y, 2) <
+         pow(radius, 2);
+}
+
+/*
+ * This code was largely taken from Kristian Høgsberg and Chris Wilson from:
+ * https://www.cairographics.org/cookbook/blur.c/
+ */
+static void blur_image_surface_at_point(cairo_t *cr, int radius,
+                                        struct swappy_point *point) {
+  cairo_surface_t *tmp;
+  int width, height;
+  int src_stride, dst_stride;
+  int x, y, z, w;
+  uint8_t *src, *dst;
+  uint32_t *s, *d, a, p;
+  int i, j, k;
+  uint8_t kernel[17];
+  const int size = ARRAY_LENGTH(kernel);
+  const int half = size / 2;
+  const int radius_extra = radius * 1.5;
+
+  cairo_surface_t *surface = cairo_get_target(cr);
+
+  if (cairo_surface_status(surface)) return;
+
+  width = cairo_image_surface_get_width(surface);
+  height = cairo_image_surface_get_height(surface);
+
+  switch (cairo_image_surface_get_format(surface)) {
+    case CAIRO_FORMAT_A1:
+    default:
+      /* Don't even think about it! */
+      return;
+
+    case CAIRO_FORMAT_A8:
+      /* Handle a8 surfaces by effectively unrolling the loops by a
+       * factor of 4 - this is safe since we know that stride has to be a
+       * multiple of uint32_t. */
+      width /= 4;
+      break;
+
+    case CAIRO_FORMAT_RGB24:
+    case CAIRO_FORMAT_ARGB32:
+      break;
+  }
+
+  tmp = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  if (cairo_surface_status(tmp)) {
+    return;
+  }
+
+  src = cairo_image_surface_get_data(surface);
+  src_stride = cairo_image_surface_get_stride(surface);
+
+  dst = cairo_image_surface_get_data(tmp);
+  dst_stride = cairo_image_surface_get_stride(tmp);
+
+  a = 0;
+  for (i = 0; i < size; i++) {
+    double f = i - half;
+    a += kernel[i] = exp(-f * f / 30.0) * 160;
+  }
+
+  int start_x = fmax(point->x - radius_extra, 0);
+  int start_y = fmax(point->y - radius_extra, 0);
+
+  int max_x = fmin(point->x + radius_extra, width);
+  int max_y = fmin(point->y + radius_extra, height);
+
+  for (i = start_y; i < max_y; i++) {
+    s = (uint32_t *)(src + i * src_stride);
+    d = (uint32_t *)(dst + i * dst_stride);
+    for (j = start_x; j < max_x; j++) {
+      d[j] = s[j];
+    }
+  }
+
+  /* Horizontally blur from surface -> tmp */
+  for (i = start_y; i < max_y; i++) {
+    s = (uint32_t *)(src + i * src_stride);
+    d = (uint32_t *)(dst + i * dst_stride);
+    for (j = start_x; j < max_x; j++) {
+      x = y = z = w = 0;
+      for (k = 0; k < size; k++) {
+        if (j - half + k < 0 || j - half + k >= width) continue;
+
+        p = s[j - half + k];
+
+        x += ((p >> 24) & 0xff) * kernel[k];
+        y += ((p >> 16) & 0xff) * kernel[k];
+        z += ((p >> 8) & 0xff) * kernel[k];
+        w += ((p >> 0) & 0xff) * kernel[k];
+      }
+      struct swappy_point pixel = {.x = j, .y = i};
+      if (is_point_within_circle(&pixel, point, radius)) {
+        d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
+      }
+    }
+  }
+
+  /* Then vertically blur from tmp -> surface */
+  for (i = start_y; i < max_y; i++) {
+    s = (uint32_t *)(dst + i * dst_stride);
+    d = (uint32_t *)(src + i * src_stride);
+    for (j = start_x; j < max_x; j++) {
+      x = y = z = w = 0;
+      for (k = 0; k < size; k++) {
+        if (i - half + k < 0 || i - half + k >= height) {
+          continue;
+        }
+
+        s = (uint32_t *)(dst + (i - half + k) * dst_stride);
+        p = s[j];
+
+        x += ((p >> 24) & 0xff) * kernel[k];
+        y += ((p >> 16) & 0xff) * kernel[k];
+        z += ((p >> 8) & 0xff) * kernel[k];
+        w += ((p >> 0) & 0xff) * kernel[k];
+      }
+      struct swappy_point pixel = {.x = j, .y = i};
+      if (is_point_within_circle(&pixel, point, radius)) {
+        d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
+      }
+    }
+  }
+
+  cairo_surface_destroy(tmp);
+  cairo_surface_mark_dirty(surface);
+}
+
 static void convert_pango_rectangle_to_swappy_box(pango_rectangle_t rectangle,
                                                   struct swappy_box *box) {
   if (!box) {
@@ -211,6 +347,17 @@ static void render_background(cairo_t *cr) {
   cairo_paint(cr);
 }
 
+static void render_blur(cairo_t *cr, struct swappy_paint_blur blur) {
+  cairo_set_source_rgba(cr, 0, 0, 0, 1);
+  cairo_set_line_width(cr, 1);
+
+  for (GList *elem = blur.points; elem; elem = elem->next) {
+    struct swappy_point *point = elem->data;
+
+    blur_image_surface_at_point(cr, blur.radius, point);
+  }
+}
+
 static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   cairo_set_source_rgba(cr, brush.r, brush.g, brush.b, brush.a);
   cairo_set_line_width(cr, brush.w);
@@ -237,6 +384,9 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
   }
 
   switch (paint->type) {
+    case SWAPPY_PAINT_MODE_BLUR:
+      render_blur(cr, paint->content.blur);
+      break;
     case SWAPPY_PAINT_MODE_BRUSH:
       render_brush(cr, paint->content.brush);
       break;
