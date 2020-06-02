@@ -18,19 +18,11 @@
 
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
 
-static gboolean is_point_within_circle(struct swappy_point *point,
-                                       struct swappy_point *center,
-                                       guint32 radius) {
-  return pow(point->x - center->x, 2) + pow(point->y - center->y, 2) <
-         pow(radius, 2);
-}
-
 /*
  * This code was largely taken from Kristian Høgsberg and Chris Wilson from:
  * https://www.cairographics.org/cookbook/blur.c/
  */
-static void blur_image_surface_at_point(cairo_t *cr, int radius,
-                                        struct swappy_point *point) {
+static void blur_paint(cairo_t *cr, struct swappy_paint_blur *blur) {
   cairo_surface_t *tmp;
   int width, height;
   int src_stride, dst_stride;
@@ -41,7 +33,9 @@ static void blur_image_surface_at_point(cairo_t *cr, int radius,
   uint8_t kernel[17];
   const int size = ARRAY_LENGTH(kernel);
   const int half = size / 2;
-  const int radius_extra = radius * 1.5;
+  double bluriness = blur->bluriness;
+  struct swappy_point from = blur->from;
+  struct swappy_point to = blur->to;
 
   cairo_surface_t *surface = cairo_get_target(cr);
 
@@ -76,25 +70,28 @@ static void blur_image_surface_at_point(cairo_t *cr, int radius,
   src = cairo_image_surface_get_data(surface);
   src_stride = cairo_image_surface_get_stride(surface);
 
+  g_debug("sizeof(src): %lu", sizeof(src));
+  g_debug("width*height*stride: %d", width * height * src_stride);
+
   dst = cairo_image_surface_get_data(tmp);
   dst_stride = cairo_image_surface_get_stride(tmp);
 
   a = 0;
   for (i = 0; i < size; i++) {
     double f = i - half;
-    a += kernel[i] = exp(-f * f / 30.0) * 160;
+    a += kernel[i] = exp(-f * f / bluriness) * 80;
   }
 
-  int start_x = fmax(point->x - radius_extra, 0);
-  int start_y = fmax(point->y - radius_extra, 0);
+  int start_x = fmax(fmin(from.x, to.x), 0);
+  int start_y = fmax(fmin(from.y, to.y), 0);
 
-  int max_x = fmin(point->x + radius_extra, width);
-  int max_y = fmin(point->y + radius_extra, height);
+  int max_x = fmin(fmax(from.x, to.x), width);
+  int max_y = fmin(fmax(from.y, to.y), height);
 
-  for (i = start_y; i < max_y; i++) {
+  for (i = 0; i < height; i++) {
     s = (uint32_t *)(src + i * src_stride);
     d = (uint32_t *)(dst + i * dst_stride);
-    for (j = start_x; j < max_x; j++) {
+    for (j = 0; j < width; j++) {
       d[j] = s[j];
     }
   }
@@ -115,10 +112,7 @@ static void blur_image_surface_at_point(cairo_t *cr, int radius,
         z += ((p >> 8) & 0xff) * kernel[k];
         w += ((p >> 0) & 0xff) * kernel[k];
       }
-      struct swappy_point pixel = {.x = j, .y = i};
-      if (is_point_within_circle(&pixel, point, radius)) {
-        d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
-      }
+      d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
     }
   }
 
@@ -141,10 +135,7 @@ static void blur_image_surface_at_point(cairo_t *cr, int radius,
         z += ((p >> 8) & 0xff) * kernel[k];
         w += ((p >> 0) & 0xff) * kernel[k];
       }
-      struct swappy_point pixel = {.x = j, .y = i};
-      if (is_point_within_circle(&pixel, point, radius)) {
-        d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
-      }
+      d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
     }
   }
 
@@ -347,15 +338,23 @@ static void render_background(cairo_t *cr) {
   cairo_paint(cr);
 }
 
-static void render_blur(cairo_t *cr, struct swappy_paint_blur blur) {
-  cairo_set_source_rgba(cr, 0, 0, 0, 1);
-  cairo_set_line_width(cr, 1);
-
-  for (GList *elem = blur.points; elem; elem = elem->next) {
-    struct swappy_point *point = elem->data;
-
-    blur_image_surface_at_point(cr, blur.radius, point);
+static void render_blur(cairo_t *cr, struct swappy_paint_blur blur,
+                        bool is_committed) {
+  if (!is_committed) {
+    // Blur not committed yet, draw bounding rectangle
+    struct swappy_paint_shape rect = {
+        .r = 0,
+        .g = 0.5,
+        .b = 1,
+        .a = 0.5,
+        .w = 5,
+        .from = blur.from,
+        .to = blur.to,
+        .type = SWAPPY_PAINT_MODE_RECTANGLE,
+    };
+    render_shape_rectangle(cr, rect);
   }
+  blur_paint(cr, &blur);
 }
 
 static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
@@ -382,10 +381,9 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
   if (!paint->can_draw) {
     return;
   }
-
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      render_blur(cr, paint->content.blur);
+      render_blur(cr, paint->content.blur, paint->is_committed);
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       render_brush(cr, paint->content.brush);
@@ -399,7 +397,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
       render_text(cr, paint->content.text);
       break;
     default:
-      g_info("unable to draw paint with type: %d", paint->type);
+      g_info("unable to render paint with type: %d", paint->type);
       break;
   }
 }

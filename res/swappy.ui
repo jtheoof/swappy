@@ -701,7 +701,7 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Blur Radius</property>
+                        <property name="label" translatable="yes">Blur Level</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -716,7 +716,7 @@
                         <property name="receives_default">True</property>
                         <property name="image">zoom-out2</property>
                         <property name="always_show_image">True</property>
-                        <signal name="clicked" handler="blur_radius_decrease_handler" swapped="no"/>
+                        <signal name="clicked" handler="blur_level_decrease_handler" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -730,7 +730,7 @@
                         <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
                         <property name="always_show_image">True</property>
-                        <signal name="clicked" handler="blur_radius_reset_handler" swapped="no"/>
+                        <signal name="clicked" handler="blur_level_reset_handler" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -745,7 +745,7 @@
                         <property name="receives_default">True</property>
                         <property name="image">zoom-in2</property>
                         <property name="always_show_image">True</property>
-                        <signal name="clicked" handler="blur_radius_increase_handler" swapped="no"/>
+                        <signal name="clicked" handler="blur_level_increase_handler" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
