@@ -261,7 +261,6 @@ void paint_commit_temporary(struct swappy_state *state) {
       paint->content.text.mode = SWAPPY_TEXT_MODE_DONE;
       break;
     default:
-      g_info("unable to update temporary text when type is: %d", paint->type);
       break;
   }
 
