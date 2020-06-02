@@ -23,7 +23,6 @@ void paint_free(gpointer data) {
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      g_list_free_full(paint->content.blur.points, g_free);
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       g_list_free_full(paint->content.brush.points, g_free);
@@ -65,6 +64,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   double t = state->settings.t;
 
   paint->type = type;
+  paint->is_committed = false;
 
   if (state->temp_paint) {
     if (type == SWAPPY_PAINT_MODE_TEXT) {
@@ -77,14 +77,11 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 
   switch (type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      paint->can_draw = true;
+      paint->can_draw = false;
 
-      paint->content.blur.radius = state->settings.blur_radius;
-      point = g_new(struct swappy_point, 1);
-      point->x = x;
-      point->y = y;
-
-      paint->content.blur.points = g_list_prepend(NULL, point);
+      paint->content.blur.bluriness = state->settings.blur_level;
+      paint->content.blur.from.x = x;
+      paint->content.blur.from.y = y;
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       paint->can_draw = true;
@@ -152,12 +149,9 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      points = paint->content.blur.points;
-      point = g_new(struct swappy_point, 1);
-      point->x = x;
-      point->y = y;
-
-      paint->content.blur.points = g_list_prepend(points, point);
+      paint->can_draw = true;
+      paint->content.blur.to.x = x;
+      paint->content.blur.to.y = y;
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       points = paint->content.brush.points;
@@ -267,6 +261,7 @@ void paint_commit_temporary(struct swappy_state *state) {
   if (!paint->can_draw) {
     paint_free(paint);
   } else {
+    paint->is_committed = true;
     state->paints = g_list_prepend(state->paints, paint);
   }
 
