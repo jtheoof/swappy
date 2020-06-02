@@ -18,11 +18,22 @@
 
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
 
+static struct swappy_point swappy_point_scaled(struct swappy_point point,
+                                               gint scale) {
+  struct swappy_point ret = {
+      .x = point.x * scale,
+      .y = point.y * scale,
+  };
+
+  return ret;
+}
+
 /*
  * This code was largely taken from Kristian Høgsberg and Chris Wilson from:
  * https://www.cairographics.org/cookbook/blur.c/
  */
-static void blur_paint(cairo_t *cr, struct swappy_paint_blur *blur) {
+static void blur_paint(cairo_t *cr, struct swappy_paint_blur *blur,
+                       gint scaling_factor) {
   cairo_surface_t *tmp;
   int width, height;
   int src_stride, dst_stride;
@@ -34,8 +45,8 @@ static void blur_paint(cairo_t *cr, struct swappy_paint_blur *blur) {
   const int size = ARRAY_LENGTH(kernel);
   const int half = size / 2;
   double bluriness = blur->bluriness;
-  struct swappy_point from = blur->from;
-  struct swappy_point to = blur->to;
+  struct swappy_point from = swappy_point_scaled(blur->from, scaling_factor);
+  struct swappy_point to = swappy_point_scaled(blur->to, scaling_factor);
 
   cairo_surface_t *surface = cairo_get_target(cr);
 
@@ -339,7 +350,7 @@ static void render_background(cairo_t *cr) {
 }
 
 static void render_blur(cairo_t *cr, struct swappy_paint_blur blur,
-                        bool is_committed) {
+                        bool is_committed, gint scaling_factor) {
   if (!is_committed) {
     // Blur not committed yet, draw bounding rectangle
     struct swappy_paint_shape rect = {
@@ -354,7 +365,7 @@ static void render_blur(cairo_t *cr, struct swappy_paint_blur blur,
     };
     render_shape_rectangle(cr, rect);
   }
-  blur_paint(cr, &blur);
+  blur_paint(cr, &blur, scaling_factor);
 }
 
 static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
@@ -377,13 +388,14 @@ static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   }
 }
 
-static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
+static void render_paint(cairo_t *cr, struct swappy_paint *paint,
+                         gint scaling_factor) {
   if (!paint->can_draw) {
     return;
   }
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      render_blur(cr, paint->content.blur, paint->is_committed);
+      render_blur(cr, paint->content.blur, paint->is_committed, scaling_factor);
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       render_brush(cr, paint->content.brush);
@@ -405,11 +417,11 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
 static void render_paints(cairo_t *cr, struct swappy_state *state) {
   for (GList *elem = g_list_last(state->paints); elem; elem = elem->prev) {
     struct swappy_paint *paint = elem->data;
-    render_paint(cr, paint);
+    render_paint(cr, paint, state->scaling_factor);
   }
 
   if (state->temp_paint) {
-    render_paint(cr, state->temp_paint);
+    render_paint(cr, state->temp_paint, state->scaling_factor);
   }
 }
 

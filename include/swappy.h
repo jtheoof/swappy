@@ -211,6 +211,7 @@ struct swappy_state {
 
   struct swappy_box *window;
   struct swappy_box *geometry;
+  gint scaling_factor;
 
   GList *paints;
   GList *redo_paints;

@@ -560,11 +560,14 @@ static void compute_window_size(struct swappy_state *state) {
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
   GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
+  gint scaling_factor = gdk_monitor_get_scale_factor(monitor);
   gdk_monitor_get_workarea(monitor, &workarea);
+  g_info("scale_factor: %d", scaling_factor);
   g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
   g_assert(workarea.width > 0);
   g_assert(workarea.height > 0);
 
+  state->scaling_factor = scaling_factor;
   state->window = g_new(struct swappy_box, 1);
   state->window->x = workarea.x;
   state->window->y = workarea.y;
