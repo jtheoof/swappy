@@ -53,7 +53,6 @@ static void xdg_output_handle_done(void *data,
   int32_t width = output->geometry.width;
   int32_t height = output->geometry.height;
   apply_output_transform(output->transform, &width, &height);
-  output->logical_scale = (double)width / output->logical_geometry.width;
 }
 
 static void xdg_output_handle_name(void *data,
