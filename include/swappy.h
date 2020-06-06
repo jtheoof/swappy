@@ -158,7 +158,6 @@ struct swappy_output {
   int32_t scale;
   struct swappy_buffer *buffer;
 
-  double logical_scale;  // guessed from the logical size
   char *name;
 
   enum wl_output_transform transform;
