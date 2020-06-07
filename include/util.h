@@ -5,3 +5,4 @@
 
 void string_remove_at(char *str, size_t pos);
 gchar *string_insert_chars_at(gchar *str, gchar *chars, size_t pos);
+void pixel_data_print(guint32 pixel);

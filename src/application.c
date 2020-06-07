@@ -406,10 +406,17 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
   g_debug("received configure_event handler");
   cairo_surface_destroy(state->cairo_surface);
 
-  state->cairo_surface = gdk_window_create_similar_surface(
-      gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR,
+  cairo_surface_t *surface = gdk_window_create_similar_surface(
+      gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR_ALPHA,
       gtk_widget_get_allocated_width(widget),
       gtk_widget_get_allocated_height(widget));
+
+  g_info("size of cairo_surface: %ux%u with type: %d",
+         cairo_image_surface_get_width(surface),
+         cairo_image_surface_get_height(surface),
+         cairo_image_surface_get_format(surface));
+
+  state->cairo_surface = surface;
 
   render_state(state);
 

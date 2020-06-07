@@ -51,6 +51,7 @@ executable(
 	swappy_resources,
 	files([
 		'src/main.c',
+		'src/algebra.c',
 		'src/application.c',
 		'src/buffer.c',
 		'src/box.c',

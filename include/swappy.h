@@ -79,9 +79,10 @@ struct swappy_paint_brush {
 };
 
 struct swappy_paint_blur {
-  double bluriness;
+  double blur_level;
   struct swappy_point from;
   struct swappy_point to;
+  cairo_surface_t *surface;
 };
 
 struct swappy_paint {
