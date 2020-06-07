@@ -1,157 +1,152 @@
-#include <gdk/gdk.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <math.h>
 #include <pango/pangocairo.h>
 
+#include "algebra.h"
 #include "swappy.h"
-#include "util.h"
-
-#ifndef M_PI
-#define M_PI (3.14159265358979323846)
-#endif
-
-#define RENDER_PANGO_FONT SWAPPY_TEXT_FONT_DEFAULT SWAPPY_TEXT_SIZE_DEFAULT
 
 #define pango_layout_t PangoLayout
 #define pango_font_description_t PangoFontDescription
 #define pango_rectangle_t PangoRectangle
 
-#define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
-
-static struct swappy_point swappy_point_scaled(struct swappy_point point,
-                                               gint scale) {
-  struct swappy_point ret = {
-      .x = point.x * scale,
-      .y = point.y * scale,
-  };
-
-  return ret;
-}
-
 /*
  * This code was largely taken from Kristian Høgsberg and Chris Wilson from:
  * https://www.cairographics.org/cookbook/blur.c/
  */
-static void blur_paint(cairo_t *cr, struct swappy_paint_blur *blur,
-                       gint scaling_factor) {
-  cairo_surface_t *tmp;
-  int width, height;
+static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
+                                     double y, double width, double height,
+                                     gint blur_level) {
+  cairo_surface_t *dest_surface, *tmp_surface;
+  cairo_t *cr;
+  int src_width, src_height;
   int src_stride, dst_stride;
-  int x, y, z, w;
-  uint8_t *src, *dst;
-  uint32_t *s, *d, a, p;
+  guint u, v, w, z;
+  uint8_t *src, *dst, *tmp;
+  uint32_t *s, *d, p;
   int i, j, k;
-  uint8_t kernel[17];
-  const int size = ARRAY_LENGTH(kernel);
+  const int size = (int)blur_level * 2 + 1;
   const int half = size / 2;
-  double bluriness = blur->bluriness;
-  struct swappy_point from = swappy_point_scaled(blur->from, scaling_factor);
-  struct swappy_point to = swappy_point_scaled(blur->to, scaling_factor);
+  const double offset_y = 10.0;
+  guint sum;
 
-  cairo_surface_t *surface = cairo_get_target(cr);
+  if (cairo_surface_status(surface)) {
+    return NULL;
+  }
 
-  if (cairo_surface_status(surface)) return;
-
-  width = cairo_image_surface_get_width(surface);
-  height = cairo_image_surface_get_height(surface);
-
-  switch (cairo_image_surface_get_format(surface)) {
+  cairo_format_t src_format = cairo_image_surface_get_format(surface);
+  switch (src_format) {
     case CAIRO_FORMAT_A1:
-    default:
-      /* Don't even think about it! */
-      return;
-
     case CAIRO_FORMAT_A8:
-      /* Handle a8 surfaces by effectively unrolling the loops by a
-       * factor of 4 - this is safe since we know that stride has to be a
-       * multiple of uint32_t. */
-      width /= 4;
-      break;
-
     case CAIRO_FORMAT_RGB24:
+    default:
+      g_warning("source surface format: %d is not supported", src_format);
+      return NULL;
     case CAIRO_FORMAT_ARGB32:
       break;
   }
 
-  tmp = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-  if (cairo_surface_status(tmp)) {
-    return;
-  }
-
   src = cairo_image_surface_get_data(surface);
   src_stride = cairo_image_surface_get_stride(surface);
+  src_width = cairo_image_surface_get_width(surface);
+  src_height = cairo_image_surface_get_height(surface);
 
-  g_debug("sizeof(src): %lu", sizeof(src));
-  g_debug("width*height*stride: %d", width * height * src_stride);
+  g_assert(src_height >= height);
+  g_assert(src_width >= width);
 
-  dst = cairo_image_surface_get_data(tmp);
-  dst_stride = cairo_image_surface_get_stride(tmp);
+  dest_surface = cairo_image_surface_create(src_format, src_width, src_height);
+  tmp_surface = cairo_image_surface_create(src_format, src_width, src_height);
 
-  a = 0;
-  for (i = 0; i < size; i++) {
-    double f = i - half;
-    a += kernel[i] = exp(-f * f / bluriness) * 80;
+  if (cairo_surface_status(dest_surface) || cairo_surface_status(tmp_surface)) {
+    return NULL;
   }
 
-  int start_x = fmax(fmin(from.x, to.x), 0);
-  int start_y = fmax(fmin(from.y, to.y), 0);
+  cr = cairo_create(tmp_surface);
+  cairo_set_source_surface(cr, surface, 0, 0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
 
-  int max_x = fmin(fmax(from.x, to.x), width);
-  int max_y = fmin(fmax(from.y, to.y), height);
+  cr = cairo_create(dest_surface);
+  cairo_set_source_surface(cr, surface, 0, 0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
 
-  for (i = 0; i < height; i++) {
-    s = (uint32_t *)(src + i * src_stride);
-    d = (uint32_t *)(dst + i * dst_stride);
-    for (j = 0; j < width; j++) {
-      d[j] = s[j];
-    }
-  }
+  dst = cairo_image_surface_get_data(dest_surface);
+  tmp = cairo_image_surface_get_data(tmp_surface);
+  dst_stride = cairo_image_surface_get_stride(dest_surface);
+
+  struct gaussian_kernel *gaussian = gaussian_kernel(4, 3.1);
+
+  int start_x = CLAMP(x, 0, src_width);
+  int start_y = CLAMP(y - offset_y, 0, src_height);
+
+  int end_x = CLAMP(x + width, 0, src_width);
+  int end_y = CLAMP(y + height + offset_y, 0, src_height);
+
+  sum = (guint)gaussian->sum;
 
   /* Horizontally blur from surface -> tmp */
-  for (i = start_y; i < max_y; i++) {
+  for (i = start_y; i < end_y; i++) {
     s = (uint32_t *)(src + i * src_stride);
-    d = (uint32_t *)(dst + i * dst_stride);
-    for (j = start_x; j < max_x; j++) {
-      x = y = z = w = 0;
-      for (k = 0; k < size; k++) {
-        if (j - half + k < 0 || j - half + k >= width) continue;
+    d = (uint32_t *)(tmp + i * dst_stride);
+    for (j = start_x; j < end_x; j++) {
+      u = v = w = z = 0;
+      for (k = 0; k < gaussian->size; k++) {
+        gdouble multiplier = gaussian->kernel[k];
+
+        if (j - half + k < 0 || j - half + k >= src_width) {
+          continue;
+        }
 
         p = s[j - half + k];
 
-        x += ((p >> 24) & 0xff) * kernel[k];
-        y += ((p >> 16) & 0xff) * kernel[k];
-        z += ((p >> 8) & 0xff) * kernel[k];
-        w += ((p >> 0) & 0xff) * kernel[k];
+        u += ((p >> 24) & 0xff) * multiplier;
+        v += ((p >> 16) & 0xff) * multiplier;
+        w += ((p >> 8) & 0xff) * multiplier;
+        z += ((p >> 0) & 0xff) * multiplier;
       }
-      d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
+
+      d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
     }
   }
 
   /* Then vertically blur from tmp -> surface */
-  for (i = start_y; i < max_y; i++) {
-    s = (uint32_t *)(dst + i * dst_stride);
-    d = (uint32_t *)(src + i * src_stride);
-    for (j = start_x; j < max_x; j++) {
-      x = y = z = w = 0;
-      for (k = 0; k < size; k++) {
-        if (i - half + k < 0 || i - half + k >= height) {
+  for (i = start_y; i < end_y; i++) {
+    d = (uint32_t *)(dst + i * dst_stride);
+    for (j = start_x; j < end_x; j++) {
+      u = v = w = z = 0;
+      for (k = 0; k < gaussian->size; k++) {
+        gdouble multiplier = gaussian->kernel[k];
+
+        if (i - half + k < 0 || i - half + k >= src_height) {
           continue;
         }
 
-        s = (uint32_t *)(dst + (i - half + k) * dst_stride);
+        s = (uint32_t *)(tmp + (i - half + k) * dst_stride);
         p = s[j];
 
-        x += ((p >> 24) & 0xff) * kernel[k];
-        y += ((p >> 16) & 0xff) * kernel[k];
-        z += ((p >> 8) & 0xff) * kernel[k];
-        w += ((p >> 0) & 0xff) * kernel[k];
+        u += ((p >> 24) & 0xff) * multiplier;
+        v += ((p >> 16) & 0xff) * multiplier;
+        w += ((p >> 8) & 0xff) * multiplier;
+        z += ((p >> 0) & 0xff) * multiplier;
       }
-      d[j] = (x / a << 24) | (y / a << 16) | (z / a << 8) | w / a;
+
+      d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
     }
   }
 
-  cairo_surface_destroy(tmp);
-  cairo_surface_mark_dirty(surface);
+  // Mark destination surface as dirty since it was altered with custom data.
+  cairo_surface_mark_dirty(dest_surface);
+  cairo_surface_t *final =
+      cairo_image_surface_create(src_format, (int)width, (int)height);
+  cr = cairo_create(final);
+  cairo_set_source_surface(cr, dest_surface, -x, -y);
+  cairo_paint(cr);
+  cairo_destroy(cr);
+  cairo_surface_destroy(dest_surface);
+  cairo_surface_destroy(tmp_surface);
+  gaussian_kernel_free(gaussian);
+  return final;
 }
 
 static void convert_pango_rectangle_to_swappy_box(pango_rectangle_t rectangle,
@@ -227,7 +222,7 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   double r = 20;
   double scaling_factor = shape.w / 4;
 
-  double alpha = M_PI / 6;
+  double alpha = G_PI / 6;
   double ta = 5 * alpha;
   double tb = 7 * alpha;
   double xa = r * cos(ta);
@@ -284,7 +279,7 @@ static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_get_matrix(cr, &save_matrix);
   cairo_translate(cr, xc, yc);
   cairo_scale(cr, x / n, y / n);
-  cairo_arc(cr, 0, 0, r, 0, 2 * M_PI);
+  cairo_arc(cr, 0, 0, r, 0, 2 * G_PI);
   cairo_set_matrix(cr, &save_matrix);
   cairo_stroke(cr);
   cairo_close_path(cr);
@@ -344,14 +339,37 @@ static void render_buffers(cairo_t *cr, struct swappy_state *state) {
   cairo_restore(cr);
 }
 
-static void render_background(cairo_t *cr) {
+static void render_background(cairo_t *cr, struct swappy_state *state) {
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_paint(cr);
 }
 
-static void render_blur(cairo_t *cr, struct swappy_paint_blur blur,
-                        bool is_committed, gint scaling_factor) {
-  if (!is_committed) {
+static void render_blur(cairo_t *cr, struct swappy_paint *paint,
+                        gint scaling_factor) {
+  struct swappy_paint_blur blur = paint->content.blur;
+
+  cairo_surface_t *target = cairo_get_target(cr);
+
+  double x = MIN(blur.from.x, blur.to.x);
+  double y = MIN(blur.from.y, blur.to.y);
+  double w = ABS(blur.from.x - blur.to.x);
+  double h = ABS(blur.from.y - blur.to.y);
+
+  cairo_save(cr);
+
+  if (!paint->is_committed) {
+    cairo_surface_t *blurred =
+        blur_surface(target, x, y, w, h, blur.blur_level);
+
+    if (blurred && cairo_surface_status(blurred) == CAIRO_STATUS_SUCCESS) {
+      cairo_set_source_surface(cr, blurred, x, y);
+      cairo_paint(cr);
+      if (blur.surface) {
+        cairo_surface_destroy(blur.surface);
+      }
+      paint->content.blur.surface = blurred;
+    }
+
     // Blur not committed yet, draw bounding rectangle
     struct swappy_paint_shape rect = {
         .r = 0,
@@ -364,8 +382,16 @@ static void render_blur(cairo_t *cr, struct swappy_paint_blur blur,
         .type = SWAPPY_PAINT_MODE_RECTANGLE,
     };
     render_shape_rectangle(cr, rect);
+
+  } else {
+    cairo_surface_t *surface = blur.surface;
+    if (surface && cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
+      cairo_set_source_surface(cr, surface, x, y);
+      cairo_paint(cr);
+    }
   }
-  blur_paint(cr, &blur, scaling_factor);
+
+  cairo_restore(cr);
 }
 
 static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
@@ -395,7 +421,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint,
   }
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      render_blur(cr, paint->content.blur, paint->is_committed, scaling_factor);
+      render_blur(cr, paint, scaling_factor);
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       render_brush(cr, paint->content.brush);
@@ -426,14 +452,15 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
 }
 
 void render_state(struct swappy_state *state) {
-  cairo_t *cr = cairo_create(state->cairo_surface);
+  cairo_surface_t *surface = state->cairo_surface;
+  cairo_t *cr = cairo_create(surface);
 
-  render_background(cr);
+  render_background(cr, state);
   render_buffers(cr, state);
   render_paints(cr, state);
 
+  cairo_destroy(cr);
+
   // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.
   gtk_widget_queue_draw(state->ui->area);
-
-  cairo_destroy(cr);
 }

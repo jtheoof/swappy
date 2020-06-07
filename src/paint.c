@@ -23,6 +23,9 @@ void paint_free(gpointer data) {
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
+      if (paint->content.blur.surface) {
+        cairo_surface_destroy(paint->content.blur.surface);
+      }
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       g_list_free_full(paint->content.brush.points, g_free);
@@ -70,7 +73,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
     if (type == SWAPPY_PAINT_MODE_TEXT) {
       paint_commit_temporary(state);
     } else {
-      g_free(state->temp_paint);
+      paint_free(state->temp_paint);
       state->temp_paint = NULL;
     }
   }
@@ -79,9 +82,10 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
     case SWAPPY_PAINT_MODE_BLUR:
       paint->can_draw = false;
 
-      paint->content.blur.bluriness = state->settings.blur_level;
+      paint->content.blur.blur_level = state->settings.blur_level;
       paint->content.blur.from.x = x;
       paint->content.blur.from.y = y;
+      paint->content.blur.surface = NULL;
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       paint->can_draw = true;
@@ -146,6 +150,14 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
   if (!paint) {
     return;
   }
+
+  int32_t width = state->window->width;
+  int32_t height = state->window->height;
+
+  // Bounding x and y to the window dimensions to avoid side effects in
+  // rendering.
+  x = fmin(fmax(x, 0), width);
+  y = fmin(fmax(y, 0), height);
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
