@@ -27,12 +27,18 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   int i, j, k;
   const int size = (int)blur_level * 2 + 1;
   const int half = size / 2;
-  const double offset_y = 10.0;
+  //  const double offset_y = 10.0;
+  gdouble scale_x, scale_y;
   guint sum;
 
   if (cairo_surface_status(surface)) {
     return NULL;
   }
+
+  cairo_surface_get_device_scale(surface, &scale_x, &scale_y);
+
+  g_debug("blurring surface at: %.2lf, %.2lf (%.2lfx%.2lf)", x, y, width,
+          height);
 
   cairo_format_t src_format = cairo_image_surface_get_format(surface);
   switch (src_format) {
@@ -51,11 +57,16 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   src_width = cairo_image_surface_get_width(surface);
   src_height = cairo_image_surface_get_height(surface);
 
+  g_debug("src surface (%dx%d)", src_width, src_height);
+
   g_assert(src_height >= height);
   g_assert(src_width >= width);
 
   dest_surface = cairo_image_surface_create(src_format, src_width, src_height);
   tmp_surface = cairo_image_surface_create(src_format, src_width, src_height);
+
+  cairo_surface_set_device_scale(dest_surface, scale_x, scale_y);
+  cairo_surface_set_device_scale(tmp_surface, scale_x, scale_y);
 
   if (cairo_surface_status(dest_surface) || cairo_surface_status(tmp_surface)) {
     return NULL;
@@ -77,11 +88,16 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
 
   struct gaussian_kernel *gaussian = gaussian_kernel(4, 3.1);
 
-  int start_x = CLAMP(x, 0, src_width);
-  int start_y = CLAMP(y - offset_y, 0, src_height);
+  int start_x = CLAMP(x * scale_x, 0, src_width);
+  //  int start_y = CLAMP(y - offset_y, 0, src_height;
+  int start_y = CLAMP(y * scale_y, 0, src_height);
 
-  int end_x = CLAMP(x + width, 0, src_width);
-  int end_y = CLAMP(y + height + offset_y, 0, src_height);
+  int end_x = CLAMP((x + width) * scale_x, 0, src_width);
+  //  int end_y = CLAMP(y + height + offset_y, 0, src_height);
+  int end_y = CLAMP((y + height) * scale_y, 0, src_height);
+
+  g_debug("blurring happening from: %d, %d to: %d, %d", start_x, start_y, end_x,
+          end_y);
 
   sum = (guint)gaussian->sum;
 
@@ -138,7 +154,8 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   // Mark destination surface as dirty since it was altered with custom data.
   cairo_surface_mark_dirty(dest_surface);
   cairo_surface_t *final =
-      cairo_image_surface_create(src_format, (int)width, (int)height);
+      cairo_image_surface_create(src_format, (int)(width * scale_x), (int)(height * scale_y));
+  cairo_surface_set_device_scale(final, scale_x, scale_y);
   cr = cairo_create(final);
   cairo_set_source_surface(cr, dest_surface, -x, -y);
   cairo_paint(cr);
@@ -328,6 +345,8 @@ static void render_buffers(cairo_t *cr, struct swappy_state *state) {
   double sx = (double)state->window->width / state->geometry->width;
   double sy = (double)state->window->height / state->geometry->height;
 
+  //  g_debug("scaling cairo context: (%.2lf, %.2lf)", sx, sy);
+
   cairo_scale(cr, sx, sy);
 
   for (GList *elem = state->patterns; elem; elem = elem->prev) {
@@ -344,11 +363,15 @@ static void render_background(cairo_t *cr, struct swappy_state *state) {
   cairo_paint(cr);
 }
 
-static void render_blur(cairo_t *cr, struct swappy_paint *paint,
-                        gint scaling_factor) {
+static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
   struct swappy_paint_blur blur = paint->content.blur;
 
   cairo_surface_t *target = cairo_get_target(cr);
+
+  double a, b;
+  cairo_surface_get_device_scale(target, &a, &b);
+
+  g_debug("cairo surface device scale: %.2lf, %.2lf", a, b);
 
   double x = MIN(blur.from.x, blur.to.x);
   double y = MIN(blur.from.y, blur.to.y);
@@ -414,14 +437,13 @@ static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   }
 }
 
-static void render_paint(cairo_t *cr, struct swappy_paint *paint,
-                         gint scaling_factor) {
+static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
   if (!paint->can_draw) {
     return;
   }
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
-      render_blur(cr, paint, scaling_factor);
+      render_blur(cr, paint);
       break;
     case SWAPPY_PAINT_MODE_BRUSH:
       render_brush(cr, paint->content.brush);
@@ -443,11 +465,11 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint,
 static void render_paints(cairo_t *cr, struct swappy_state *state) {
   for (GList *elem = g_list_last(state->paints); elem; elem = elem->prev) {
     struct swappy_paint *paint = elem->data;
-    render_paint(cr, paint, state->scaling_factor);
+    render_paint(cr, paint);
   }
 
   if (state->temp_paint) {
-    render_paint(cr, state->temp_paint, state->scaling_factor);
+    render_paint(cr, state->temp_paint);
   }
 }
 

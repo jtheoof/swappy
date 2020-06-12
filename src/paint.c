@@ -69,6 +69,8 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   paint->type = type;
   paint->is_committed = false;
 
+  g_debug("adding temporary paint at: %.2lfx%.2lf", x, y);
+
   if (state->temp_paint) {
     if (type == SWAPPY_PAINT_MODE_TEXT) {
       paint_commit_temporary(state);
