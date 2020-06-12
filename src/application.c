@@ -14,6 +14,13 @@
 #include "swappy.h"
 #include "wayland.h"
 
+static void on_area_size_allocate(GtkWidget *area, struct swappy_state *state) {
+  GtkAllocation *alloc = g_new(GtkAllocation, 1);
+  gtk_widget_get_allocation(area, alloc);
+  g_info("size of area to render: %ux%u", alloc->width, alloc->height);
+  g_free(alloc);
+}
+
 static void update_ui_undo_redo(struct swappy_state *state) {
   GtkWidget *undo = GTK_WIDGET(state->ui->undo);
   GtkWidget *redo = GTK_WIDGET(state->ui->redo);
@@ -567,7 +574,7 @@ static void compute_window_size(struct swappy_state *state) {
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
   GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
-  gint scaling_factor = gdk_monitor_get_scale_factor(monitor);
+  gint scaling_factor = gdk_window_get_scale_factor(window);
   gdk_monitor_get_workarea(monitor, &workarea);
   g_info("scale_factor: %d", scaling_factor);
   g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
@@ -679,6 +686,9 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->blur = blur;
   state->ui->area = area;
   state->ui->window = window;
+
+  g_signal_connect(area, "size-allocate", G_CALLBACK(on_area_size_allocate),
+                   state);
 
   compute_window_size(state);
 
