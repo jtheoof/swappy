@@ -2,6 +2,6 @@
 <gresources>
     <gresource prefix="/me/jtheoof/swappy">
         <file>style/swappy.css</file>
-        <file>swappy.ui</file>
+        <file>swappy.glade</file>
     </gresource>
 </gresources>
