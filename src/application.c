@@ -577,7 +577,7 @@ static bool load_layout(struct swappy_state *state) {
 
   /* Construct a GtkBuilder instance and load our UI description */
   GtkBuilder *builder = gtk_builder_new();
-  if (gtk_builder_add_from_resource(builder, "/me/jtheoof/swappy/swappy.ui",
+  if (gtk_builder_add_from_resource(builder, "/me/jtheoof/swappy/swappy.glade",
                                     &error) == 0) {
     g_printerr("Error loading file: %s", error->message);
     g_clear_error(&error);
