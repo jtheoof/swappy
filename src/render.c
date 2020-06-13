@@ -22,23 +22,19 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   int src_width, src_height;
   int src_stride, dst_stride;
   guint u, v, w, z;
-  uint8_t *src, *dst, *tmp;
+  uint8_t *dst, *tmp;
   uint32_t *s, *d, p;
   int i, j, k;
   const int size = (int)blur_level * 2 + 1;
   const int half = size / 2;
-  //  const double offset_y = 10.0;
   gdouble scale_x, scale_y;
-  guint sum;
+  guint sum, pass, nb_passes;
 
   if (cairo_surface_status(surface)) {
     return NULL;
   }
 
   cairo_surface_get_device_scale(surface, &scale_x, &scale_y);
-
-  g_debug("blurring surface at: %.2lf, %.2lf (%.2lfx%.2lf)", x, y, width,
-          height);
 
   cairo_format_t src_format = cairo_image_surface_get_format(surface);
   switch (src_format) {
@@ -52,12 +48,9 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
       break;
   }
 
-  src = cairo_image_surface_get_data(surface);
   src_stride = cairo_image_surface_get_stride(surface);
   src_width = cairo_image_surface_get_width(surface);
   src_height = cairo_image_surface_get_height(surface);
-
-  g_debug("src surface (%dx%d)", src_width, src_height);
 
   g_assert(src_height >= height);
   g_assert(src_width >= width);
@@ -86,75 +79,74 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   tmp = cairo_image_surface_get_data(tmp_surface);
   dst_stride = cairo_image_surface_get_stride(dest_surface);
 
+  nb_passes = (guint)sqrt(scale_x * scale_y) + 1;
+
   struct gaussian_kernel *gaussian = gaussian_kernel(4, 3.1);
 
   int start_x = CLAMP(x * scale_x, 0, src_width);
-  //  int start_y = CLAMP(y - offset_y, 0, src_height;
   int start_y = CLAMP(y * scale_y, 0, src_height);
 
   int end_x = CLAMP((x + width) * scale_x, 0, src_width);
-  //  int end_y = CLAMP(y + height + offset_y, 0, src_height);
   int end_y = CLAMP((y + height) * scale_y, 0, src_height);
-
-  g_debug("blurring happening from: %d, %d to: %d, %d", start_x, start_y, end_x,
-          end_y);
 
   sum = (guint)gaussian->sum;
 
-  /* Horizontally blur from surface -> tmp */
-  for (i = start_y; i < end_y; i++) {
-    s = (uint32_t *)(src + i * src_stride);
-    d = (uint32_t *)(tmp + i * dst_stride);
-    for (j = start_x; j < end_x; j++) {
-      u = v = w = z = 0;
-      for (k = 0; k < gaussian->size; k++) {
-        gdouble multiplier = gaussian->kernel[k];
+  for (pass = 0; pass < nb_passes; pass++) {
+    /* Horizontally blur from surface -> tmp */
+    for (i = start_y; i < end_y; i++) {
+      s = (uint32_t *)(dst + i * src_stride);
+      d = (uint32_t *)(tmp + i * dst_stride);
+      for (j = start_x; j < end_x; j++) {
+        u = v = w = z = 0;
+        for (k = 0; k < gaussian->size; k++) {
+          gdouble multiplier = gaussian->kernel[k];
 
-        if (j - half + k < 0 || j - half + k >= src_width) {
-          continue;
+          if (j - half + k < 0 || j - half + k >= src_width) {
+            continue;
+          }
+
+          p = s[j - half + k];
+
+          u += ((p >> 24) & 0xff) * multiplier;
+          v += ((p >> 16) & 0xff) * multiplier;
+          w += ((p >> 8) & 0xff) * multiplier;
+          z += ((p >> 0) & 0xff) * multiplier;
         }
 
-        p = s[j - half + k];
-
-        u += ((p >> 24) & 0xff) * multiplier;
-        v += ((p >> 16) & 0xff) * multiplier;
-        w += ((p >> 8) & 0xff) * multiplier;
-        z += ((p >> 0) & 0xff) * multiplier;
+        d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
       }
-
-      d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
     }
-  }
 
-  /* Then vertically blur from tmp -> surface */
-  for (i = start_y; i < end_y; i++) {
-    d = (uint32_t *)(dst + i * dst_stride);
-    for (j = start_x; j < end_x; j++) {
-      u = v = w = z = 0;
-      for (k = 0; k < gaussian->size; k++) {
-        gdouble multiplier = gaussian->kernel[k];
+    /* Then vertically blur from tmp -> surface */
+    for (i = start_y; i < end_y; i++) {
+      d = (uint32_t *)(dst + i * dst_stride);
+      for (j = start_x; j < end_x; j++) {
+        u = v = w = z = 0;
+        for (k = 0; k < gaussian->size; k++) {
+          gdouble multiplier = gaussian->kernel[k];
 
-        if (i - half + k < 0 || i - half + k >= src_height) {
-          continue;
+          if (i - half + k < 0 || i - half + k >= src_height) {
+            continue;
+          }
+
+          s = (uint32_t *)(tmp + (i - half + k) * dst_stride);
+          p = s[j];
+
+          u += ((p >> 24) & 0xff) * multiplier;
+          v += ((p >> 16) & 0xff) * multiplier;
+          w += ((p >> 8) & 0xff) * multiplier;
+          z += ((p >> 0) & 0xff) * multiplier;
         }
 
-        s = (uint32_t *)(tmp + (i - half + k) * dst_stride);
-        p = s[j];
-
-        u += ((p >> 24) & 0xff) * multiplier;
-        v += ((p >> 16) & 0xff) * multiplier;
-        w += ((p >> 8) & 0xff) * multiplier;
-        z += ((p >> 0) & 0xff) * multiplier;
+        d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
       }
-
-      d[j] = (u / sum << 24) | (v / sum << 16) | (w / sum << 8) | z / sum;
     }
   }
 
   // Mark destination surface as dirty since it was altered with custom data.
   cairo_surface_mark_dirty(dest_surface);
-  cairo_surface_t *final =
-      cairo_image_surface_create(src_format, (int)(width * scale_x), (int)(height * scale_y));
+  cairo_surface_t *final = cairo_image_surface_create(
+      src_format, (int)(width * scale_x), (int)(height * scale_y));
   cairo_surface_set_device_scale(final, scale_x, scale_y);
   cr = cairo_create(final);
   cairo_set_source_surface(cr, dest_surface, -x, -y);
@@ -370,8 +362,6 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
 
   double a, b;
   cairo_surface_get_device_scale(target, &a, &b);
-
-  g_debug("cairo surface device scale: %.2lf, %.2lf", a, b);
 
   double x = MIN(blur.from.x, blur.to.x);
   double y = MIN(blur.from.y, blur.to.y);
