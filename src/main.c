@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 2
+#define _POSIX_C_SOURCE 200809L
 
 #include "application.h"
 #include "config.h"

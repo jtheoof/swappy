@@ -26,7 +26,7 @@ static void write_file(GdkPixbuf *pixbuf, char *path) {
   char *msg = "Saved Swappshot to: ";
   size_t len = strlen(msg) + strlen(path) + 1;
   char *message = g_new(char, len);
-  snprintf(message, len, "%s%s", msg, path);
+  g_snprintf(message, len, "%s%s", msg, path);
   notification_send("Swappy", message);
   g_free(message);
 }
@@ -40,7 +40,8 @@ void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder) {
   c_time_string = ctime(&current_time);
   c_time_string[strlen(c_time_string) - 1] = '\0';
   char path[MAX_PATH];
-  snprintf(path, MAX_PATH, "%s/%s %s.png", folder, "Swappshot", c_time_string);
+  g_snprintf(path, MAX_PATH, "%s/%s %s.png", folder, "Swappshot",
+             c_time_string);
   write_file(pixbuf, path);
 }
 

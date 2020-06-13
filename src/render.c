@@ -191,7 +191,7 @@ static void render_text(cairo_t *cr, struct swappy_paint_text text) {
 
   pango_layout_t *layout = pango_cairo_create_layout(crt);
   pango_layout_set_text(layout, text.text, -1);
-  snprintf(pango_font, 255, "%s %d", text.font, (int)text.s);
+  g_snprintf(pango_font, 255, "%s %d", text.font, (int)text.s);
   pango_font_description_t *desc =
       pango_font_description_from_string(pango_font);
   pango_layout_set_width(layout, pango_units_from_double(w));

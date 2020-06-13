@@ -3,16 +3,28 @@ name: CI
 on: [push]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  build-gcc:
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
-      - name: Build
+      - name: GCC build
         run: |
           sudo apt-get update
-          sudo apt-get install python3-setuptools ninja-build libgtk-3-dev wayland-protocols
+          sudo apt --yes install libgtk-3-dev libnotify-dev meson ninja-build scdoc
           pkg-config --list-all
-          sudo pip3 install meson
-          meson build
+          CC=gcc meson build
           ninja -C build
+
+  build-clang:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Clang buid
+        run: |
+          sudo apt --yes install libgtk-3-dev libnotify-dev meson ninja-build scdoc clang clang-format clang-tidy
+          CC=clang meson build
+          ninja -C build
+          echo "Making sure clang-format is correct..."
+          git ls-files -- '*.[ch]' | xargs clang-format -Werror -n
+          echo "Running clang-tidy..."
+          run-clang-tidy -p build
