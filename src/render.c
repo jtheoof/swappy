@@ -16,7 +16,7 @@
  */
 static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
                                      double y, double width, double height) {
-  cairo_surface_t *dest_surface, *tmp_surface;
+  cairo_surface_t *dest_surface, *tmp_surface, *final = NULL;
   cairo_t *cr;
   int src_width, src_height;
   int src_stride, dst_stride;
@@ -66,7 +66,7 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   cairo_surface_set_device_scale(tmp_surface, scale_x, scale_y);
 
   if (cairo_surface_status(dest_surface) || cairo_surface_status(tmp_surface)) {
-    return NULL;
+    goto cleanup;
   }
 
   cr = cairo_create(tmp_surface);
@@ -92,7 +92,7 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   int end_y = CLAMP((y + height) * scale_y, 0, src_height);
 
   for (pass = 0; pass < nb_passes; pass++) {
-    /* Horizontally blur from surface -> tmp */
+    /* Horizontally blur from dst -> tmp */
     for (i = start_y; i < end_y; i++) {
       s = (uint32_t *)(dst + i * src_stride);
       d = (uint32_t *)(tmp + i * dst_stride);
@@ -117,7 +117,7 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
       }
     }
 
-    /* Then vertically blur from tmp -> surface */
+    /* Then vertically blur from tmp -> dst */
     for (i = start_y; i < end_y; i++) {
       d = (uint32_t *)(dst + i * dst_stride);
       for (j = start_x; j < end_x; j++) {
@@ -145,13 +145,21 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
 
   // Mark destination surface as dirty since it was altered with custom data.
   cairo_surface_mark_dirty(dest_surface);
-  cairo_surface_t *final = cairo_image_surface_create(
-      src_format, (int)(width * scale_x), (int)(height * scale_y));
+
+  final = cairo_image_surface_create(src_format, (int)(width * scale_x),
+                                     (int)(height * scale_y));
+
+  if (cairo_surface_status(final)) {
+    goto cleanup;
+  }
+
   cairo_surface_set_device_scale(final, scale_x, scale_y);
   cr = cairo_create(final);
   cairo_set_source_surface(cr, dest_surface, -x, -y);
   cairo_paint(cr);
   cairo_destroy(cr);
+
+cleanup:
   cairo_surface_destroy(dest_surface);
   cairo_surface_destroy(tmp_surface);
   gaussian_kernel_free(gaussian);
