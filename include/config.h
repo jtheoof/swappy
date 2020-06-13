@@ -1,6 +1,5 @@
 #include "swappy.h"
 
-#define CONFIG_BLUR_LEVEL_DEFAULT 80
 #define CONFIG_LINE_SIZE_DEFAULT 5
 #define CONFIG_TEXT_FONT_DEFAULT "sans-serif"
 #define CONFIG_TEXT_SIZE_DEFAULT 20

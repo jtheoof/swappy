@@ -19,9 +19,6 @@
 #define SWAPPY_LINE_SIZE_MIN 1
 #define SWAPPY_LINE_SIZE_MAX 50
 
-#define SWAPPY_BLUR_LEVEL_MIN 1
-#define SWAPPY_BLUR_LEVEL_MAX 500
-
 #define SWAPPY_TEXT_SIZE_MIN 10
 #define SWAPPY_TEXT_SIZE_MAX 50
 
@@ -79,7 +76,6 @@ struct swappy_paint_brush {
 };
 
 struct swappy_paint_blur {
-  double blur_level;
   struct swappy_point from;
   struct swappy_point to;
   cairo_surface_t *surface;
@@ -111,7 +107,6 @@ struct swappy_state_settings {
   double a;
   double w;
   double t;
-  guint32 blur_level;
 };
 
 struct swappy_state_ui {
@@ -137,7 +132,6 @@ struct swappy_state_ui {
   GtkRadioButton *custom;
   GtkColorButton *color;
 
-  GtkButton *blur_level;
   GtkButton *line_size;
   GtkButton *text_size;
 };
@@ -188,7 +182,6 @@ struct swappy_config {
   char *save_dir;
   guint32 line_size;
   guint32 text_size;
-  guint32 blur_level;
   char *text_font;
 };
 

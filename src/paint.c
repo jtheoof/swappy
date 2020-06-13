@@ -84,7 +84,6 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
     case SWAPPY_PAINT_MODE_BLUR:
       paint->can_draw = false;
 
-      paint->content.blur.blur_level = state->settings.blur_level;
       paint->content.blur.from.x = x;
       paint->content.blur.from.y = y;
       paint->content.blur.surface = NULL;

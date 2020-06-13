@@ -30,13 +30,6 @@ static void update_ui_undo_redo(struct swappy_state *state) {
   gtk_widget_set_sensitive(redo, redo_sensitive);
 }
 
-static void update_ui_blur_level_widget(struct swappy_state *state) {
-  GtkButton *button = GTK_BUTTON(state->ui->blur_level);
-  char label[255];
-  snprintf(label, 255, "%u", state->settings.blur_level);
-  gtk_button_set_label(button, label);
-}
-
 static void update_ui_stroke_size_widget(struct swappy_state *state) {
   GtkButton *button = GTK_BUTTON(state->ui->line_size);
   char label[255];
@@ -128,33 +121,6 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
 
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
-}
-
-static void action_blur_level_decrease(struct swappy_state *state) {
-  guint step = state->settings.blur_level <= 50 ? 5 : 10;
-
-  state->settings.blur_level -= step;
-
-  if (state->settings.blur_level < SWAPPY_BLUR_LEVEL_MIN) {
-    state->settings.blur_level = SWAPPY_BLUR_LEVEL_MIN;
-  }
-
-  update_ui_blur_level_widget(state);
-}
-static void action_blur_level_increase(struct swappy_state *state) {
-  guint step = state->settings.blur_level >= 50 ? 10 : 5;
-  state->settings.blur_level += step;
-
-  if (state->settings.blur_level > SWAPPY_BLUR_LEVEL_MAX) {
-    state->settings.blur_level = SWAPPY_BLUR_LEVEL_MAX;
-  }
-
-  update_ui_blur_level_widget(state);
-}
-static void action_blur_level_reset(struct swappy_state *state) {
-  state->settings.blur_level = state->config->blur_level;
-
-  update_ui_blur_level_widget(state);
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
@@ -510,19 +476,6 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
   }
 }
 
-void blur_level_decrease_handler(GtkWidget *widget,
-                                 struct swappy_state *state) {
-  action_blur_level_decrease(state);
-}
-
-void blur_level_increase_handler(GtkWidget *widget,
-                                 struct swappy_state *state) {
-  action_blur_level_increase(state);
-}
-void blur_level_reset_handler(GtkWidget *widget, struct swappy_state *state) {
-  action_blur_level_reset(state);
-}
-
 void color_red_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_update_color_state(state, 1, 0, 0, 1, false);
 }
@@ -671,8 +624,6 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->color =
       GTK_COLOR_BUTTON(gtk_builder_get_object(builder, "custom-color-button"));
 
-  state->ui->blur_level =
-      GTK_BUTTON(gtk_builder_get_object(builder, "blur-radius-button"));
   state->ui->line_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
   state->ui->text_size =
@@ -714,7 +665,6 @@ static bool init_gtk_window(struct swappy_state *state) {
     return false;
   }
 
-  update_ui_blur_level_widget(state);
   update_ui_stroke_size_widget(state);
   update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
@@ -741,7 +691,6 @@ static void init_settings(struct swappy_state *state) {
   state->settings.a = 1;
   state->settings.w = state->config->line_size;
   state->settings.t = state->config->text_size;
-  state->settings.blur_level = state->config->blur_level;
 }
 
 static gint command_line_handler(GtkApplication *app,
