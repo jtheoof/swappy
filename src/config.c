@@ -13,7 +13,6 @@ static void print_config(struct swappy_config *config) {
   g_info("printing config:");
   g_info("config_dir: %s", config->config_file);
   g_info("save_dir: %s", config->save_dir);
-  g_info("blur_level: %d", config->blur_level);
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
@@ -69,7 +68,7 @@ static void load_config_from_file(struct swappy_config *config,
   const gchar *group = "Default";
   gchar *save_dir = NULL;
   gchar *save_dir_expanded = NULL;
-  guint64 line_size, text_size, blur_level;
+  guint64 line_size, text_size;
   gchar *text_font = NULL;
   GError *error = NULL;
 
@@ -140,23 +139,6 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
-  blur_level = g_key_file_get_uint64(gkf, group, "blur_level", &error);
-
-  if (error == NULL) {
-    if (blur_level >= SWAPPY_BLUR_LEVEL_MIN &&
-        blur_level <= SWAPPY_BLUR_LEVEL_MAX) {
-      config->blur_level = blur_level;
-    } else {
-      g_warning(
-          "blur_level is not a valid value: %ld - see man page for details",
-          blur_level);
-    }
-  } else {
-    g_info("blur_level is missing in %s (%s)", file, error->message);
-    g_error_free(error);
-    error = NULL;
-  }
-
   text_font = g_key_file_get_string(gkf, group, "text_font", &error);
 
   if (error == NULL) {
@@ -177,7 +159,6 @@ static void load_default_config(struct swappy_config *config) {
   }
 
   config->save_dir = get_default_save_dir();
-  config->blur_level = CONFIG_BLUR_LEVEL_DEFAULT;
   config->line_size = CONFIG_LINE_SIZE_DEFAULT;
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;

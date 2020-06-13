@@ -27,10 +27,6 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state);
 
-void blur_level_decrease_handler(GtkWidget *widget, struct swappy_state *state);
-void blur_level_increase_handler(GtkWidget *widget, struct swappy_state *state);
-void blur_level_reset_handler(GtkWidget *widget, struct swappy_state *state);
-
 void brush_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void text_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void rectangle_clicked_handler(GtkWidget *widget, struct swappy_state *state);

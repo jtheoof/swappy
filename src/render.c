@@ -15,8 +15,7 @@
  * https://www.cairographics.org/cookbook/blur.c/
  */
 static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
-                                     double y, double width, double height,
-                                     gint blur_level) {
+                                     double y, double width, double height) {
   cairo_surface_t *dest_surface, *tmp_surface;
   cairo_t *cr;
   int src_width, src_height;
@@ -372,8 +371,7 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
   cairo_save(cr);
 
   if (!paint->is_committed) {
-    cairo_surface_t *blurred =
-        blur_surface(target, x, y, w, h, blur.blur_level);
+    cairo_surface_t *blurred = blur_surface(target, x, y, w, h);
 
     if (blurred && cairo_surface_status(blurred) == CAIRO_STATUS_SUCCESS) {
       cairo_set_source_surface(cr, blurred, x, y);
