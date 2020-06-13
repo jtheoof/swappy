@@ -7,7 +7,6 @@
 #include <unistd.h>
 
 #include "box.h"
-#include "wayland.h"
 
 static void randname(char *buf) {
   struct timespec ts;
@@ -152,6 +151,8 @@ bool buffer_init_from_screencopy(struct swappy_state *state) {
   int32_t with_cursor = 0;
   size_t n_pending = 0;
   struct swappy_output *output;
+
+  g_assert(geometry != NULL);
 
   const struct zwlr_screencopy_frame_v1_listener screencopy_frame_listener = {
       .buffer = screencopy_frame_handle_buffer,

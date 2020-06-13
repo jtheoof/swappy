@@ -82,7 +82,7 @@ bool clipboard_copy_drawing_area_to_selection(struct swappy_state *state) {
   }
 
   char message[MAX_PATH];
-  snprintf(message, MAX_PATH, "Swappshot copied to clipboard\n");
+  g_snprintf(message, MAX_PATH, "Swappshot copied to clipboard\n");
   notification_send("Swappy", message);
   g_object_unref(pixbuf);
 

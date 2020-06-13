@@ -7,7 +7,6 @@
 #include "clipboard.h"
 #include "config.h"
 #include "file.h"
-#include "notification.h"
 #include "paint.h"
 #include "pixbuf.h"
 #include "render.h"
@@ -33,14 +32,14 @@ static void update_ui_undo_redo(struct swappy_state *state) {
 static void update_ui_stroke_size_widget(struct swappy_state *state) {
   GtkButton *button = GTK_BUTTON(state->ui->line_size);
   char label[255];
-  snprintf(label, 255, "%.0lf", state->settings.w);
+  g_snprintf(label, 255, "%.0lf", state->settings.w);
   gtk_button_set_label(button, label);
 }
 
 static void update_ui_text_size_widget(struct swappy_state *state) {
   GtkButton *button = GTK_BUTTON(state->ui->text_size);
   char label[255];
-  snprintf(label, 255, "%.0lf", state->settings.t);
+  g_snprintf(label, 255, "%.0lf", state->settings.t);
   gtk_button_set_label(button, label);
 }
 
