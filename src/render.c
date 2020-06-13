@@ -25,10 +25,15 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   uint8_t *dst, *tmp;
   uint32_t *s, *d, p;
   int i, j, k;
-  const int size = (int)blur_level * 2 + 1;
-  const int half = size / 2;
+  const int radius = 4;
+  const double sigma = 3.1;
+  struct gaussian_kernel *gaussian = gaussian_kernel(radius, sigma);
+  const int size = gaussian->size;
+  const int half = (int)radius * 2;
   gdouble scale_x, scale_y;
   guint sum, pass, nb_passes;
+
+  sum = (guint)gaussian->sum;
 
   if (cairo_surface_status(surface)) {
     return NULL;
@@ -81,15 +86,11 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
 
   nb_passes = (guint)sqrt(scale_x * scale_y) + 1;
 
-  struct gaussian_kernel *gaussian = gaussian_kernel(4, 3.1);
-
   int start_x = CLAMP(x * scale_x, 0, src_width);
   int start_y = CLAMP(y * scale_y, 0, src_height);
 
   int end_x = CLAMP((x + width) * scale_x, 0, src_width);
   int end_y = CLAMP((y + height) * scale_y, 0, src_height);
-
-  sum = (guint)gaussian->sum;
 
   for (pass = 0; pass < nb_passes; pass++) {
     /* Horizontally blur from surface -> tmp */
@@ -98,7 +99,7 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
       d = (uint32_t *)(tmp + i * dst_stride);
       for (j = start_x; j < end_x; j++) {
         u = v = w = z = 0;
-        for (k = 0; k < gaussian->size; k++) {
+        for (k = 0; k < size; k++) {
           gdouble multiplier = gaussian->kernel[k];
 
           if (j - half + k < 0 || j - half + k >= src_width) {
@@ -122,7 +123,7 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
       d = (uint32_t *)(dst + i * dst_stride);
       for (j = start_x; j < end_x; j++) {
         u = v = w = z = 0;
-        for (k = 0; k < gaussian->size; k++) {
+        for (k = 0; k < size; k++) {
           gdouble multiplier = gaussian->kernel[k];
 
           if (i - half + k < 0 || i - half + k >= src_height) {
