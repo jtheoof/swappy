@@ -6,7 +6,7 @@
 struct gaussian_kernel *gaussian_kernel(int width, double sigma) {
   double sum = 0;
   gint size = width * width + 1;
-  double *kernel = g_new(double, size);
+  double *kernel = g_new0(double, size);
   struct gaussian_kernel *gaussian = g_new(struct gaussian_kernel, 1);
   for (gint y = 0; y < width; y++) {
     for (gint x = 0; x < width; x++) {
