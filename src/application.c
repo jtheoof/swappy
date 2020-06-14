@@ -13,13 +13,6 @@
 #include "swappy.h"
 #include "wayland.h"
 
-static void on_area_size_allocate(GtkWidget *area, struct swappy_state *state) {
-  GtkAllocation *alloc = g_new(GtkAllocation, 1);
-  gtk_widget_get_allocation(area, alloc);
-  g_info("size of area to render: %ux%u", alloc->width, alloc->height);
-  g_free(alloc);
-}
-
 static void update_ui_undo_redo(struct swappy_state *state) {
   GtkWidget *undo = GTK_WIDGET(state->ui->undo);
   GtkWidget *redo = GTK_WIDGET(state->ui->redo);
@@ -237,7 +230,10 @@ void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
   buffer_free_all(state);
-  cairo_surface_destroy(state->cairo_surface);
+  g_free(state->drawing_area_rect);
+  cairo_surface_destroy(state->rendered_surface);
+  cairo_surface_destroy(state->original_image_surface);
+  cairo_surface_destroy(state->scaled_image_surface);
   g_free(state->file_str);
   g_free(state->geometry_str);
   g_free(state->geometry);
@@ -382,7 +378,7 @@ void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
                            struct swappy_state *state) {
-  cairo_set_source_surface(cr, state->cairo_surface, 0, 0);
+  cairo_set_source_surface(cr, state->rendered_surface, 0, 0);
   cairo_paint(cr);
 
   return FALSE;
@@ -392,19 +388,26 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
                                      GdkEventConfigure *event,
                                      struct swappy_state *state) {
   g_debug("received configure_event handler");
-  cairo_surface_destroy(state->cairo_surface);
+  cairo_surface_destroy(state->rendered_surface);
+  g_free(state->drawing_area_rect);
 
   cairo_surface_t *surface = gdk_window_create_similar_surface(
       gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR_ALPHA,
       gtk_widget_get_allocated_width(widget),
       gtk_widget_get_allocated_height(widget));
 
+  state->rendered_surface = surface;
+
+  GtkAllocation *alloc = g_new(GtkAllocation, 1);
+  gtk_widget_get_allocation(widget, alloc);
+  state->drawing_area_rect = alloc;
+  buffer_resize_patterns(state);
+
   g_info("size of cairo_surface: %ux%u with type: %d",
          cairo_image_surface_get_width(surface),
          cairo_image_surface_get_height(surface),
          cairo_image_surface_get_format(surface));
-
-  state->cairo_surface = surface;
+  g_info("size of area to render: %ux%u", alloc->width, alloc->height);
 
   render_state(state);
 
@@ -655,9 +658,6 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->blur = blur;
   state->ui->area = area;
   state->ui->window = window;
-
-  g_signal_connect(area, "size-allocate", G_CALLBACK(on_area_size_allocate),
-                   state);
 
   compute_window_size(state);
 

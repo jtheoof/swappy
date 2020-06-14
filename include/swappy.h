@@ -196,7 +196,10 @@ struct swappy_state {
   struct swappy_config *config;
   struct swappy_wayland *wl;
 
-  cairo_surface_t *cairo_surface;
+  cairo_surface_t *original_image_surface;
+  cairo_surface_t *scaled_image_surface;
+  cairo_surface_t *rendered_surface;
+
   GList *patterns;  // List of cairo_pattern_t
 
   enum swappy_paint_type mode;
@@ -208,6 +211,9 @@ struct swappy_state {
 
   struct swappy_box *window;
   struct swappy_box *geometry;
+
+  cairo_rectangle_int_t *drawing_area_rect;
+
   gint scaling_factor;
 
   GList *paints;

@@ -335,29 +335,6 @@ static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_restore(cr);
 }
 
-static void render_buffers(cairo_t *cr, struct swappy_state *state) {
-  if (!state->patterns) {
-    return;
-  }
-
-  cairo_save(cr);
-
-  double sx = (double)state->window->width / state->geometry->width;
-  double sy = (double)state->window->height / state->geometry->height;
-
-  //  g_debug("scaling cairo context: (%.2lf, %.2lf)", sx, sy);
-
-  cairo_scale(cr, sx, sy);
-
-  for (GList *elem = state->patterns; elem; elem = elem->prev) {
-    cairo_pattern_t *pattern = elem->data;
-    cairo_set_source(cr, pattern);
-    cairo_paint(cr);
-  }
-
-  cairo_restore(cr);
-}
-
 static void render_background(cairo_t *cr, struct swappy_state *state) {
   cairo_set_source_rgb(cr, 0, 0, 0);
   cairo_paint(cr);
@@ -434,6 +411,19 @@ static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
   }
 }
 
+static void render_image(cairo_t *cr, struct swappy_state *state) {
+  cairo_surface_t *surface = state->scaled_image_surface;
+
+  cairo_save(cr);
+
+  if (surface && !cairo_surface_status(surface)) {
+    cairo_set_source_surface(cr, surface, 0, 0);
+    cairo_paint(cr);
+  }
+
+  cairo_restore(cr);
+}
+
 static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
   if (!paint->can_draw) {
     return;
@@ -471,11 +461,11 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
 }
 
 void render_state(struct swappy_state *state) {
-  cairo_surface_t *surface = state->cairo_surface;
+  cairo_surface_t *surface = state->rendered_surface;
   cairo_t *cr = cairo_create(surface);
 
   render_background(cr, state);
-  render_buffers(cr, state);
+  render_image(cr, state);
   render_paints(cr, state);
 
   cairo_destroy(cr);

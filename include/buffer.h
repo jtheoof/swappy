@@ -12,4 +12,6 @@ bool buffer_init_from_file(struct swappy_state *state);
 
 bool buffer_parse_geometry(struct swappy_state *state);
 
+void buffer_resize_patterns(struct swappy_state *state);
+
 void buffer_free_all(struct swappy_state *state);

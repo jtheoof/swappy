@@ -6,10 +6,10 @@
 #include "notification.h"
 
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
-  guint width = cairo_image_surface_get_width(state->cairo_surface);
-  guint height = cairo_image_surface_get_height(state->cairo_surface);
+  guint width = cairo_image_surface_get_width(state->rendered_surface);
+  guint height = cairo_image_surface_get_height(state->rendered_surface);
   GdkPixbuf *pixbuf =
-      gdk_pixbuf_get_from_surface(state->cairo_surface, 0, 0, width, height);
+      gdk_pixbuf_get_from_surface(state->rendered_surface, 0, 0, width, height);
 
   return pixbuf;
 }
