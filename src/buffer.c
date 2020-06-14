@@ -275,8 +275,7 @@ bool buffer_init_from_file(struct swappy_state *state) {
 
   cairo_pattern_t *output_pattern = cairo_pattern_create_for_surface(surface);
   state->patterns = g_list_append(state->patterns, output_pattern);
-
-  cairo_surface_destroy(surface);
+  state->original_image_surface = surface;
 
   return true;
 }
@@ -292,6 +291,46 @@ bool buffer_parse_geometry(struct swappy_state *state) {
     return false;
   }
   return true;
+}
+
+static void scale_pattern(gpointer data, gpointer user_data) {
+  struct swappy_state *state = (struct swappy_state *)user_data;
+  cairo_pattern_t *pattern = (cairo_pattern_t *)data;
+  int image_width, image_height;
+  int rendered_width, rendered_height;
+
+  image_width = state->geometry->width;
+  image_height = state->geometry->height;
+
+  rendered_width = state->drawing_area_rect->width;
+  rendered_height = state->drawing_area_rect->height;
+
+  cairo_surface_t *scaled = cairo_surface_create_similar(
+      state->rendered_surface, CAIRO_CONTENT_COLOR_ALPHA, rendered_width,
+      rendered_height);
+  cairo_t *cr = cairo_create(scaled);
+
+  double sx = (double)rendered_width / image_width;
+  double sy = (double)rendered_height / image_height;
+
+  cairo_matrix_t matrix;
+  cairo_matrix_init_scale(&matrix, 1.0 / sx, 1.0 / sy);
+  cairo_pattern_set_matrix(pattern, &matrix);
+  cairo_set_source_surface(cr, state->original_image_surface, 0, 0);
+  cairo_set_source(cr, pattern);
+  cairo_paint(cr);
+
+  cairo_destroy(cr);
+
+  if (state->scaled_image_surface) {
+    cairo_surface_destroy(state->scaled_image_surface);
+  }
+
+  state->scaled_image_surface = scaled;
+}
+
+void buffer_resize_patterns(struct swappy_state *state) {
+  g_list_foreach(state->patterns, scale_pattern, state);
 }
 
 void buffer_wayland_destroy(struct swappy_buffer *buffer) {
