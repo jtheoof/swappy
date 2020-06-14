@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
-      - name: Clang buid
+      - name: Clang build
         run: |
           sudo apt --yes install libgtk-3-dev libnotify-dev meson ninja-build scdoc clang clang-format clang-tidy
           CC=clang meson build
