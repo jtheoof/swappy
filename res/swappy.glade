@@ -365,7 +365,7 @@
                     </child>
                     <child>
                       <object class="GtkRadioButton" id="blur">
-                        <property name="label" translatable="yes">💧</property>
+                        <property name="label" translatable="yes"></property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
