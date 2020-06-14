@@ -43,6 +43,15 @@ static void update_ui_text_size_widget(struct swappy_state *state) {
   gtk_button_set_label(button, label);
 }
 
+static void update_ui_panel_toggle_button(struct swappy_state *state) {
+  GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->panel_toggle_button);
+  gboolean toggled = state->ui->panel_toggled;
+
+  gtk_toggle_button_set_active(button, toggled);
+  gtk_widget_set_visible(painting_box, toggled);
+}
+
 static void action_undo(struct swappy_state *state) {
   GList *first = state->paints;
 
@@ -73,10 +82,11 @@ static void action_clear(struct swappy_state *state) {
   update_ui_undo_redo(state);
 }
 
-static void action_toggle_painting_pane(struct swappy_state *state) {
-  GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
-  gboolean is_visible = gtk_widget_get_visible(painting_box);
-  gtk_widget_set_visible(painting_box, !is_visible);
+static void action_toggle_painting_panel(struct swappy_state *state,
+                                         gboolean *toggled) {
+  state->ui->panel_toggled =
+      (toggled == NULL) ? !state->ui->panel_toggled : *toggled;
+  update_ui_panel_toggle_button(state);
 }
 
 static void action_update_color_state(struct swappy_state *state, double r,
@@ -267,7 +277,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         save_state_to_file_or_folder(state, NULL);
         break;
       case GDK_KEY_b:
-        action_toggle_painting_pane(state);
+        action_toggle_painting_panel(state, NULL);
         break;
       case GDK_KEY_w:
         gtk_main_quit();
@@ -354,6 +364,12 @@ gboolean window_delete_handler(GtkWidget *widget, GdkEvent *event,
                                struct swappy_state *state) {
   gtk_main_quit();
   return FALSE;
+}
+
+void pane_toggled_handler(GtkWidget *widget, struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
+  gboolean toggled = gtk_toggle_button_get_active(button);
+  action_toggle_painting_panel(state, &toggled);
 }
 
 void undo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -591,6 +607,9 @@ static bool load_layout(struct swappy_state *state) {
 
   g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 
+  state->ui->panel_toggle_button =
+      GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "btn-toggle-panel"));
+
   state->ui->undo = GTK_BUTTON(gtk_builder_get_object(builder, "undo-button"));
   state->ui->redo = GTK_BUTTON(gtk_builder_get_object(builder, "redo-button"));
 
@@ -667,6 +686,7 @@ static bool init_gtk_window(struct swappy_state *state) {
   update_ui_stroke_size_widget(state);
   update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
+  update_ui_panel_toggle_button(state);
 
   return true;
 }
@@ -771,6 +791,7 @@ bool application_init(struct swappy_state *state) {
   g_application_add_main_option_entries(G_APPLICATION(state->app), cli_options);
 
   state->ui = g_new(struct swappy_state_ui, 1);
+  state->ui->panel_toggled = false;
 
   g_signal_connect(state->app, "command-line", G_CALLBACK(command_line_handler),
                    state);
