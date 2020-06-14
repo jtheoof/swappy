@@ -110,8 +110,12 @@ struct swappy_state_settings {
 };
 
 struct swappy_state_ui {
+  gboolean panel_toggled;
+
   GtkWindow *window;
   GtkWidget *area;
+
+  GtkToggleButton *panel_toggle_button;
 
   // Undo / Redo
   GtkButton *undo;
