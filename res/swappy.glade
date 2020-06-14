@@ -12,6 +12,21 @@
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo</property>
   </object>
+  <object class="GtkImage" id="img-clear-paints">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-delete</property>
+  </object>
+  <object class="GtkImage" id="img-copy-surface">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">edit-copy</property>
+  </object>
+  <object class="GtkImage" id="img-save-surface">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-save</property>
+  </object>
   <object class="GtkImage" id="zoom-in">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -610,6 +625,7 @@
           <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">10</property>
             <property name="layout_style">start</property>
             <child>
               <object class="GtkButton" id="undo-button">
@@ -618,6 +634,7 @@
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Undo Last Paint</property>
                 <property name="image">edit-undo</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="undo_clicked_handler" swapped="no"/>
@@ -636,11 +653,12 @@
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Redo Previous Paint</property>
                 <property name="image">edit-redo</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="redo_clicked_handler" swapped="no"/>
-                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                 <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -655,12 +673,15 @@
           <object class="GtkBox" id="control_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">10</property>
             <child>
               <object class="GtkButton" id="copy">
-                <property name="label" translatable="yes">Copy</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Copy Surface</property>
+                <property name="image">img-copy-surface</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="copy_clicked_handler" swapped="no"/>
               </object>
               <packing>
@@ -671,10 +692,12 @@
             </child>
             <child>
               <object class="GtkButton" id="save">
-                <property name="label" translatable="yes">Save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Save Surface</property>
+                <property name="image">img-save-surface</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="save_clicked_handler" swapped="no"/>
               </object>
               <packing>
@@ -707,10 +730,12 @@
             </child>
             <child>
               <object class="GtkButton" id="clear">
-                <property name="label" translatable="yes">Clear</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Clear Paints</property>
+                <property name="image">img-clear-paints</property>
+                <property name="always_show_image">True</property>
                 <signal name="clicked" handler="clear_clicked_handler" swapped="no"/>
               </object>
               <packing>
