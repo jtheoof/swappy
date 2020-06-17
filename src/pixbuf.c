@@ -51,7 +51,7 @@ void pixbuf_save_to_stdout(GdkPixbuf *pixbuf) {
 
   out = g_unix_output_stream_new(STDOUT_FILENO, TRUE);
 
-  gdk_pixbuf_save_to_stream(pixbuf, out, "png", NULL, &error);
+  gdk_pixbuf_save_to_stream(pixbuf, out, "png", NULL, &error, NULL);
 
   if (error != NULL) {
     g_warning("unable to save surface to stdout: %s", error->message);
