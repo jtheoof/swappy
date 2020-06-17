@@ -1,5 +1,7 @@
 #include "paint.h"
 
+#include <glib.h>
+
 #include "util.h"
 
 static void cursor_move_backward(struct swappy_paint_text *text) {
@@ -157,8 +159,8 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
   // Bounding x and y to the window dimensions to avoid side effects in
   // rendering.
-  x = fmin(fmax(x, 0), width);
-  y = fmin(fmax(y, 0), height);
+  x = MIN(MAX(x, 0), width);
+  y = MIN(MAX(y, 0), height);
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:

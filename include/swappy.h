@@ -5,16 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <wayland-client.h>
-#ifdef HAVE_WAYLAND_PROTOCOLS
-#include <xdg-output-unstable-v1-client-protocol.h>
-#endif
-
-#include "wlr-screencopy-unstable-v1-client-protocol.h"
 
 #define MAX_PATH 4096
-
-#define GEOMETRY_PATTERN "xx,yy wwxhh"
 
 #define SWAPPY_LINE_SIZE_MIN 1
 #define SWAPPY_LINE_SIZE_MAX 50
@@ -140,47 +132,6 @@ struct swappy_state_ui {
   GtkButton *text_size;
 };
 
-struct swappy_buffer {
-  struct wl_buffer *wl_buffer;
-  void *data;
-  int32_t width, height, stride;
-  size_t size;
-  enum wl_shm_format format;
-};
-
-struct swappy_output {
-  struct swappy_state *state;
-  struct swappy_box geometry;
-  struct swappy_box logical_geometry;
-  struct wl_output *wl_output;
-  struct wl_list link;
-  int32_t scale;
-  struct swappy_buffer *buffer;
-
-  char *name;
-
-  enum wl_output_transform transform;
-  struct zwlr_screencopy_frame_v1 *screencopy_frame;
-  uint32_t screencopy_frame_flags;  // enum zwlr_screencopy_frame_v1_flags
-
-#ifdef HAVE_WAYLAND_PROTOCOLS
-  struct zxdg_output_v1 *xdg_output;
-#endif
-};
-
-struct swappy_wayland {
-  struct wl_display *display;
-  struct wl_registry *registry;
-  struct wl_compositor *compositor;
-  struct wl_shm *shm;
-  struct wl_list outputs;
-  struct zwlr_screencopy_manager_v1 *zwlr_screencopy_manager;
-  size_t n_done;
-#ifdef HAVE_WAYLAND_PROTOCOLS
-  struct zxdg_output_manager_v1 *xdg_output_manager;
-#endif
-};
-
 struct swappy_config {
   char *config_file;
   char *save_dir;
@@ -195,7 +146,6 @@ struct swappy_state {
 
   struct swappy_state_ui *ui;
   struct swappy_config *config;
-  struct swappy_wayland *wl;
 
   cairo_surface_t *original_image_surface;
   cairo_surface_t *scaled_image_surface;
@@ -206,7 +156,6 @@ struct swappy_state {
   enum swappy_paint_type mode;
 
   /* Options */
-  char *geometry_str;
   char *file_str;
   char *output_file;
 

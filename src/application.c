@@ -11,7 +11,6 @@
 #include "pixbuf.h"
 #include "render.h"
 #include "swappy.h"
-#include "wayland.h"
 
 static void update_ui_undo_redo(struct swappy_state *state) {
   GtkWidget *undo = GTK_WIDGET(state->ui->undo);
@@ -235,13 +234,11 @@ void application_finish(struct swappy_state *state) {
   cairo_surface_destroy(state->original_image_surface);
   cairo_surface_destroy(state->scaled_image_surface);
   g_free(state->file_str);
-  g_free(state->geometry_str);
   g_free(state->geometry);
   g_free(state->window);
   g_free(state->ui);
   g_object_unref(state->app);
 
-  wayland_finish(state);
   config_free(state);
 }
 
@@ -689,10 +686,6 @@ static bool init_gtk_window(struct swappy_state *state) {
   return true;
 }
 
-static gboolean has_option_geometry(struct swappy_state *state) {
-  return (state->geometry_str != NULL);
-}
-
 static gboolean has_option_file(struct swappy_state *state) {
   return (state->file_str != NULL);
 }
@@ -716,22 +709,6 @@ static gint command_line_handler(GtkApplication *app,
   config_load(state);
   init_settings(state);
 
-  if (!wayland_init(state)) {
-    g_warning(
-        "error while initializing wayland objects, can only be used in file "
-        "mode");
-  }
-
-  if (has_option_geometry(state)) {
-    if (!buffer_parse_geometry(state)) {
-      return EXIT_FAILURE;
-    }
-
-    if (!buffer_init_from_screencopy(state)) {
-      return EXIT_FAILURE;
-    }
-  }
-
   if (has_option_file(state)) {
     if (is_file_from_stdin(state->file_str)) {
       char *new_file_str = file_dump_stdin_into_a_temp_file();
@@ -753,14 +730,6 @@ static gint command_line_handler(GtkApplication *app,
 
 bool application_init(struct swappy_state *state) {
   const GOptionEntry cli_options[] = {
-      {
-          .long_name = "geometry",
-          .short_name = 'g',
-          .arg = G_OPTION_ARG_STRING,
-          .arg_data = &state->geometry_str,
-          .description =
-              "Set the region to capture. (Can be an output of slurp)",
-      },
       {
           .long_name = "file",
           .short_name = 'f',

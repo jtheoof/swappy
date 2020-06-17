@@ -1,10 +1,6 @@
 # swappy
 
-A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [grim], [slurp] and [sway]. Also works with other screenshot tools if you use the `-f` option. See [below](#example-usage).
-
-Wayland code was largely taken from [grim] and requires a compositor that implements the [wlr-screencopy-unstable-v1] protocol.
-
-You can use this tool in two ways, either use it as the output of `grim` (**recommended**) or grab the geometry yourself (`wayland` code is still WIP).
+A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [grim], [slurp] and [sway]. But can easily work with other screen copy tools that can output a final PNG image to `stdout`. See [below](#example-usage).
 
 ## Screenshot
 
@@ -18,22 +14,10 @@ Output of `grim` (or any tool outputing a PNG file):
 grim -g "$(slurp)" - | swappy -f -
 ```
 
-Swappshot a PNG file (good for compositors not supporting screencopy protocol):
+Swappshot a PNG file:
 
 ```sh
 swappy -f "~/Desktop/my-gnome-saved-file.png"
-```
-
-Swappshot a region:
-
-```sh
-swappy -g "100,100 200x200"
-```
-
-Select a region and swappshot it:
-
-```sh
-swappy -g "$(slurp)"
 ```
 
 Print final surface to stdout (useful to pipe with other tools):
@@ -118,7 +102,6 @@ Install dependencies (on Arch, name can vary for other distros):
 
 - meson
 - ninja
-- wayland
 - cairo
 - pango
 - gtk
@@ -127,7 +110,7 @@ Install dependencies (on Arch, name can vary for other distros):
 
 Optional dependencies:
 
-- wayland-protocols (for the `-g` option to work with [wlr-screencopy-unstable-v1] protocol)
+- `wl-clipboard` (to make sure the copy is saved if you close swappy)
 - wl-clipboard (to make sure the copy is saved if you close swappy)
 - libnotify (not get notified when swappshot is copied or saved)
 
@@ -151,4 +134,3 @@ MIT
 [grim]: https://github.com/emersion/grim
 [sway]: https://github.com/swaywm/sway
 [wl-clipboard]: https://github.com/bugaevc/wl-clipboard
-[wlr-screencopy-unstable-v1]: https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-screencopy-unstable-v1.xml

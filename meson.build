@@ -28,9 +28,6 @@ math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = cc.find_library('gio-2.0')
-wayland_client = dependency('wayland-client')
-wayland_cursor = dependency('wayland-cursor')
-wayland_protos = dependency('wayland-protocols', version: '>=1.14', required: false)
 
 libnotify = dependency('libnotify', required: false)
 
@@ -38,13 +35,7 @@ if libnotify.found()
 	add_project_arguments('-DHAVE_LIBNOTIFY', language: 'c')
 endif
 
-if wayland_protos.found()
-	add_project_arguments('-DHAVE_WAYLAND_PROTOCOLS', language: 'c')
-endif
-
-
 subdir('res')
-subdir('protocol')
 
 executable(
 	'swappy',
@@ -63,19 +54,15 @@ executable(
 		'src/render.c',
 		'src/notification.c',
 		'src/util.c',
-		'src/wayland.c',
 	]),
 	dependencies: [
 		cairo,
 		pango,
-		client_protos,
 		gio,
 		gtk,
 		libnotify,
 		math,
 		realtime,
-		wayland_client,
-		wayland_cursor,
 	],
 	link_args: '-rdynamic',
 	include_directories: [swappy_inc],
