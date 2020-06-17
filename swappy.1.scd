@@ -11,12 +11,10 @@ swappy - grab and edit on the fly snapshots of a Wayland compositor
 # SYNOPSIS
 
 swappy is a command-line utility to take and edit screenshots of Wayland
-desktops. It can also work on regular X11 desktops if using the *-f* option.
+desktops. Works great with grim, slurp and sway. But can easily work with
+other screen copy tools that can output a final PNG image to *stdout*.
 
-Can be used in two ways, either as the output of grim (recommended) or by
-grabbing the geometry (if the compositor supports the screencopy protocol).
-
-swappy will save the swappshot images to the config *save_dir*, see below.
+swappy will save the annotated images to the config *save_dir*, see below.
 
 If absent, then if it will try to default to a *Desktop* folder following this
 pattern: *$XDG\_DESKTOP\_DIR*. If this variable is not set, it will revert to:
@@ -27,11 +25,6 @@ to: *$HOME/Desktop*.
 
 *-h*
 	Show help message and quit.
-
-*-g* "<x>,<y> <width>x<height>"
-	Set the region to capture, in layout coordinates. This is slurp friendly.
-
-	Requires a Wayland compositor that supports screencopy protocol.
 
 *-f* <file>
 	A PNG file to load for editing.
