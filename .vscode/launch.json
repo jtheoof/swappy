@@ -19,6 +19,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -43,6 +44,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -67,6 +69,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -91,6 +94,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -115,6 +119,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
@@ -139,6 +144,7 @@
         }
       ],
       "externalConsole": false,
+      "preLaunchTask": "build",
       "MIMode": "gdb",
       "setupCommands": [
         {
