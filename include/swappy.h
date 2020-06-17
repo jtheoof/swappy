@@ -214,8 +214,6 @@ struct swappy_state {
 
   cairo_rectangle_int_t *drawing_area_rect;
 
-  gint scaling_factor;
-
   GList *paints;
   GList *redo_paints;
   struct swappy_paint *temp_paint;
