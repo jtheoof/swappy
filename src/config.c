@@ -13,6 +13,7 @@ static void print_config(struct swappy_config *config) {
   g_info("printing config:");
   g_info("config_dir: %s", config->config_file);
   g_info("save_dir: %s", config->save_dir);
+  g_info("show_panel: %d", config->show_panel);
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
@@ -67,6 +68,7 @@ static void load_config_from_file(struct swappy_config *config,
   GKeyFile *gkf;
   const gchar *group = "Default";
   gchar *save_dir = NULL;
+  gboolean show_panel;
   gchar *save_dir_expanded = NULL;
   guint64 line_size, text_size;
   gchar *text_font = NULL;
@@ -150,6 +152,16 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  show_panel = g_key_file_get_boolean(gkf, group, "show_panel", &error);
+
+  if (error == NULL) {
+    config->show_panel = show_panel;
+  } else {
+    g_info("show_panel is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -162,6 +174,7 @@ static void load_default_config(struct swappy_config *config) {
   config->line_size = CONFIG_LINE_SIZE_DEFAULT;
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;
+  config->show_panel = CONFIG_SHOW_PANEL_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {

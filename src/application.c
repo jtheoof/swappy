@@ -658,9 +658,9 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->window = window;
 
   compute_window_size(state);
-
   gtk_widget_set_size_request(area, state->window->width,
                               state->window->height);
+  action_toggle_painting_panel(state, &state->config->show_panel);
 
   g_object_unref(G_OBJECT(builder));
 

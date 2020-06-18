@@ -184,6 +184,7 @@ struct swappy_wayland {
 struct swappy_config {
   char *config_file;
   char *save_dir;
+  gboolean show_panel;
   guint32 line_size;
   guint32 text_size;
   char *text_font;
