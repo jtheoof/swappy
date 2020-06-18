@@ -62,6 +62,7 @@ The following lines can be used as swappy's default:
 ```
 	[Default]
 	save_dir=$HOME/Desktop
+	show_panel=false
 	blur_level=80
 	line_size=5
 	text_size=20
@@ -69,6 +70,7 @@ The following lines can be used as swappy's default:
 ```
 
 - *save_dir* is where swappshots will be saved, can contain env variables and must exist in your filesystem
+- *show_panel* is used to toggle the paint panel on or off upon startup
 - *blur_level* is the default blur level (must be between 1 and 500)
 - *line_size* is the default line size (must be between 1 and 50)
 - *text_size* is the default text size (must be between 10 and 50)
