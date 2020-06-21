@@ -95,6 +95,7 @@ The following lines can be used as swappy's default:
 ## Installation
 
 - [Arch Linux](https://aur.archlinux.org/packages/swappy-git)
+- [fedora 31/32](https://copr.fedorainfracloud.org/coprs/wef/swappy)
 
 ## Building from source
 
