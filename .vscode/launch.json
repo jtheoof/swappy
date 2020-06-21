@@ -34,7 +34,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/swappy",
-      "args": ["-f", "docs/images/screenshot.png"],
+      "args": ["-f", "docs/images/screenshot-beta.png"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -109,7 +109,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/swappy",
-      "args": ["-f", "docs/images/screenshot.png", "-o", "-"],
+      "args": ["-f", "docs/images/screenshot-beta.png", "-o", "-"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
