@@ -94,7 +94,8 @@ The following lines can be used as swappy's default:
 
 ## Installation
 
-- [Arch Linux](https://aur.archlinux.org/packages/swappy-git)
+- [Arch Linux](https://aur.archlinux.org/packages/swappy)
+- [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 
 ## Building from source
 
