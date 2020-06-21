@@ -41,12 +41,12 @@ The file follows the GLib `conf` format. See the `man` page for details. There i
 The following lines can be used as swappy's default:
 
 ```
-	[Default]
-	save_dir=$HOME/Desktop
-	show_panel=false
-	line_size=5
-	text_size=20
-	text_font=sans-serif
+[Default]
+save_dir=$HOME/Desktop
+show_panel=false
+line_size=5
+text_size=20
+text_font=sans-serif
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables and must exist in your filesystem
@@ -94,7 +94,8 @@ The following lines can be used as swappy's default:
 
 ## Installation
 
-- [Arch Linux](https://aur.archlinux.org/packages/swappy-git)
+- [Arch Linux](https://aur.archlinux.org/packages/swappy)
+- [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 - [Fedora 31/32](https://copr.fedorainfracloud.org/coprs/wef/swappy)
 
 ## Building from source

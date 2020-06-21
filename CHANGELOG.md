@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/jtheoof/swappy/compare/v1.0.0...v1.0.1) (2020-06-21)
+
+
+### Bug Fixes
+
+* **cli:** stop showing -g option ([ee06d66](https://github.com/jtheoof/swappy/commit/ee06d6685f6f59ffce544b45d7b51f3f4523348b))
+
 ## 1.0.0 (2020-06-21)
 
 
