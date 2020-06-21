@@ -4,7 +4,7 @@ A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works 
 
 ## Screenshot
 
-![Swappy Screenshot](docs/images/screenshot.png)
+![Swappy Screenshot](docs/images/screenshot-1.0.0.png)
 
 ## Example usage
 
