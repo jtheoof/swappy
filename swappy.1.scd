@@ -23,10 +23,13 @@ to: *$HOME/Desktop*.
 
 # OPTIONS
 
-*-h*
+*-h, --help*
 	Show help message and quit.
 
-*-f* <file>
+*-v, --version*
+	Show version and quit.
+
+*-f, --file* <file>
 	A PNG file to load for editing.
 
 	If set to *-*, read the file from standard input instead. This is grim
