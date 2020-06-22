@@ -729,7 +729,7 @@ static gint command_line_handler(GtkApplication *app,
   return EXIT_SUCCESS;
 }
 
-// Print version and guit
+// Print version and quit
 gboolean callback_on_flag(const gchar *option_name, 
             const gchar *value,
             gpointer data,
