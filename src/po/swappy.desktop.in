@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Swappy
+GenericName=Annotation Tool
+Comment=A Wayland native snapshot editing tool
+TryExec=swappy
+Exec=swappy -f %F
+Terminal=true
+Type=Application
+Keywords=wayland;snapshot;annotation;editing;
+Icon=swappy
+Categories=Utility;Graphics;Annotation;
+StartupNotify=true
+MimeType=image/png;
