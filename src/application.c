@@ -1,8 +1,8 @@
 #include <gdk/gdk.h>
 #include <glib-2.0/glib.h>
 #include <gtk/gtk.h>
-#include <time.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "buffer.h"
 #include "clipboard.h"
@@ -730,20 +730,19 @@ static gint command_line_handler(GtkApplication *app,
 }
 
 // Print version and quit
-gboolean callback_on_flag(const gchar *option_name, 
-            const gchar *value,
-            gpointer data,
-            GError **error) {
-      if (!strcmp(option_name, "-v") || !strcmp(option_name, "--version")) {
-        printf("swappy version %s\n", SWAPPY_VERSION);
-        exit(0);
-      }
-      return TRUE;
+gboolean callback_on_flag(const gchar *option_name, const gchar *value,
+                          gpointer data, GError **error) {
+  if (!strcmp(option_name, "-v") || !strcmp(option_name, "--version")) {
+    printf("swappy version %s\n", SWAPPY_VERSION);
+    exit(0);
+  }
+  return TRUE;
 }
 
 bool application_init(struct swappy_state *state) {
   // Callback function for flags
-  gboolean (*GOptionArgFunc) (const gchar *option_name, const gchar *value, gpointer data, GError **error);
+  gboolean (*GOptionArgFunc)(const gchar *option_name, const gchar *value,
+                             gpointer data, GError **error);
   GOptionArgFunc = &callback_on_flag;
 
   const GOptionEntry cli_options[] = {
