@@ -51,6 +51,7 @@ if libnotify.found()
 endif
 
 subdir('res')
+subdir('src/po')
 
 executable(
 	'swappy',
