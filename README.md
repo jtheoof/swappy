@@ -125,7 +125,16 @@ ninja -C build
 
 ## Contributing
 
-Pull requests are welcome.
+Pull requests are welcome. This project uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to automate changelog generation.
+
+## Generating a new release
+
+This is only for maintainers, to create a new release. We rely on [standard-version](https://github.com/conventional-changelog/standard-version) which is part of the JavaScript ecosystem but works well with any project.
+
+```
+npx standard-version --sign
+git push --follow-tags
+```
 
 ## License
 
