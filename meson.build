@@ -1,7 +1,7 @@
 project(
 	'swappy',
 	'c',
-	version: '1.0.0',
+	version: '1.0.1',
 	license: 'MIT',
 	meson_version: '>=0.48.0',
 	default_options: [
@@ -10,6 +10,21 @@ project(
 		'werror=true',
 	],
 )
+
+version = '"@0@"'.format(meson.project_version())
+git = find_program('git', native: true, required: false)
+if git.found()
+	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'])
+	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'])
+	if git_commit.returncode() == 0 and git_branch.returncode() == 0
+		version = '"@0@-@1@ (" __DATE__ ", branch \'@2@\')"'.format(
+			meson.project_version(),
+			git_commit.stdout().strip(),
+			git_branch.stdout().strip(),
+		)
+	endif
+endif
+add_project_arguments('-DSWAPPY_VERSION=@0@'.format(version), language: 'c')
 
 add_project_arguments('-Wno-unused-parameter', language: 'c')
 
