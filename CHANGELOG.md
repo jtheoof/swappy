@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/jtheoof/swappy/compare/v1.0.1...v1.1.0) (2020-06-23)
+
+
+### Features
+
+* **cli:** add -v and --version flags ([e32c024](https://github.com/jtheoof/swappy/commit/e32c02454ae4ec6ac30549d5fa9e80c2b64edb72))
+
 ### [1.0.1](https://github.com/jtheoof/swappy/compare/v1.0.0...v1.0.1) (2020-06-21)
 
 
