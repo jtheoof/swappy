@@ -44,7 +44,7 @@ realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
 
-libnotify = dependency('libnotify', required: false)
+libnotify = dependency('libnotify', required: get_option('libnotify'))
 
 if libnotify.found()
 	add_project_arguments('-DHAVE_LIBNOTIFY', language: 'c')
