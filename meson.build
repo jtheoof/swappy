@@ -1,78 +1,44 @@
 project(
 	'swappy',
-	'c',
+	'rust',
 	version: '1.5.1',
 	license: 'MIT',
-	meson_version: '>=0.48.0',
-	default_options: [
-		'c_std=c11',
-		'warning_level=2',
-		'werror=true',
-	],
+	meson_version: '>=0.59.0',
+  default_options: [ 'warning_level=2', ],
 )
 
 version = '"@0@"'.format(meson.project_version())
 git = find_program('git', native: true, required: false)
 if git.found()
-	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check:true)
-	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check:true)
+	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check: true)
+	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check: true)
 	if git_commit.returncode() == 0 and git_branch.returncode() == 0
-		version = '"@0@-@1@ (" __DATE__ ", branch \'@2@\')"'.format(
+	  # TODO: Try to add __DATE__ back
+		version = '"@0@-@1@ (branch \'@2@\')"'.format(
 			meson.project_version(),
 			git_commit.stdout().strip(),
 			git_branch.stdout().strip(),
 		)
 	endif
 endif
-add_project_arguments('-DSWAPPY_VERSION=@0@'.format(version), language: 'c')
 
-add_project_arguments('-Wno-unused-parameter', language: 'c')
-
-swappy_inc = include_directories('include')
-
-cc = meson.get_compiler('c')
-
-if cc.get_id() == 'clang'
-    message('clang')
-    add_global_arguments('-Wno-missing-field-initializers', language: 'c')
-endif
+application_id = 'me.jtheoof.swappy'
 
 cairo = dependency('cairo')
 pango = dependency('pango')
-math = cc.find_library('m')
-gtk = dependency('gtk+-3.0', version: '>=3.20.0')
+gtk4 = dependency('gtk4', version: '>= 4.6.0')
 gio = dependency('gio-2.0')
 
-subdir('res')
-subdir('src/po')
+cargo = find_program('cargo', required: true)
 
-executable(
-	'swappy',
-	swappy_resources,
-	files([
-		'src/main.c',
-		'src/algebra.c',
-		'src/application.c',
-		'src/box.c',
-		'src/config.c',
-		'src/clipboard.c',
-		'src/file.c',
-		'src/paint.c',
-		'src/pixbuf.c',
-		'src/render.c',
-		'src/util.c',
-	]),
-	dependencies: [
-		cairo,
-		pango,
-		gio,
-		gtk,
-		math,
-	],
-	link_args: '-rdynamic',
-	include_directories: [swappy_inc],
-	install: true,
+cargo_sources = files(
+  'Cargo.toml',
+  'Cargo.lock',
 )
+
+subdir('res')
+subdir('src')
+subdir('src/po')
 
 scdoc = find_program('scdoc', required: get_option('man-pages'))
 
@@ -93,10 +59,32 @@ if scdoc.found()
 			input: src,
 			output: output,
 			command: [
-				sh, '-c', '@0@ < @INPUT@ > @1@'.format(scdoc.path(), output)
+				sh, '-c', '@0@ < @INPUT@ > @1@'.format(scdoc.full_path(), output)
 			],
 			install: true,
 			install_dir: '@0@/man@1@'.format(mandir, section)
 		)
 	endforeach
 endif
+
+gnome.post_install(
+  glib_compile_schemas: true,
+  gtk_update_icon_cache: true,
+  update_desktop_database: true,
+)
+
+summary({
+    'buildtype': get_option('buildtype'),
+    'version': version,
+  },
+  section: 'Build',
+)
+
+summary({
+    'prefix': get_option('prefix'),
+    'libdir': get_option('libdir'),
+    'datadir': get_option('datadir'),
+    'bindir': get_option('bindir'),
+  },
+  section: 'Directories',
+)

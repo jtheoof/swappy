@@ -128,6 +128,18 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "name": "swappyrs - file",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/target/debug/swappy",
+      "args": ["-f", "docs/images/screenshot-beta.png"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "G_MESSAGES_DEBUG": "all"
+      },
+      "preLaunchTask": "cargo"
     }
   ]
 }

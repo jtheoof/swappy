@@ -57,3 +57,10 @@ dkms.conf
 # Build folders
 build/
 release/
+target/
+
+# Built files
+src/constant.rs
+
+# Resource files
+*.gresource

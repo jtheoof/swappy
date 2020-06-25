@@ -1,0 +1,13 @@
+[package]
+name = "swappy"
+version = "1.5.1"
+authors = ["Jeremy Attali <contact@jtheoof.me>"]
+edition = "2021"
+
+[dependencies]
+die = "0.2.0"
+version = "3.0.0"
+
+[dependencies.gtk]
+package = "gtk4"
+version = "0.4.8"

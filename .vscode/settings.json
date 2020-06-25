@@ -4,7 +4,6 @@
     "*.h": "c",
     "*.c": "c"
   },
-  "cSpell.words": [
-    "swappy"
-  ]
+  "cSpell.words": ["swappy"],
+  "editor.rulers": [100]
 }

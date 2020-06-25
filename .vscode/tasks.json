@@ -16,6 +16,18 @@
         "base": "$gcc",
         "fileLocation": ["relative", "${workspaceFolder}/build"]
       }
+    },
+    {
+      "label": "cargo",
+      "type": "shell",
+      "command": "cargo build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }

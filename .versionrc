@@ -6,6 +6,14 @@
     },
     {
       "filename": "package.json"
+    },
+    {
+      "filename": "Cargo.toml",
+      "updater": "script/bump-cargo.js"
+    },
+    {
+      "filename": "Cargo.lock",
+      "updater": "script/bump-cargo.js"
     }
   ]
 }

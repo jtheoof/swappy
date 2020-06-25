@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkImage" id="zoom-in">
+    <property name="icon_name">zoom-in</property>
+  </object>
+  <object class="GtkImage" id="zoom-in1">
+    <property name="icon_name">zoom-in</property>
+  </object>
+  <object class="GtkImage" id="zoom-in2">
+    <property name="icon_name">zoom-in</property>
+  </object>
+  <object class="GtkImage" id="zoom-out">
+    <property name="icon_name">zoom-out</property>
+  </object>
+  <object class="GtkImage" id="zoom-out1">
+    <property name="icon_name">zoom-out</property>
+  </object>
+  <object class="GtkApplicationWindow" id="paint-window">
+    <property name="visible">1</property>
+    <property name="resizable">0</property>
+    <!-- <property name="window_position">center</property> -->
+    <!-- <signal name="delete-event" handler="window_delete_handler" swapped="no"/> -->
+    <!-- <signal name="key-press-event" handler="window_keypress_handler" swapped="no"/> -->
+    <!-- <signal name="key-release-event" handler="window_keyrelease_handler" swapped="no"/> -->
+    <child>
+      <object class="GtkOverlay">
+        <property name="child">
+          <object class="GtkPaned">
+            <property name="shrink-start-child">0</property>
+            <property name="resize-start-child">0</property>
+            <property name="width_request">100</property>
+            <property name="height_request">80</property>
+            <property name="focusable">1</property>
+            <child>
+              <object class="GtkBox" id="side-panel">
+                <property name="visible">0</property>
+                <property name="margin-start">10</property>
+                <property name="margin-end">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="homogeneous">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">B</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">T</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">R</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">O</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">A</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="0">D</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin_bottom">15</property>
+                    <property name="spacing">6</property>
+                    <property name="homogeneous">1</property>
+                    <child>
+                      <object class="GtkToggleButton" id="brush">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="active">1</property>
+                        <!-- <signal name="clicked" handler="brush_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="text">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="group">brush</property>
+                        <!-- <signal name="clicked" handler="text_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="rectangle">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="group">brush</property>
+                        <!-- <signal name="clicked" handler="rectangle_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="ellipse">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="group">brush</property>
+                        <!-- <signal name="clicked" handler="ellipse_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="arrow">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="group">brush</property>
+                        <!-- <signal name="clicked" handler="arrow_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="blur">
+                        <property name="label" translatable="0"></property>
+                        <property name="can_focus">0</property>
+                        <property name="group">brush</property>
+                        <!-- <signal name="clicked" handler="blur_clicked_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <style>
+                      <class name="drawing"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="brush-box">
+                    <property name="valign">center</property>
+                    <property name="halign">center</property>
+                    <property name="margin_bottom">15</property>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="halign">start</property>
+                        <property name="valign">baseline</property>
+                        <property name="spacing">10</property>
+                        <child>
+                          <object class="GtkToggleButton" id="color-red-button">
+                            <property name="can_focus">0</property>
+                            <property name="focus_on_click">0</property>
+                            <property name="receives_default">1</property>
+                            <property name="valign">center</property>
+                            <!-- <signal name="clicked" handler="color_red_clicked_handler" swapped="no"/> -->
+                            <child>
+                              <object class="GtkImage"/>
+                            </child>
+                            <style>
+                              <class name="color-red"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="color-green-button">
+                            <property name="can_focus">0</property>
+                            <property name="focus_on_click">0</property>
+                            <property name="receives_default">1</property>
+                            <property name="valign">center</property>
+                            <property name="group">color-red-button</property>
+                            <!-- <signal name="clicked" handler="color_green_clicked_handler" swapped="no"/> -->
+                            <child>
+                              <object class="GtkImage"/>
+                            </child>
+                            <style>
+                              <class name="color-green"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="color-blue-button">
+                            <property name="can_focus">0</property>
+                            <property name="focus_on_click">0</property>
+                            <property name="receives_default">1</property>
+                            <property name="valign">center</property>
+                            <property name="group">color-red-button</property>
+                            <!-- <signal name="clicked" handler="color_blue_clicked_handler" swapped="no"/> -->
+                            <child>
+                              <object class="GtkImage"/>
+                            </child>
+                            <style>
+                              <class name="color-blue"/>
+                            </style>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="color-box"/>
+                        </style>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkToggleButton" id="color-custom-button">
+                            <property name="can_focus">0</property>
+                            <property name="focus_on_click">0</property>
+                            <property name="receives_default">1</property>
+                            <property name="valign">center</property>
+                            <property name="group">color-red-button</property>
+                            <!-- <signal name="clicked" handler="color_custom_clicked_handler" swapped="no"/> -->
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">gtk-color-picker</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkColorButton" id="custom-color-button">
+                            <property name="sensitive">0</property>
+                            <property name="receives_default">1</property>
+                            <property name="valign">center</property>
+                            <property name="title" translatable="1"></property>
+                            <property name="rgba">rgb(193,125,17)</property>
+                            <!-- <signal name="color-set" handler="color_custom_color_set_handler" swapped="no"/> -->
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin_bottom">10</property>
+                    <property name="spacing">2</property>
+                    <property name="homogeneous">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Line Width</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="minus-button">
+                        <property name="halign">center</property>
+                        <property name="receives_default">1</property>
+                        <property name="icon-name">zoom-out</property>
+                        <!-- <signal name="clicked" handler="stroke_size_decrease_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="stroke-size-button">
+                        <property name="receives_default">1</property>
+                        <!-- <signal name="clicked" handler="stroke_size_reset_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="plus-button">
+                        <property name="halign">center</property>
+                        <property name="receives_default">1</property>
+                        <property name="icon-name">zoom-in</property>
+                        <!-- <signal name="clicked" handler="stroke_size_increase_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="margin_bottom">10</property>
+                    <property name="spacing">2</property>
+                    <property name="homogeneous">1</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Text Size</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="text-minus-button">
+                        <property name="halign">center</property>
+                        <property name="focusable">1</property>
+                        <property name="receives_default">1</property>
+                        <property name="icon-name">zoom-out1</property>
+                        <!-- <signal name="clicked" handler="text_size_decrease_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="text-size-button">
+                        <property name="focusable">1</property>
+                        <property name="receives_default">1</property>
+                        <!-- <signal name="clicked" handler="text_size_reset_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="text-plus-button">
+                        <property name="halign">center</property>
+                        <property name="focusable">1</property>
+                        <property name="receives_default">1</property>
+                        <property name="icon-name">zoom-in1</property>
+                        <!-- <signal name="clicked" handler="text_size_increase_handler" swapped="no"/> -->
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFixed">
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkDrawingArea" id="painting-area">
+                    <!-- <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property> -->
+                    <property name="margin-start">10</property>
+                    <property name="margin-end">10</property>
+                    <property name="margin_top">10</property>
+                    <property name="margin_bottom">10</property>
+                    <!-- <signal name="button-press-event" handler="draw_area_button_press_handler" swapped="no"/> -->
+                    <!-- <signal name="button-release-event" handler="draw_area_button_release_handler" swapped="no"/> -->
+                    <!-- <signal name="configure-event" handler="draw_area_configure_handler" swapped="no"/> -->
+                    <!-- <signal name="draw" handler="draw_area_handler" swapped="no"/> -->
+                    <!-- <signal name="motion-notify-event" handler="draw_area_motion_notify_handler" swapped="no"/> -->
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkToggleButton" id="btn-toggle-panel">
+                <property name="focus_on_click">0</property>
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Toggle Paint Panel</property>
+                <property name="icon-name">sidebar-show</property>
+                <!-- <signal name="toggled" handler="pane_toggled_handler" swapped="no"/> -->
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkButton" id="undo-button">
+                <property name="sensitive">0</property>
+                <property name="focus_on_click">0</property>
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Undo Last Paint</property>
+                <property name="icon-name">edit-undo</property>
+                <!-- <signal name="clicked" handler="undo_clicked_handler" swapped="no"/> -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="redo-button">
+                <property name="sensitive">0</property>
+                <property name="focus_on_click">0</property>
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Redo Previous Paint</property>
+                <property name="icon-name">edit-redo</property>
+                <!-- <signal name="clicked" handler="redo_clicked_handler" swapped="no"/> -->
+                <!-- <accelerator key="y" signal="clicked" modifiers="GDK_CONTROL_MASK"/> -->
+                <!-- <accelerator key="z" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/> -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="clear">
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Clear Paints</property>
+                <property name="icon-name">edit-delete</property>
+                <!-- <signal name="clicked" handler="clear_clicked_handler" swapped="no"/> -->
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="control_box">
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkButton" id="copy">
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Copy Surface</property>
+                <property name="icon-name">edit-copy</property>
+                <!-- <signal name="clicked" handler="copy_clicked_handler" swapped="no"/> -->
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="save">
+                <property name="receives_default">1</property>
+                <property name="tooltip_text" translatable="1">Save Surface</property>
+                <property name="icon-name">document-save</property>
+                <!-- <signal name="clicked" handler="save_clicked_handler" swapped="no"/> -->
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkSeparator"/>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="zoom-out2">
+    <property name="icon_name">zoom-out</property>
+  </object>
+</interface>
