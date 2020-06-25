@@ -42,7 +42,7 @@ pango = dependency('pango')
 math = cc.find_library('m')
 realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
-gio = cc.find_library('gio-2.0')
+gio = dependency('gio-2.0')
 
 libnotify = dependency('libnotify', required: false)
 
