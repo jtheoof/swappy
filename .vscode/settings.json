@@ -3,5 +3,8 @@
   "files.associations": {
     "*.h": "c",
     "*.c": "c"
-  }
+  },
+  "cSpell.words": [
+    "swappy"
+  ]
 }
