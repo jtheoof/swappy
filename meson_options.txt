@@ -1,1 +1,2 @@
 option('man-pages', type: 'feature', value: 'auto', description: 'Generate and install man pages')
+option('libnotify', type: 'feature', value: 'auto', description: 'Send desktop notifications')
