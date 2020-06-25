@@ -1,6 +1,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -114,9 +115,9 @@ static void load_config_from_file(struct swappy_config *config,
         line_size <= SWAPPY_LINE_SIZE_MAX) {
       config->line_size = line_size;
     } else {
-      g_warning(
-          "line_size is not a valid value: %ld - see man page for details",
-          line_size);
+      g_warning("line_size is not a valid value: %" PRIu64
+                " - see man page for details",
+                line_size);
     }
   } else {
     g_info("line_size is missing in %s (%s)", file, error->message);
@@ -131,9 +132,9 @@ static void load_config_from_file(struct swappy_config *config,
         text_size <= SWAPPY_TEXT_SIZE_MAX) {
       config->text_size = text_size;
     } else {
-      g_warning(
-          "text_size is not a valid value: %ld - see man page for details",
-          text_size);
+      g_warning("text_size is not a valid value: %" PRIu64
+                " - see man page for details",
+                text_size);
     }
   } else {
     g_info("text_size is missing in %s (%s)", file, error->message);
