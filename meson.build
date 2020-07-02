@@ -40,7 +40,6 @@ endif
 cairo = dependency('cairo')
 pango = dependency('pango')
 math = cc.find_library('m')
-realtime = cc.find_library('rt')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
 
@@ -78,7 +77,6 @@ executable(
 		gtk,
 		libnotify,
 		math,
-		realtime,
 	],
 	link_args: '-rdynamic',
 	include_directories: [swappy_inc],
