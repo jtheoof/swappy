@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/jtheoof/swappy/compare/v1.1.0...v1.2.0) (2020-07-05)
+
+
+### Features
+
+* **i18n:** add translatable desktop file ([cf3d7a5](https://github.com/jtheoof/swappy/commit/cf3d7a5283a7b8c34b05996f87b608513e0830ca)), closes [#35](https://github.com/jtheoof/swappy/issues/35)
+* **i18n:** setup i18n for swappy ([5b3c8ad](https://github.com/jtheoof/swappy/commit/5b3c8aded8fd4f9d00aa660a24127de0e1791d7f))
+
+## [1.2.0](https://github.com/jtheoof/swappy/compare/v1.1.0...v1.2.0) (2020-07-05)
+
+
+### Features
+
+* **i18n:** add translatable desktop file ([cf3d7a5](https://github.com/jtheoof/swappy/commit/cf3d7a5283a7b8c34b05996f87b608513e0830ca)), closes [#35](https://github.com/jtheoof/swappy/issues/35)
+* **i18n:** setup i18n for swappy ([5b3c8ad](https://github.com/jtheoof/swappy/commit/5b3c8aded8fd4f9d00aa660a24127de0e1791d7f))
+
 ## [1.1.0](https://github.com/jtheoof/swappy/compare/v1.0.1...v1.1.0) (2020-06-23)
 
 
