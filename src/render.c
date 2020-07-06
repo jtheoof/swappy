@@ -5,6 +5,7 @@
 
 #include "algebra.h"
 #include "swappy.h"
+#include "util.h"
 
 #define pango_layout_t PangoLayout
 #define pango_font_description_t PangoFontDescription
@@ -201,13 +202,13 @@ static void render_text(cairo_t *cr, struct swappy_paint_text text) {
 
   if (text.mode == SWAPPY_TEXT_MODE_EDIT) {
     pango_rectangle_t strong_pos;
-    pango_rectangle_t weak_pos;
     struct swappy_box cursor_box;
     cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.3);
     cairo_set_line_width(cr, 5);
     cairo_rectangle(cr, x, y, w, h);
     cairo_stroke(cr);
-    pango_layout_get_cursor_pos(layout, text.cursor, &strong_pos, &weak_pos);
+    glong bytes_til_cursor = string_get_nb_bytes_until(text.text, text.cursor);
+    pango_layout_get_cursor_pos(layout, bytes_til_cursor, &strong_pos, NULL);
     convert_pango_rectangle_to_swappy_box(strong_pos, &cursor_box);
     cairo_move_to(crt, cursor_box.x, cursor_box.y);
     cairo_set_source_rgba(crt, 0.3, 0.3, 0.3, 1);

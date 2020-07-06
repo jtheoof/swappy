@@ -11,7 +11,7 @@ static void cursor_move_backward(struct swappy_paint_text *text) {
 }
 
 static void cursor_move_forward(struct swappy_paint_text *text) {
-  if (text->cursor < strlen(text->text)) {
+  if (text->cursor < g_utf8_strlen(text->text, -1)) {
     text->cursor++;
   }
 }
@@ -194,6 +194,7 @@ void paint_update_temporary_text(struct swappy_state *state,
                                  GdkEventKey *event) {
   struct swappy_paint *paint = state->temp_paint;
   struct swappy_paint_text *text;
+  char *new_text;
   char buffer[32];
   guint32 unicode;
 
@@ -209,14 +210,18 @@ void paint_update_temporary_text(struct swappy_state *state,
       paint_commit_temporary(state);
       break;
     case GDK_KEY_BackSpace:
-      if (strlen(text->text) > 0) {
-        string_remove_at(text->text, text->cursor - 1);
+      if (g_utf8_strlen(text->text, -1) > 0) {
+        new_text = string_remove_at(text->text, text->cursor - 1);
+        g_free(text->text);
+        text->text = new_text;
         cursor_move_backward(text);
       }
       break;
     case GDK_KEY_Delete:
-      if (strlen(text->text) > 0) {
-        string_remove_at(text->text, text->cursor);
+      if (g_utf8_strlen(text->text, -1) > 0) {
+        new_text = string_remove_at(text->text, text->cursor);
+        g_free(text->text);
+        text->text = new_text;
       }
       break;
     case GDK_KEY_Left:
@@ -264,7 +269,7 @@ void paint_commit_temporary(struct swappy_state *state) {
 
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_TEXT:
-      if (strlen(paint->content.text.text) == 0) {
+      if (g_utf8_strlen(paint->content.text.text, -1) == 0) {
         paint->can_draw = false;
       }
       paint->content.text.mode = SWAPPY_TEXT_MODE_DONE;
