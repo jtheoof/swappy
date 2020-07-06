@@ -41,7 +41,7 @@ struct swappy_paint_text {
   double s;
   gchar *font;
   gchar *text;
-  size_t cursor;
+  glong cursor;
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_text_mode mode;
