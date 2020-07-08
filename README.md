@@ -97,6 +97,7 @@ text_font=sans-serif
 - [Arch Linux](https://aur.archlinux.org/packages/swappy)
 - [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 - [Fedora 31/32](https://copr.fedorainfracloud.org/coprs/wef/swappy)
+- [openSUSE](https://build.opensuse.org/package/show/X11:Wayland/swappy)
 
 ## Building from source
 
