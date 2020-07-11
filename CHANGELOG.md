@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/jtheoof/swappy/compare/v1.2.0...v1.2.1) (2020-07-11)
+
+
+### Bug Fixes
+
+* **text:** properly handle utf-8 chars ([717ab0c](https://github.com/jtheoof/swappy/commit/717ab0c2d1757e10bb4eef17d35ccd6a991705c4)), closes [#43](https://github.com/jtheoof/swappy/issues/43)
+
 ## [1.2.0](https://github.com/jtheoof/swappy/compare/v1.1.0...v1.2.0) (2020-07-05)
 
 
