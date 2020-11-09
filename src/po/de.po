@@ -1,0 +1,50 @@
+# German translations for swappy package.
+# Copyright (C) 2020 THE swappy'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the swappy package.
+# Brodi <me@brodi.ml>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: swappy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-21 21:57-0400\n"
+"PO-Revision-Date: 2020-11-19 18:03+0300\n"
+"Last-Translator: Brodi <me@brodi.ml>\n"
+"Language-Team: none\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: res/swappy.glade:455
+msgid "Line Width"
+msgstr "Linienstärke"
+
+#: res/swappy.glade:525
+msgid "Text Size"
+msgstr "Textgröße"
+
+#: res/swappy.glade:641
+msgid "Toggle Paint Panel"
+msgstr "Farbtafel umschalten"
+
+#: res/swappy.glade:667
+msgid "Undo Last Paint"
+msgstr "Letzte Bemalung rückgängig machen"
+
+#: res/swappy.glade:686
+msgid "Redo Previous Paint"
+msgstr "Vorherige Bemalung wiederherstellen"
+
+#: res/swappy.glade:705
+msgid "Clear Paints"
+msgstr "Bemalung löschen"
+
+#: res/swappy.glade:733
+msgid "Copy Surface"
+msgstr "Fläche kopieren"
+
+#: res/swappy.glade:749
+msgid "Save Surface"
+msgstr "Fläche speichern"
