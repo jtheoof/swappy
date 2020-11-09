@@ -14,6 +14,7 @@ static void print_config(struct swappy_config *config) {
   g_info("printing config:");
   g_info("config_dir: %s", config->config_file);
   g_info("save_dir: %s", config->save_dir);
+  g_info("save_filename_format: %s", config->save_filename_format);
   g_info("show_panel: %d", config->show_panel);
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
@@ -69,6 +70,7 @@ static void load_config_from_file(struct swappy_config *config,
   GKeyFile *gkf;
   const gchar *group = "Default";
   gchar *save_dir = NULL;
+  gchar *save_filename_format = NULL;
   gboolean show_panel;
   gchar *save_dir_expanded = NULL;
   guint64 line_size, text_size;
@@ -104,6 +106,17 @@ static void load_config_from_file(struct swappy_config *config,
     }
   } else {
     g_info("save_dir is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
+  save_filename_format =
+      g_key_file_get_string(gkf, group, "save_filename_format", &error);
+
+  if (error == NULL) {
+    config->save_filename_format = save_filename_format;
+  } else {
+    g_info("save_filename_format is missing in %s (%s)", file, error->message);
     g_error_free(error);
     error = NULL;
   }
@@ -172,6 +185,7 @@ static void load_default_config(struct swappy_config *config) {
   }
 
   config->save_dir = get_default_save_dir();
+  config->save_filename_format = g_strdup(CONFIG_SAVE_FILENAME_FORMAT_DEFAULT);
   config->line_size = CONFIG_LINE_SIZE_DEFAULT;
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;
@@ -200,6 +214,7 @@ void config_free(struct swappy_state *state) {
   if (state->config) {
     g_free(state->config->config_file);
     g_free(state->config->save_dir);
+    g_free(state->config->save_filename_format);
     g_free(state->config->text_font);
     g_free(state->config);
     state->config = NULL;
