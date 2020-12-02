@@ -33,7 +33,7 @@ static gboolean send_pixbuf_to_wl_copy(gdk_pixbuf_t *pixbuf) {
     close(pipefd[1]);
     dup2(pipefd[0], STDIN_FILENO);
     close(pipefd[0]);
-    execlp("wl-copy", "wl-copy", NULL);
+    execlp("wl-copy", "wl-copy", "-t", "image/png", NULL);
     g_warning(
         "Unable to copy contents to clipboard. Please make sure you have "
         "`wl-clipboard`, `xclip`, or `xsel` installed.");
