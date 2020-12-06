@@ -57,3 +57,5 @@ void stroke_size_increase_handler(GtkWidget *widget,
 void text_size_decrease_handler(GtkWidget *widget, struct swappy_state *state);
 void text_size_reset_handler(GtkWidget *widget, struct swappy_state *state);
 void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state);
+
+void delete_tmp_file_and_quit(struct swappy_state *state);

@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <glib-2.0/glib.h>
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <time.h>
@@ -255,6 +256,21 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   clipboard_copy_drawing_area_to_selection(state);
 }
 
+void delete_tmpfile(struct swappy_state *state) {
+  if (g_unlink(state->file_str) != 0)
+    printf("Could not delete tmpfile %s\n", state->file_str);
+}
+
+void delete_tmpfile_and_quit(struct swappy_state *state) {
+  delete_tmpfile(state);
+  gtk_main_quit();
+}
+
+size_t delete_tmpfile_and_fail(struct swappy_state *state) {
+  delete_tmpfile(state);
+  return EXIT_FAILURE;
+}
+
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
@@ -274,7 +290,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         action_toggle_painting_panel(state, NULL);
         break;
       case GDK_KEY_w:
-        gtk_main_quit();
+        delete_tmpfile_and_quit(state);
         break;
       case GDK_KEY_z:
         action_undo(state);
@@ -291,7 +307,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_Escape:
       case GDK_KEY_q:
         maybe_save_output_file(state);
-        gtk_main_quit();
+        delete_tmpfile_and_quit(state);
         break;
       case GDK_KEY_b:
         switch_mode_to_brush(state);
@@ -356,7 +372,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
 
 gboolean window_delete_handler(GtkWidget *widget, GdkEvent *event,
                                struct swappy_state *state) {
-  gtk_main_quit();
+  delete_tmpfile_and_quit(state);
   return FALSE;
 }
 
@@ -718,12 +734,12 @@ static gint command_line_handler(GtkApplication *app,
     }
 
     if (!buffer_init_from_file(state)) {
-      return EXIT_FAILURE;
+      return delete_tmpfile_and_fail(state);
     }
   }
 
   if (!init_gtk_window(state)) {
-    return EXIT_FAILURE;
+    return delete_tmpfile_and_fail(state);
   }
 
   return EXIT_SUCCESS;
