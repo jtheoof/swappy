@@ -185,7 +185,8 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
   GdkPixbuf *pixbuf = pixbuf_get_from_state(state);
 
   if (file == NULL) {
-    pixbuf_save_state_to_folder(pixbuf, state->config->save_dir);
+    pixbuf_save_state_to_folder(pixbuf, state->config->save_dir,
+                                state->config->save_filename_format);
   } else {
     pixbuf_save_to_file(pixbuf, file);
   }

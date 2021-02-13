@@ -31,17 +31,18 @@ static void write_file(GdkPixbuf *pixbuf, char *path) {
   g_free(message);
 }
 
-void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder) {
-  time_t current_time;
+void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
+                                 char *filename_format) {
+  time_t current_time = time(NULL);
   char *c_time_string;
-
-  time(&current_time);
+  char filename[strlen(filename_format) + 3];
 
   c_time_string = ctime(&current_time);
   c_time_string[strlen(c_time_string) - 1] = '\0';
+  strftime(filename, sizeof(filename), filename_format,
+           localtime(&current_time));
   char path[MAX_PATH];
-  g_snprintf(path, MAX_PATH, "%s/%s %s.png", folder, "Swappshot",
-             c_time_string);
+  g_snprintf(path, MAX_PATH, "%s/%s", folder, filename);
   write_file(pixbuf, path);
 }
 
