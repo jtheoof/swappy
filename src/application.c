@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <glib-2.0/glib.h>
+#include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <time.h>
@@ -235,6 +236,13 @@ void application_finish(struct swappy_state *state) {
   cairo_surface_destroy(state->rendered_surface);
   cairo_surface_destroy(state->original_image_surface);
   cairo_surface_destroy(state->scaled_image_surface);
+  if (state->temp_file_str) {
+    g_info("deleting temporary file: %s", state->temp_file_str);
+    if (g_unlink(state->temp_file_str) != 0) {
+      g_warning("unable to delete temporary file: %s", state->temp_file_str);
+    }
+    g_free(state->temp_file_str);
+  }
   g_free(state->file_str);
   g_free(state->geometry);
   g_free(state->window);
@@ -713,9 +721,8 @@ static gint command_line_handler(GtkApplication *app,
 
   if (has_option_file(state)) {
     if (is_file_from_stdin(state->file_str)) {
-      char *new_file_str = file_dump_stdin_into_a_temp_file();
-      g_free(state->file_str);
-      state->file_str = new_file_str;
+      char *temp_file_str = file_dump_stdin_into_a_temp_file();
+      state->temp_file_str = temp_file_str;
     }
 
     if (!buffer_init_from_file(state)) {
