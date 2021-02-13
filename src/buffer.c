@@ -6,7 +6,10 @@
 #include "swappy.h"
 
 bool buffer_init_from_file(struct swappy_state *state) {
-  char *file = state->file_str;
+  char *file =
+      state->temp_file_str != NULL ? state->temp_file_str : state->file_str;
+
+  g_info("creating cairo image surface from file: %s", file);
 
   cairo_surface_t *surface = cairo_image_surface_create_from_png(file);
   cairo_status_t status = cairo_surface_status(surface);

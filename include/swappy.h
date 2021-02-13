@@ -160,6 +160,8 @@ struct swappy_state {
   char *file_str;
   char *output_file;
 
+  char *temp_file_str;
+
   struct swappy_box *window;
   struct swappy_box *geometry;
 
