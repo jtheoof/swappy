@@ -153,6 +153,8 @@ struct swappy_state {
   cairo_surface_t *scaled_image_surface;
   cairo_surface_t *rendered_surface;
 
+  gdouble scaling_factor;
+
   enum swappy_paint_type mode;
 
   /* Options */
