@@ -346,9 +346,6 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
 
   cairo_surface_t *target = cairo_get_target(cr);
 
-  double a, b;
-  cairo_surface_get_device_scale(target, &a, &b);
-
   double x = MIN(blur.from.x, blur.to.x);
   double y = MIN(blur.from.y, blur.to.y);
   double w = ABS(blur.from.x - blur.to.x);
