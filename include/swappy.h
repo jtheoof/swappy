@@ -153,8 +153,6 @@ struct swappy_state {
   cairo_surface_t *scaled_image_surface;
   cairo_surface_t *rendered_surface;
 
-  GList *patterns;  // List of cairo_pattern_t
-
   enum swappy_paint_type mode;
 
   /* Options */
