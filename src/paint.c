@@ -118,6 +118,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.shape.a = a;
       paint->content.shape.w = w;
       paint->content.shape.type = type;
+      paint->content.shape.operation = SWAPPY_PAINT_SHAPE_OPERATION_STROKE;
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       paint->can_draw = false;

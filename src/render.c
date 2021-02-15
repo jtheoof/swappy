@@ -315,7 +315,18 @@ static void render_shape_rectangle(cairo_t *cr,
 
   cairo_rectangle(cr, x, y, w, h);
   cairo_close_path(cr);
-  cairo_stroke(cr);
+
+  switch (shape.operation) {
+    case SWAPPY_PAINT_SHAPE_OPERATION_STROKE:
+      cairo_stroke(cr);
+      break;
+    case SWAPPY_PAINT_SHAPE_OPERATION_FILL:
+      cairo_fill(cr);
+      break;
+    default:
+      cairo_stroke(cr);
+      break;
+  }
 }
 
 static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
@@ -353,18 +364,29 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
 
   cairo_save(cr);
 
-  if (!paint->is_committed) {
-    cairo_surface_t *blurred = blur_surface(target, x, y, w, h);
-
-    if (blurred && cairo_surface_status(blurred) == CAIRO_STATUS_SUCCESS) {
-      cairo_set_source_surface(cr, blurred, x, y);
-      cairo_paint(cr);
-      if (blur.surface) {
-        cairo_surface_destroy(blur.surface);
+  if (paint->is_committed) {
+    // Surface has already been blurred, reuse it in future passes
+    if (blur.surface) {
+      cairo_surface_t *surface = blur.surface;
+      if (surface && cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
+        cairo_set_source_surface(cr, surface, x, y);
+        cairo_paint(cr);
       }
-      paint->content.blur.surface = blurred;
-    }
+    } else {
+      // Blur surface and reuse it in future passes
+      g_info(
+          "blurring surface on following image coordinates: %.2lf,%.2lf size: "
+          "%.2lfx%.2lf",
+          x, y, w, h);
+      cairo_surface_t *blurred = blur_surface(target, x, y, w, h);
 
+      if (blurred && cairo_surface_status(blurred) == CAIRO_STATUS_SUCCESS) {
+        cairo_set_source_surface(cr, blurred, x, y);
+        cairo_paint(cr);
+        paint->content.blur.surface = blurred;
+      }
+    }
+  } else {
     // Blur not committed yet, draw bounding rectangle
     struct swappy_paint_shape rect = {
         .r = 0,
@@ -375,15 +397,9 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
         .from = blur.from,
         .to = blur.to,
         .type = SWAPPY_PAINT_MODE_RECTANGLE,
+        .operation = SWAPPY_PAINT_SHAPE_OPERATION_FILL,
     };
     render_shape_rectangle(cr, rect);
-
-  } else {
-    cairo_surface_t *surface = blur.surface;
-    if (surface && cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
-      cairo_set_source_surface(cr, surface, x, y);
-      cairo_paint(cr);
-    }
   }
 
   cairo_restore(cr);

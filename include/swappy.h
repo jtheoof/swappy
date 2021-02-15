@@ -23,6 +23,11 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
 };
 
+enum swappy_paint_shape_operation {
+  SWAPPY_PAINT_SHAPE_OPERATION_STROKE = 0, /* Used to stroke the shape */
+  SWAPPY_PAINT_SHAPE_OPERATION_FILL,       /* Used to fill the shape */
+};
+
 enum swappy_text_mode {
   SWAPPY_TEXT_MODE_EDIT = 0,
   SWAPPY_TEXT_MODE_DONE,
@@ -56,6 +61,7 @@ struct swappy_paint_shape {
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_type type;
+  enum swappy_paint_shape_operation operation;
 };
 
 struct swappy_paint_brush {
