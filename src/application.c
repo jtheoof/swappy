@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "buffer.h"
 #include "clipboard.h"
 #include "config.h"
 #include "file.h"
@@ -231,8 +230,6 @@ void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
-  buffer_free_all(state);
-  g_free(state->drawing_area_rect);
   cairo_surface_destroy(state->rendered_surface);
   cairo_surface_destroy(state->original_image_surface);
   cairo_surface_destroy(state->scaled_image_surface);
@@ -247,6 +244,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->geometry);
   g_free(state->window);
   g_free(state->ui);
+  g_object_unref(state->original_image);
   g_object_unref(state->app);
 
   config_free(state);
@@ -394,27 +392,21 @@ gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
 gboolean draw_area_configure_handler(GtkWidget *widget,
                                      GdkEventConfigure *event,
                                      struct swappy_state *state) {
-  g_debug("received configure_event handler");
+  g_debug("received configure_event callback");
   cairo_surface_destroy(state->rendered_surface);
-  g_free(state->drawing_area_rect);
 
   cairo_surface_t *surface = gdk_window_create_similar_surface(
       gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR_ALPHA,
       gtk_widget_get_allocated_width(widget),
       gtk_widget_get_allocated_height(widget));
 
+  g_info("size of drawing area surface: %ux%u",
+         cairo_image_surface_get_width(surface),
+         cairo_image_surface_get_height(surface));
+
   state->rendered_surface = surface;
 
-  GtkAllocation *alloc = g_new(GtkAllocation, 1);
-  gtk_widget_get_allocation(widget, alloc);
-  state->drawing_area_rect = alloc;
-  buffer_resize_patterns(state);
-
-  g_info("size of cairo_surface: %ux%u with type: %d",
-         cairo_image_surface_get_width(surface),
-         cairo_image_surface_get_height(surface),
-         cairo_image_surface_get_format(surface));
-  g_info("size of area to render: %ux%u", alloc->width, alloc->height);
+  pixbuf_scale_surface_from_widget(state, widget);
 
   render_state(state);
 
@@ -562,18 +554,34 @@ static void compute_window_size(struct swappy_state *state) {
   state->window->y = workarea.y;
 
   double threshold = 0.75;
-  double scaling = 1.0;
 
-  if (state->geometry->width > workarea.width * threshold) {
-    scaling = workarea.width * threshold / state->geometry->width;
-  } else if (state->geometry->height > workarea.height * threshold) {
-    scaling = workarea.height * threshold / state->geometry->height;
+  int image_width = gdk_pixbuf_get_width(state->original_image);
+  int image_height = gdk_pixbuf_get_height(state->original_image);
+
+  int max_width = workarea.width * threshold;
+  int max_height = workarea.height * threshold;
+
+  g_info("size of image: %ux%u", image_width, image_height);
+  g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
+  g_info("maxium size allowed for window: %ux%u", max_width, max_height);
+
+  int scaled_width = image_width;
+  int scaled_height = image_height;
+
+  double scaling_factor_width = (double)max_width / image_width;
+  double scaling_factor_height = (double)max_height / image_height;
+
+  if (scaling_factor_height < 1.0 || scaling_factor_width < 1.0) {
+    double scaling_factor = MIN(scaling_factor_width, scaling_factor_height);
+    scaled_width = image_width * scaling_factor;
+    scaled_height = image_height * scaling_factor;
+    g_info("rendering area will be scaled by a factor of: %.2lf",
+           scaling_factor);
   }
 
-  state->window->width = state->geometry->width * scaling;
-  state->window->height = state->geometry->height * scaling;
+  state->window->width = scaled_width;
+  state->window->height = scaled_height;
 
-  g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
   g_info("size of window to render: %ux%u", state->window->width,
          state->window->height);
 }
@@ -675,8 +683,8 @@ static bool load_layout(struct swappy_state *state) {
 }
 
 static bool init_gtk_window(struct swappy_state *state) {
-  if (!state->geometry) {
-    g_critical("no geometry found, did you use -f option?");
+  if (!state->original_image) {
+    g_critical("original image not loaded");
     return false;
   }
 
@@ -725,7 +733,7 @@ static gint command_line_handler(GtkApplication *app,
       state->temp_file_str = temp_file_str;
     }
 
-    if (!buffer_init_from_file(state)) {
+    if (!pixbuf_init_from_file(state)) {
       return EXIT_FAILURE;
     }
   }

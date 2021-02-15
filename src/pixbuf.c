@@ -63,10 +63,65 @@ void pixbuf_save_to_stdout(GdkPixbuf *pixbuf) {
   g_object_unref(out);
 }
 
+GdkPixbuf *pixbuf_init_from_file(struct swappy_state *state) {
+  GError *error = NULL;
+  char *file =
+      state->temp_file_str != NULL ? state->temp_file_str : state->file_str;
+  GdkPixbuf *image = gdk_pixbuf_new_from_file(file, &error);
+
+  if (error != NULL) {
+    g_error("unable to load file: %s - reason: %s", file, error->message);
+    return NULL;
+  }
+
+  state->original_image = image;
+  return image;
+}
+
 void pixbuf_save_to_file(GdkPixbuf *pixbuf, char *file) {
   if (g_strcmp0(file, "-") == 0) {
     pixbuf_save_to_stdout(pixbuf);
   } else {
     write_file(pixbuf, file);
   }
+}
+
+void pixbuf_scale_surface_from_widget(struct swappy_state *state,
+                                      GtkWidget *widget) {
+  GtkAllocation *alloc = g_new(GtkAllocation, 1);
+  GdkPixbuf *image = state->original_image;
+  gtk_widget_get_allocation(widget, alloc);
+
+  gboolean has_alpha = gdk_pixbuf_get_has_alpha(image);
+  cairo_format_t format = has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
+  gint image_width = gdk_pixbuf_get_width(image);
+  gint image_height = gdk_pixbuf_get_height(image);
+  cairo_surface_t *surface =
+      cairo_image_surface_create(format, image_width, image_height);
+
+  if (!surface) {
+    g_error("unable to create cairo surface from pixbuf");
+    goto cleanup;
+  } else {
+    cairo_t *cr;
+    cr = cairo_create(surface);
+    double scale_x = (double)alloc->width / image_width;
+    double scale_y = (double)alloc->height / image_height;
+    g_info("image scaled on x,y: %.2lf,%.2lf", scale_x, scale_y);
+    cairo_scale(cr, scale_x, scale_y);
+    gdk_cairo_set_source_pixbuf(cr, image, 0, 0);
+    cairo_paint(cr);
+    cairo_destroy(cr);
+  }
+
+  g_info("size of area to render: %ux%u", alloc->width, alloc->height);
+
+  if (state->scaled_image_surface) {
+    cairo_surface_destroy(state->scaled_image_surface);
+    state->scaled_image_surface = NULL;
+  }
+  state->scaled_image_surface = surface;
+
+cleanup:
+  g_free(alloc);
 }

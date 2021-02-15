@@ -148,6 +148,7 @@ struct swappy_state {
   struct swappy_state_ui *ui;
   struct swappy_config *config;
 
+  GdkPixbuf *original_image;
   cairo_surface_t *original_image_surface;
   cairo_surface_t *scaled_image_surface;
   cairo_surface_t *rendered_surface;
@@ -164,8 +165,6 @@ struct swappy_state {
 
   struct swappy_box *window;
   struct swappy_box *geometry;
-
-  cairo_rectangle_int_t *drawing_area_rect;
 
   GList *paints;
   GList *redo_paints;
