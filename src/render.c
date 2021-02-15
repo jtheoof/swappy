@@ -45,10 +45,10 @@ static cairo_surface_t *blur_surface(cairo_surface_t *surface, double x,
   switch (src_format) {
     case CAIRO_FORMAT_A1:
     case CAIRO_FORMAT_A8:
-    case CAIRO_FORMAT_RGB24:
     default:
       g_warning("source surface format: %d is not supported", src_format);
       return NULL;
+    case CAIRO_FORMAT_RGB24:
     case CAIRO_FORMAT_ARGB32:
       break;
   }
