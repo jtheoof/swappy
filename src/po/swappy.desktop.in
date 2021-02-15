@@ -1,7 +1,9 @@
 [Desktop Entry]
 Name=Swappy
 GenericName=Annotation Tool
+GenericName[pt_BR]=Ferramenta de Anotação
 Comment=A Wayland native snapshot editing tool
+Comment[pt_BR]=Uma ferramenta de edição de snapshot nativa do Wayland
 TryExec=swappy
 Exec=swappy -f %F
 Terminal=true
