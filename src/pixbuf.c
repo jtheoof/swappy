@@ -96,32 +96,47 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
   cairo_format_t format = has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
   gint image_width = gdk_pixbuf_get_width(image);
   gint image_height = gdk_pixbuf_get_height(image);
-  cairo_surface_t *surface =
+
+  cairo_surface_t *scaled_surface =
       cairo_image_surface_create(format, image_width, image_height);
 
-  if (!surface) {
+  if (!scaled_surface) {
     g_error("unable to create cairo surface from pixbuf");
-    goto cleanup;
+    goto finish;
   } else {
     cairo_t *cr;
-    cr = cairo_create(surface);
-    double scale_x = (double)alloc->width / image_width;
-    double scale_y = (double)alloc->height / image_height;
-    g_info("image scaled on x,y: %.2lf,%.2lf", scale_x, scale_y);
-    cairo_scale(cr, scale_x, scale_y);
+    cr = cairo_create(scaled_surface);
+    // double scale_x = (double)alloc->width / image_width;
+    // double scale_y = (double)alloc->height / image_height;
+    // g_info("image scaled on x,y: %.2lf,%.2lf", scale_x, scale_y);
+    // cairo_scale(cr, scale_x, scale_y);
     gdk_cairo_set_source_pixbuf(cr, image, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
   }
 
+  cairo_surface_t *rendered_surface =
+      cairo_image_surface_create(format, image_width, image_height);
+
+  if (!rendered_surface) {
+    g_error("unable to create rendering surface");
+    goto finish;
+  }
+
   g_info("size of area to render: %ux%u", alloc->width, alloc->height);
 
+finish:
   if (state->scaled_image_surface) {
     cairo_surface_destroy(state->scaled_image_surface);
     state->scaled_image_surface = NULL;
   }
-  state->scaled_image_surface = surface;
+  state->scaled_image_surface = scaled_surface;
 
-cleanup:
+  if (state->rendered_surface) {
+    cairo_surface_destroy(state->rendered_surface);
+    state->rendered_surface = NULL;
+  }
+  state->rendered_surface = rendered_surface;
+
   g_free(alloc);
 }

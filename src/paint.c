@@ -154,14 +154,6 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
     return;
   }
 
-  int32_t width = state->window->width;
-  int32_t height = state->window->height;
-
-  // Bounding x and y to the window dimensions to avoid side effects in
-  // rendering.
-  x = MIN(MAX(x, 0), width);
-  y = MIN(MAX(y, 0), height);
-
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
       paint->can_draw = true;

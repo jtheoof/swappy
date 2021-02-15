@@ -199,6 +199,25 @@ static void maybe_save_output_file(struct swappy_state *state) {
   }
 }
 
+static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
+                                                    gdouble screen_x,
+                                                    gdouble screen_y,
+                                                    gdouble *image_x,
+                                                    gdouble *image_y) {
+  gdouble x, y;
+
+  gint w = gdk_pixbuf_get_width(state->original_image);
+  gint h = gdk_pixbuf_get_height(state->original_image);
+
+  // Clamp coordinates to original image properties to avoid side effects in
+  // rendering pipeline
+  x = CLAMP(screen_x / state->scaling_factor, 0, w);
+  y = CLAMP(screen_y / state->scaling_factor, 0, h);
+
+  *image_x = x;
+  *image_y = y;
+}
+
 void on_destroy(GtkApplication *application, gpointer data) {
   struct swappy_state *state = (struct swappy_state *)data;
   maybe_save_output_file(state);
@@ -383,6 +402,16 @@ void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
                            struct swappy_state *state) {
+  GtkAllocation *alloc = g_new(GtkAllocation, 1);
+  gtk_widget_get_allocation(widget, alloc);
+
+  GdkPixbuf *image = state->original_image;
+  gint image_width = gdk_pixbuf_get_width(image);
+  gint image_height = gdk_pixbuf_get_height(image);
+  double scale_x = (double)alloc->width / image_width;
+  double scale_y = (double)alloc->height / image_height;
+
+  cairo_scale(cr, scale_x, scale_y);
   cairo_set_source_surface(cr, state->rendered_surface, 0, 0);
   cairo_paint(cr);
 
@@ -393,18 +422,6 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
                                      GdkEventConfigure *event,
                                      struct swappy_state *state) {
   g_debug("received configure_event callback");
-  cairo_surface_destroy(state->rendered_surface);
-
-  cairo_surface_t *surface = gdk_window_create_similar_surface(
-      gtk_widget_get_window(widget), CAIRO_CONTENT_COLOR_ALPHA,
-      gtk_widget_get_allocated_width(widget),
-      gtk_widget_get_allocated_height(widget));
-
-  g_info("size of drawing area surface: %ux%u",
-         cairo_image_surface_get_width(surface),
-         cairo_image_surface_get_height(surface));
-
-  state->rendered_surface = surface;
 
   pixbuf_scale_surface_from_widget(state, widget);
 
@@ -415,6 +432,10 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
 
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
+  gdouble x, y;
+
+  screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
+
   if (event->button == 1) {
     switch (state->mode) {
       case SWAPPY_PAINT_MODE_BLUR:
@@ -423,7 +444,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
       case SWAPPY_PAINT_MODE_TEXT:
-        paint_add_temporary(state, event->x, event->y, state->mode);
+        paint_add_temporary(state, x, y, state->mode);
         render_state(state);
         update_ui_undo_redo(state);
         break;
@@ -434,8 +455,10 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
 }
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state) {
-  gdouble x = event->x;
-  gdouble y = event->y;
+  gdouble x, y;
+
+  screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
+
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = event->window;
   GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
@@ -539,7 +562,7 @@ void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
   action_text_size_increase(state);
 }
 
-static void compute_window_size(struct swappy_state *state) {
+static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   GdkRectangle workarea = {0};
   GdkDisplay *display = gdk_display_get_default();
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
@@ -554,6 +577,7 @@ static void compute_window_size(struct swappy_state *state) {
   state->window->y = workarea.y;
 
   double threshold = 0.75;
+  double scaling_factor = 1.0;
 
   int image_width = gdk_pixbuf_get_width(state->original_image);
   int image_height = gdk_pixbuf_get_height(state->original_image);
@@ -572,13 +596,14 @@ static void compute_window_size(struct swappy_state *state) {
   double scaling_factor_height = (double)max_height / image_height;
 
   if (scaling_factor_height < 1.0 || scaling_factor_width < 1.0) {
-    double scaling_factor = MIN(scaling_factor_width, scaling_factor_height);
+    scaling_factor = MIN(scaling_factor_width, scaling_factor_height);
     scaled_width = image_width * scaling_factor;
     scaled_height = image_height * scaling_factor;
     g_info("rendering area will be scaled by a factor of: %.2lf",
            scaling_factor);
   }
 
+  state->scaling_factor = scaling_factor;
   state->window->width = scaled_width;
   state->window->height = scaled_height;
 
@@ -672,7 +697,7 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->area = area;
   state->ui->window = window;
 
-  compute_window_size(state);
+  compute_window_size_and_scaling_factor(state);
   gtk_widget_set_size_request(area, state->window->width,
                               state->window->height);
   action_toggle_painting_panel(state, &state->config->show_panel);
