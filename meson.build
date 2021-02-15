@@ -59,7 +59,6 @@ executable(
 		'src/main.c',
 		'src/algebra.c',
 		'src/application.c',
-		'src/buffer.c',
 		'src/box.c',
 		'src/config.c',
 		'src/clipboard.c',
