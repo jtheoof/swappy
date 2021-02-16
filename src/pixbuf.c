@@ -6,10 +6,10 @@
 #include "notification.h"
 
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
-  guint width = cairo_image_surface_get_width(state->rendered_surface);
-  guint height = cairo_image_surface_get_height(state->rendered_surface);
-  GdkPixbuf *pixbuf =
-      gdk_pixbuf_get_from_surface(state->rendered_surface, 0, 0, width, height);
+  guint width = cairo_image_surface_get_width(state->rendering_surface);
+  guint height = cairo_image_surface_get_height(state->rendering_surface);
+  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(state->rendering_surface, 0,
+                                                  0, width, height);
 
   return pixbuf;
 }
@@ -97,24 +97,24 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
   gint image_width = gdk_pixbuf_get_width(image);
   gint image_height = gdk_pixbuf_get_height(image);
 
-  cairo_surface_t *scaled_surface =
+  cairo_surface_t *original_image_surface =
       cairo_image_surface_create(format, image_width, image_height);
 
-  if (!scaled_surface) {
-    g_error("unable to create cairo surface from pixbuf");
+  if (!original_image_surface) {
+    g_error("unable to create cairo original surface from pixbuf");
     goto finish;
   } else {
     cairo_t *cr;
-    cr = cairo_create(scaled_surface);
+    cr = cairo_create(original_image_surface);
     gdk_cairo_set_source_pixbuf(cr, image, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
   }
 
-  cairo_surface_t *rendered_surface =
+  cairo_surface_t *rendering_surface =
       cairo_image_surface_create(format, image_width, image_height);
 
-  if (!rendered_surface) {
+  if (!rendering_surface) {
     g_error("unable to create rendering surface");
     goto finish;
   }
@@ -122,17 +122,17 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
   g_info("size of area to render: %ux%u", alloc->width, alloc->height);
 
 finish:
-  if (state->scaled_image_surface) {
-    cairo_surface_destroy(state->scaled_image_surface);
-    state->scaled_image_surface = NULL;
+  if (state->original_image_surface) {
+    cairo_surface_destroy(state->original_image_surface);
+    state->original_image_surface = NULL;
   }
-  state->scaled_image_surface = scaled_surface;
+  state->original_image_surface = original_image_surface;
 
-  if (state->rendered_surface) {
-    cairo_surface_destroy(state->rendered_surface);
-    state->rendered_surface = NULL;
+  if (state->rendering_surface) {
+    cairo_surface_destroy(state->rendering_surface);
+    state->rendering_surface = NULL;
   }
-  state->rendered_surface = rendered_surface;
+  state->rendering_surface = rendering_surface;
 
   g_free(alloc);
 }

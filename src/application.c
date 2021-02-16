@@ -249,9 +249,8 @@ void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
-  cairo_surface_destroy(state->rendered_surface);
+  cairo_surface_destroy(state->rendering_surface);
   cairo_surface_destroy(state->original_image_surface);
-  cairo_surface_destroy(state->scaled_image_surface);
   if (state->temp_file_str) {
     g_info("deleting temporary file: %s", state->temp_file_str);
     if (g_unlink(state->temp_file_str) != 0) {
@@ -412,7 +411,7 @@ gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
   double scale_y = (double)alloc->height / image_height;
 
   cairo_scale(cr, scale_x, scale_y);
-  cairo_set_source_surface(cr, state->rendered_surface, 0, 0);
+  cairo_set_source_surface(cr, state->rendering_surface, 0, 0);
   cairo_paint(cr);
 
   return FALSE;
