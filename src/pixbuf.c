@@ -106,10 +106,6 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
   } else {
     cairo_t *cr;
     cr = cairo_create(scaled_surface);
-    // double scale_x = (double)alloc->width / image_width;
-    // double scale_y = (double)alloc->height / image_height;
-    // g_info("image scaled on x,y: %.2lf,%.2lf", scale_x, scale_y);
-    // cairo_scale(cr, scale_x, scale_y);
     gdk_cairo_set_source_pixbuf(cr, image, 0, 0);
     cairo_paint(cr);
     cairo_destroy(cr);
