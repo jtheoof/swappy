@@ -218,6 +218,13 @@ static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
   *image_y = y;
 }
 
+static void commit_state(struct swappy_state *state) {
+  paint_commit_temporary(state);
+  paint_free_list(&state->redo_paints);
+  render_state(state);
+  update_ui_undo_redo(state);
+}
+
 void on_destroy(GtkApplication *application, gpointer data) {
   struct swappy_state *state = (struct swappy_state *)data;
   maybe_save_output_file(state);
@@ -269,6 +276,8 @@ void application_finish(struct swappy_state *state) {
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  // Commit a potential paint (e.g. text being written)
+  commit_state(state);
   save_state_to_file_or_folder(state, NULL);
 }
 
@@ -277,6 +286,8 @@ void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 }
 
 void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  // Commit a potential paint (e.g. text being written)
+  commit_state(state);
   clipboard_copy_drawing_area_to_selection(state);
 }
 
@@ -499,10 +510,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
-      paint_commit_temporary(state);
-      paint_free_list(&state->redo_paints);
-      render_state(state);
-      update_ui_undo_redo(state);
+      commit_state(state);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       if (state->temp_paint && !state->temp_paint->can_draw) {
