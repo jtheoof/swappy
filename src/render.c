@@ -426,7 +426,7 @@ static void render_brush(cairo_t *cr, struct swappy_paint_brush brush) {
 }
 
 static void render_image(cairo_t *cr, struct swappy_state *state) {
-  cairo_surface_t *surface = state->scaled_image_surface;
+  cairo_surface_t *surface = state->original_image_surface;
 
   cairo_save(cr);
 
@@ -475,7 +475,7 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
 }
 
 void render_state(struct swappy_state *state) {
-  cairo_surface_t *surface = state->rendered_surface;
+  cairo_surface_t *surface = state->rendering_surface;
   cairo_t *cr = cairo_create(surface);
 
   render_background(cr, state);

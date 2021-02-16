@@ -156,8 +156,7 @@ struct swappy_state {
 
   GdkPixbuf *original_image;
   cairo_surface_t *original_image_surface;
-  cairo_surface_t *scaled_image_surface;
-  cairo_surface_t *rendered_surface;
+  cairo_surface_t *rendering_surface;
 
   gdouble scaling_factor;
 
