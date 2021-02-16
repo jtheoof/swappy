@@ -572,6 +572,11 @@ static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   g_assert(workarea.width > 0);
   g_assert(workarea.height > 0);
 
+  if (state->window) {
+    g_free(state->window);
+    state->window = NULL;
+  }
+
   state->window = g_new(struct swappy_box, 1);
   state->window->x = workarea.x;
   state->window->y = workarea.y;
