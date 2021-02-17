@@ -3,8 +3,6 @@
 #include <cairo/cairo.h>
 #include <gio/gunixoutputstream.h>
 
-#include "notification.h"
-
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
   guint width = cairo_image_surface_get_width(state->rendering_surface);
   guint height = cairo_image_surface_get_height(state->rendering_surface);
@@ -22,13 +20,6 @@ static void write_file(GdkPixbuf *pixbuf, char *path) {
     g_critical("unable to save drawing area to pixbuf: %s", error->message);
     g_error_free(error);
   }
-
-  char *msg = "Saved Swappshot to: ";
-  size_t len = strlen(msg) + strlen(path) + 1;
-  char *message = g_new(char, len);
-  g_snprintf(message, len, "%s%s", msg, path);
-  notification_send("Swappy", message);
-  g_free(message);
 }
 
 void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,

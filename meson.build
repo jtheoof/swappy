@@ -43,12 +43,6 @@ math = cc.find_library('m')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
 
-libnotify = dependency('libnotify', required: get_option('libnotify'))
-
-if libnotify.found()
-	add_project_arguments('-DHAVE_LIBNOTIFY', language: 'c')
-endif
-
 subdir('res')
 subdir('src/po')
 
@@ -66,7 +60,6 @@ executable(
 		'src/paint.c',
 		'src/pixbuf.c',
 		'src/render.c',
-		'src/notification.c',
 		'src/util.c',
 	]),
 	dependencies: [
@@ -74,7 +67,6 @@ executable(
 		pango,
 		gio,
 		gtk,
-		libnotify,
 		math,
 	],
 	link_args: '-rdynamic',
