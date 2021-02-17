@@ -117,7 +117,6 @@ Install dependencies (on Arch, name can vary for other distros):
 Optional dependencies:
 
 - `wl-clipboard` (to make sure the copy is saved if you close swappy)
-- `libnotify` (not get notified when swappshot is copied or saved)
 - `otf-font-awesome` (to draw the paint icons properly)
 
 Then run:
