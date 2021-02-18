@@ -1,6 +1,6 @@
 # swappy
 
-A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [grim], [slurp] and [sway]. But can easily work with other screen copy tools that can output a final PNG image to `stdout`. See [below](#example-usage).
+A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works great with [grim], [slurp] and [sway]. But can easily work with other screen copy tools that can output a final image to `stdout`. See [below](#example-usage).
 
 ## Screenshot
 
@@ -8,7 +8,7 @@ A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works 
 
 ## Example usage
 
-Output of `grim` (or any tool outputing a PNG file):
+Output of `grim` (or any tool outputing an image file):
 
 ```sh
 grim -g "$(slurp)" - | swappy -f -

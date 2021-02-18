@@ -14,4 +14,4 @@ Keywords=wayland;snapshot;annotation;editing;
 Icon=swappy
 Categories=Utility;Graphics;Annotation;
 StartupNotify=true
-MimeType=image/png;
+MimeType=image/png;image/jpeg;
