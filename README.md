@@ -137,6 +137,8 @@ This is only for maintainers, to create a new release. We rely on [standard-vers
 ```
 npx standard-version --sign
 git push --follow-tags
+# Do the release on Github with manual steps, then:
+./script/sign-post-release
 ```
 
 ## License

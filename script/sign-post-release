@@ -1,0 +1,60 @@
+#!/bin/bash
+
+set -e
+
+declare -r git_root=$(git rev-parse --show-toplevel)
+declare -r app_name="swappy"
+declare -r release_folder="$git_root/release"
+
+declare version=""
+
+die() {
+  echo "$*" 1>&2
+  exit 1
+}
+
+init() {
+  command -v gh >/dev/null 2>&1 || { echo >&2 "github cli tool required: pacman -S github-cli"; exit 1; }
+
+  mkdir -p $release_folder
+  cd $release_folder
+}
+
+get_release_version() {
+  version=$(git describe | sed 's/^v//')
+  echo "found latest version: $version"
+}
+
+download_source_for_release() {
+  echo "downloading source assets..."
+  curl --output $app_name-$version.zip https://github.com/jtheoof/$app_name/archive/v$version.zip
+  curl --output $app_name-$version.tar.gz https://github.com/jtheoof/$app_name/archive/v$version.tar.gz
+}
+
+sign_release_source() {
+  echo "signing source assets..."
+  gpg --detach-sign $app_name-$version.zip
+  gpg --detach-sign $app_name-$version.tar.gz
+}
+
+upload_signed_assets_to_release() {
+  echo "uploading signatures to github release..."
+  gh release upload v$version $app_name-$version.zip.sig --clobber
+  gh release upload v$version $app_name-$version.tar.gz.sig --clobber
+}
+
+main() {
+  init
+  get_release_version
+
+  if [ -z "$version" ]
+  then
+    die "version not found, is the git tag valid?"  
+  fi
+
+  download_source_for_release
+  sign_release_source
+  upload_signed_assets_to_release
+}
+
+main "$@"
