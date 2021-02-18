@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/jtheoof/swappy/compare/v1.2.1...v1.3.0) (2021-02-18)
+
+
+### Features
+
+* **cli:** add configure options for filename save ([597f005](https://github.com/jtheoof/swappy/commit/597f0055b9c6230b25a7f7a7bf3f4e14c06b1fbb))
+* **i18n:** add brazilian portuguese translations ([4a0eb82](https://github.com/jtheoof/swappy/commit/4a0eb82369a0859fafdcce9d242c086cd2360a84))
+* **i18n:** add german translations ([b4be847](https://github.com/jtheoof/swappy/commit/b4be8476350771454b29b9ce29c62a3337acc736))
+* **i18n:** add turkish translations ([c8419da](https://github.com/jtheoof/swappy/commit/c8419da7faef14223ada6853942a6d11e2acf92f))
+
+
+### Bug Fixes
+
+* **application:** unlink temp file coming from stdin ([c24e56a](https://github.com/jtheoof/swappy/commit/c24e56a165394e60b37534287e168e5d8e69627c)), closes [#80](https://github.com/jtheoof/swappy/issues/80)
+* **blur:** optimize blur to only render after commit ([27fcece](https://github.com/jtheoof/swappy/commit/27fcecedaeea49aaec6acdecbc51cbd865a13363))
+* **blur:** rgb24 is properly handled ([c04ed63](https://github.com/jtheoof/swappy/commit/c04ed63d26e5012215198f7b41a7f2232dac1ebe))
+* **clipboard:** wl-copy mimetype should be png ([a931acb](https://github.com/jtheoof/swappy/commit/a931acb2cff615badc63294ed121aba008f32ef8)), closes [#68](https://github.com/jtheoof/swappy/issues/68)
+* **notification:** notification shows the image icon ([eb53e5c](https://github.com/jtheoof/swappy/commit/eb53e5c2b28717f509dd58eab6da85897c0d6d9d))
+* **ui:** adjust rendering surface with proper scaling ([9b72571](https://github.com/jtheoof/swappy/commit/9b72571596f9313d4efd94a4b17da8b3733fd2de)), closes [#54](https://github.com/jtheoof/swappy/issues/54)
+* **ui:** commit state before copying or saving ([46e5854](https://github.com/jtheoof/swappy/commit/46e5854b3cce93a82984b19ca90e3f3337952fe2)), closes [#52](https://github.com/jtheoof/swappy/issues/52)
+* **ui:** compute window sizes and buffers properly ([5bcffdb](https://github.com/jtheoof/swappy/commit/5bcffdbb01cc6e56f9c0f37de899b46efe68ed4a)), closes [#56](https://github.com/jtheoof/swappy/issues/56)
+
 ### [1.2.1](https://github.com/jtheoof/swappy/compare/v1.2.0...v1.2.1) (2020-07-11)
 
 
