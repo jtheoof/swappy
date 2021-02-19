@@ -126,6 +126,14 @@ meson build
 ninja -C build
 ```
 
+### i18n
+
+To build the translation files:
+
+```sh
+ninja -C build swappy-pot
+```
+
 ## Contributing
 
 Pull requests are welcome. This project uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to automate changelog generation.
