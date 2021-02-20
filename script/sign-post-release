@@ -17,7 +17,6 @@ init() {
   command -v gh >/dev/null 2>&1 || { echo >&2 "github cli tool required: pacman -S github-cli"; exit 1; }
 
   mkdir -p $release_folder
-  cd $release_folder
 }
 
 get_release_version() {
@@ -25,23 +24,40 @@ get_release_version() {
   echo "found latest version: $version"
 }
 
+build_archives_from_source() {
+  echo "building source archives..."
+  cd $git_root
+  git archive -o "$release_folder/local-$app_name-$version.tar.gz" --format tar.gz --prefix "$app_name-$version/" "v$version"
+}
+
+
 download_source_for_release() {
   echo "downloading source assets..."
-  curl --output $app_name-$version.zip https://github.com/jtheoof/$app_name/archive/v$version.zip
-  curl --output $app_name-$version.tar.gz https://github.com/jtheoof/$app_name/archive/v$version.tar.gz
+  cd $release_folder
+  curl --location --output github-$app_name-$version.tar.gz https://github.com/jtheoof/$app_name/archive/v$version.tar.gz
+}
+
+verify_sha256_checksums() {
+  echo "verifying signatures..."
+  cd $release_folder
+  sha256sum local-$app_name-$version.tar.gz | awk '{ print $1 }' > local-$app_name-$version.tar.gz.sha256
+
+  # sha256sum --check will exit if the checksums do not match
+  echo "$(cat local-$app_name-$version.tar.gz.sha256) github-$app_name-$version.tar.gz" | sha256sum --check
 }
 
 sign_release_source() {
   echo "signing source assets..."
-  gpg --detach-sign $app_name-$version.zip
-  gpg --detach-sign $app_name-$version.tar.gz
+  cd $release_folder
+  gpg --output $app_name-$version.tar.gz.sig --detach-sign github-$app_name-$version.tar.gz
 }
 
 upload_signed_assets_to_release() {
   echo "uploading signatures to github release..."
-  gh release upload v$version $app_name-$version.zip.sig --clobber
-  gh release upload v$version $app_name-$version.tar.gz.sig --clobber
+  cd $release_folder
+  gh release upload v$version $app_name-$version.tar.gz.sig  --clobber
 }
+
 
 main() {
   init
@@ -52,7 +68,9 @@ main() {
     die "version not found, is the git tag valid?"  
   fi
 
+  build_archives_from_source
   download_source_for_release
+  verify_sha256_checksums
   sign_release_source
   upload_signed_assets_to_release
 }
