@@ -96,6 +96,10 @@ The following lines can be used as swappy's default:
 - *Equal*: Reset Stroke Size
 - *k*: Clear Paints (cannot be undone)
 
+## MODIFIERS
+
+- *Ctrl*: Center Shape (Rectangle & Ellipse) based on draw start
+
 ## HEADER BAR
 
 - *Ctrl+z*: Undo

@@ -284,11 +284,22 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
 static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
   double x = fabs(shape.from.x - shape.to.x);
   double y = fabs(shape.from.y - shape.to.y);
-  double xc = shape.from.x + ((shape.to.x - shape.from.x) / 2);
-  double yc = shape.from.y + ((shape.to.y - shape.from.y) / 2);
 
   double n = sqrt(x * x + y * y);
-  double r = n / 2;
+
+  double xc, yc, r;
+
+  if (shape.should_center_at_from) {
+    xc = shape.from.x;
+    yc = shape.from.y;
+
+    r = n;
+  } else {
+    xc = shape.from.x + ((shape.to.x - shape.from.x) / 2);
+    yc = shape.from.y + ((shape.to.y - shape.from.y) / 2);
+
+    r = n / 2;
+  }
 
   cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
   cairo_set_line_width(cr, shape.w);
@@ -305,10 +316,19 @@ static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
 
 static void render_shape_rectangle(cairo_t *cr,
                                    struct swappy_paint_shape shape) {
-  double x = fmin(shape.from.x, shape.to.x);
-  double y = fmin(shape.from.y, shape.to.y);
-  double w = fabs(shape.from.x - shape.to.x);
-  double h = fabs(shape.from.y - shape.to.y);
+  double x, y, w, h;
+
+  if (shape.should_center_at_from) {
+    x = shape.from.x - fabs(shape.from.x - shape.to.x);
+    y = shape.from.y - fabs(shape.from.y - shape.to.y);
+    w = fabs(shape.from.x - shape.to.x) * 2;
+    h = fabs(shape.from.y - shape.to.y) * 2;
+  } else {
+    x = fmin(shape.from.x, shape.to.x);
+    y = fmin(shape.from.y, shape.to.y);
+    w = fabs(shape.from.x - shape.to.x);
+    h = fabs(shape.from.y - shape.to.y);
+  }
 
   cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
   cairo_set_line_width(cr, shape.w);

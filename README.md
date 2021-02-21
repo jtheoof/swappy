@@ -83,6 +83,10 @@ text_font=sans-serif
 
 <hr>
 
+- `Ctrl`: Center Shape (Rectangle & Ellipse) based on draw start
+
+<hr>
+
 - `Ctrl+z`: Undo
 - `Ctrl+Shift+z` or `Ctrl+y`: Redo
 - `Ctrl+s`: Save to file (see man page)

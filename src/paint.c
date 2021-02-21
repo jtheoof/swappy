@@ -146,7 +146,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 }
 
 void paint_update_temporary_shape(struct swappy_state *state, double x,
-                                  double y) {
+                                  double y, gboolean is_control_pressed) {
   struct swappy_paint *paint = state->temp_paint;
   struct swappy_point *point;
   GList *points;
@@ -171,6 +171,12 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
+      paint->can_draw = true;  // all set
+
+      paint->content.shape.should_center_at_from = is_control_pressed;
+      paint->content.shape.to.x = x;
+      paint->content.shape.to.y = y;
+      break;
     case SWAPPY_PAINT_MODE_ARROW:
       paint->can_draw = true;  // all set
 

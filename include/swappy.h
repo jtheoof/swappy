@@ -58,6 +58,7 @@ struct swappy_paint_shape {
   double b;
   double a;
   double w;
+  bool should_center_at_from;
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_type type;
