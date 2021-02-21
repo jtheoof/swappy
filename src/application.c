@@ -684,6 +684,10 @@ static bool load_layout(struct swappy_state *state) {
 
   /* Construct a GtkBuilder instance and load our UI description */
   GtkBuilder *builder = gtk_builder_new();
+
+  // Set translation domain for the application based on `src/po/meson.build`
+  gtk_builder_set_translation_domain(builder, GETTEXT_PACKAGE);
+
   if (gtk_builder_add_from_resource(builder, "/me/jtheoof/swappy/swappy.glade",
                                     &error) == 0) {
     g_printerr("Error loading file: %s", error->message);
