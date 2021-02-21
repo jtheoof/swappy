@@ -26,14 +26,23 @@ void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
                                  char *filename_format) {
   time_t current_time = time(NULL);
   char *c_time_string;
-  char filename[strlen(filename_format) + 3];
+  char filename[255];
+  char path[MAX_PATH];
+  size_t bytes_formated;
 
   c_time_string = ctime(&current_time);
   c_time_string[strlen(c_time_string) - 1] = '\0';
-  strftime(filename, sizeof(filename), filename_format,
-           localtime(&current_time));
-  char path[MAX_PATH];
+  bytes_formated = strftime(filename, sizeof(filename), filename_format,
+                            localtime(&current_time));
+  if (!bytes_formated) {
+    g_warning(
+        "filename_format: %s overflows filename limit - file cannot be saved",
+        filename_format);
+    return;
+  }
+
   g_snprintf(path, MAX_PATH, "%s/%s", folder, filename);
+  g_info("saving surface to path: %s", path);
   write_file(pixbuf, path);
 }
 
