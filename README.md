@@ -100,7 +100,7 @@ text_font=sans-serif
 
 ## Installation
 
-- [Arch Linux](https://aur.archlinux.org/packages/swappy)
+- [Arch Linux](https://archlinux.org/packages/community/x86_64/swappy/)
 - [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 - [Fedora 31/32](https://copr.fedorainfracloud.org/coprs/wef/swappy)
 - [openSUSE](https://build.opensuse.org/package/show/X11:Wayland/swappy)
