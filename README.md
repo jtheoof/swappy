@@ -132,11 +132,24 @@ ninja -C build
 
 ### i18n
 
-To build the translation files:
+This section is for developers, maintainers and translators.
+
+To add support to a new locale or when translations are updated:
+
+1. Update `src/po/LINGUAS` (when new locales are added)
+2. Generate a new `po` file (ignore and do not commit potential noise in other files):
+
+```sh
+ninja -C build swappy-update-po
+```
+
+To rebuild the base template (should happen less often):
 
 ```sh
 ninja -C build swappy-pot
 ```
+
+See the [meson documentation](https://mesonbuild.com/Localisation.html) for details.
 
 ## Contributing
 
