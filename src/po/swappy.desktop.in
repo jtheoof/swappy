@@ -17,3 +17,20 @@ Icon=swappy
 Categories=Utility;Graphics;Annotation;
 StartupNotify=true
 MimeType=image/png;image/jpeg;
+Actions=current-window;current-output;select-window;select-area;
+
+[Desktop Action current-window]
+Name=Current Window
+Exec=grimshot save active - | swappy -f -
+
+[Desktop Action current-output]
+Name=Current Output
+Exec=grimshot save output - | swappy -f -
+
+[Desktop Action select-window]
+Name=Select Window
+Exec=grimshot save window - | swappy -f -
+
+[Desktop Action select-area]
+Name=Select Area
+Exec=grimshot save area - | swappy -f -
