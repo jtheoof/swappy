@@ -256,6 +256,7 @@ void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   paint_free_all(state);
+  pixbuf_free(state);
   cairo_surface_destroy(state->rendering_surface);
   cairo_surface_destroy(state->original_image_surface);
   if (state->temp_file_str) {
@@ -269,7 +270,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->geometry);
   g_free(state->window);
   g_free(state->ui);
-  g_object_unref(state->original_image);
+
   g_object_unref(state->app);
 
   config_free(state);
