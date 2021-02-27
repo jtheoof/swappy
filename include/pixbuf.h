@@ -10,3 +10,4 @@ void pixbuf_save_to_file(GdkPixbuf *pixbuf, char *file);
 void pixbuf_save_to_stdout(GdkPixbuf *pixbuf);
 void pixbuf_scale_surface_from_widget(struct swappy_state *state,
                                       GtkWidget *widget);
+void pixbuf_free(struct swappy_state *state);

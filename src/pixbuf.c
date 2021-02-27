@@ -70,7 +70,8 @@ GdkPixbuf *pixbuf_init_from_file(struct swappy_state *state) {
   GdkPixbuf *image = gdk_pixbuf_new_from_file(file, &error);
 
   if (error != NULL) {
-    g_error("unable to load file: %s - reason: %s", file, error->message);
+    g_printerr("unable to load file: %s - reason: %s\n", file, error->message);
+    g_error_free(error);
     return NULL;
   }
 
@@ -135,4 +136,10 @@ finish:
   state->rendering_surface = rendering_surface;
 
   g_free(alloc);
+}
+
+void pixbuf_free(struct swappy_state *state) {
+  if (G_IS_OBJECT(state->original_image)) {
+    g_object_unref(state->original_image);
+  }
 }
