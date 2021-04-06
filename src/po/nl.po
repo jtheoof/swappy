@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the swappy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: swappy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-06-21 21:57-0400\n"
+"PO-Revision-Date: 2021-04-06 21:43+0200\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4.2\n"
+"Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: nl\n"
+
+#: res/swappy.glade:455
+msgid "Line Width"
+msgstr "Lijnbreedte"
+
+#: res/swappy.glade:525
+msgid "Text Size"
+msgstr "Tekstgrootte"
+
+#: res/swappy.glade:641
+msgid "Toggle Paint Panel"
+msgstr "Tekenpaneel tonen/verbergen"
+
+#: res/swappy.glade:667
+msgid "Undo Last Paint"
+msgstr "Ongedaan maken"
+
+#: res/swappy.glade:686
+msgid "Redo Previous Paint"
+msgstr "Opnieuw uitvoeren"
+
+#: res/swappy.glade:705
+msgid "Clear Paints"
+msgstr "Aanpassingen wissen"
+
+#: res/swappy.glade:733
+msgid "Copy Surface"
+msgstr "Bovenste laag kopiëren"
+
+#: res/swappy.glade:749
+msgid "Save Surface"
+msgstr "Bovenste laag opslaan"
