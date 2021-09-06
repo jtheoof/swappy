@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Clang
         run: |
+          sudo apt-get update
           sudo apt --yes install libgtk-3-dev meson ninja-build scdoc clang clang-format clang-tidy
           CC=clang meson build
           ninja -C build
