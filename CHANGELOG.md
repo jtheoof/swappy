@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/jtheoof/swappy/compare/v1.3.1...v1.4.0) (2021-09-06)
+
+
+### Features
+
+* **draw:** draw shape from center if holding control ([d80c361](https://github.com/jtheoof/swappy/commit/d80c3614895d3b5da479831c651cc1afa2fcf916))
+* **i18n:** add french translations ([cacb283](https://github.com/jtheoof/swappy/commit/cacb2830e4cc41010d6ab96655054d2eb1651651))
+
+
+### Bug Fixes
+
+* **desktop:** remove annotation from desktop categories ([0d383f6](https://github.com/jtheoof/swappy/commit/0d383f690b99026c340eab1efa590c48d54e7368))
+* **desktop:** various fixes ([42425c0](https://github.com/jtheoof/swappy/commit/42425c0657a65b3f66ba4f64b1727c8198a70684))
+* **i18n:** add german translations to desktop file ([c6b09e5](https://github.com/jtheoof/swappy/commit/c6b09e56399369b14a8de090a2239350dbe4aca8))
+* **i18n:** add turkish translation to desktop file ([fa5769e](https://github.com/jtheoof/swappy/commit/fa5769e9406b8ab1b67aca3bff2656850362491e))
+* **i18n:** properly set translation domain during layout init ([5301aeb](https://github.com/jtheoof/swappy/commit/5301aebd5e5534453621db7168b8afac5d7810f2)), closes [#92](https://github.com/jtheoof/swappy/issues/92)
+* **pixbuf:** handle invalid input file ([cdbd06d](https://github.com/jtheoof/swappy/commit/cdbd06d7af94b4aedfc2bda2231da8853f775f3a))
+* **pixbuf:** handle overflow when filename_format is too long ([185575b](https://github.com/jtheoof/swappy/commit/185575bf75281eba8a0bc49b3da59225bdd9e1c7)), closes [#74](https://github.com/jtheoof/swappy/issues/74)
+* **po:** update GETTEXT_PACKAGE value with project name ([7fd552e](https://github.com/jtheoof/swappy/commit/7fd552e8c41f29711212d7f70edf61ac6ada7a7d))
+* **release:** properly check sha256 remote content ([91985c7](https://github.com/jtheoof/swappy/commit/91985c7994764f52c8e9d864db8ec9cf2eb1df5c)), closes [#90](https://github.com/jtheoof/swappy/issues/90)
+
 ### [1.3.1](https://github.com/jtheoof/swappy/compare/v1.3.0...v1.3.1) (2021-02-20)
 
 ## [1.3.0](https://github.com/jtheoof/swappy/compare/v1.2.1...v1.3.0) (2021-02-18)
