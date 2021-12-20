@@ -97,7 +97,11 @@ static void load_config_from_file(struct swappy_config *config,
       save_dir_expanded = g_strdup(p.we_wordv[0]);
       wordfree(&p);
       if (!save_dir_expanded || !folder_exists(save_dir_expanded)) {
-        g_warning("save_dir: %s is not a valid directory", save_dir_expanded);
+        g_info("save_dir: attempting to create non-existent directory '%s'",
+               save_dir_expanded);
+        if (g_mkdir_with_parents(save_dir_expanded, 0755)) {
+          g_warning("save_dir: failed to create '%s'", save_dir_expanded);
+        }
       }
 
       g_free(save_dir);
