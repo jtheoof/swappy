@@ -48,14 +48,16 @@ show_panel=false
 line_size=5
 text_size=20
 text_font=sans-serif
+paint_mode=brush
 ```
 
-- `save_dir` is where swappshots will be saved, can contain env variables and must exist in your filesystem
+- `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
 - `save_filename_format`: is the filename template, if it contains a date format, this will be parsed into a timestamp. Format is detailed in [strftime(3)](https://man.archlinux.org/man/strftime.3). If this date format is missing, filename will have no timestamp
 - `show_panel` is used to toggle the paint panel on or off upon startup
 - `line_size` is the default line size (must be between 1 and 50)
 - `text_size` is the default text size (must be between 10 and 50)
 - `text_font` is the font used to render text, its format is pango friendly
+- `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
 
 ## Keyboard Shortcuts
 
