@@ -143,6 +143,7 @@ struct swappy_config {
   char *config_file;
   char *save_dir;
   char *save_filename_format;
+  gint8 paint_mode;
   gboolean show_panel;
   guint32 line_size;
   guint32 text_size;
