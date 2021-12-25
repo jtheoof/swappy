@@ -762,6 +762,32 @@ static bool load_layout(struct swappy_state *state) {
   return true;
 }
 
+static void set_paint_mode(struct swappy_state *state) {
+  switch (state->mode) {
+    case SWAPPY_PAINT_MODE_BRUSH:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush), true);
+      break;
+    case SWAPPY_PAINT_MODE_TEXT:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text), true);
+      break;
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
+                                   true);
+      break;
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse), true);
+      break;
+    case SWAPPY_PAINT_MODE_ARROW:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+      break;
+    case SWAPPY_PAINT_MODE_BLUR:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+      break;
+    default:
+      break;
+  }
+}
+
 static bool init_gtk_window(struct swappy_state *state) {
   if (!state->original_image) {
     g_critical("original image not loaded");
@@ -775,6 +801,8 @@ static bool init_gtk_window(struct swappy_state *state) {
   if (!load_css(state)) {
     return false;
   }
+
+  set_paint_mode(state);
 
   update_ui_stroke_size_widget(state);
   update_ui_text_size_widget(state);
@@ -799,6 +827,7 @@ static void init_settings(struct swappy_state *state) {
   state->settings.a = 1;
   state->settings.w = state->config->line_size;
   state->settings.t = state->config->text_size;
+  state->mode = state->config->paint_mode;
 }
 
 static gint command_line_handler(GtkApplication *app,

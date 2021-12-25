@@ -19,6 +19,7 @@ static void print_config(struct swappy_config *config) {
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
+  g_info("paint_mode: %d", config->paint_mode);
 }
 
 static char *get_default_save_dir() {
@@ -75,6 +76,7 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *save_dir_expanded = NULL;
   guint64 line_size, text_size;
   gchar *text_font = NULL;
+  gchar *paint_mode = NULL;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -180,6 +182,32 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  paint_mode = g_key_file_get_string(gkf, group, "paint_mode", &error);
+
+  if (error == NULL) {
+    if (g_ascii_strcasecmp(paint_mode, "brush") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_BRUSH;
+    } else if (g_ascii_strcasecmp(paint_mode, "text") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_TEXT;
+    } else if (g_ascii_strcasecmp(paint_mode, "rectangle") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_RECTANGLE;
+    } else if (g_ascii_strcasecmp(paint_mode, "ellipse") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_ELLIPSE;
+    } else if (g_ascii_strcasecmp(paint_mode, "arrow") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_ARROW;
+    } else if (g_ascii_strcasecmp(paint_mode, "blur") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_BLUR;
+    } else {
+      g_warning(
+          "paint_mode is not a valid value: %s - see man page for details",
+          paint_mode);
+    }
+  } else {
+    g_info("paint_mode is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -194,6 +222,7 @@ static void load_default_config(struct swappy_config *config) {
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;
   config->show_panel = CONFIG_SHOW_PANEL_DEFAULT;
+  config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
