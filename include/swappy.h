@@ -137,6 +137,8 @@ struct swappy_state_ui {
 
   GtkButton *line_size;
   GtkButton *text_size;
+
+  GtkToggleButton *fill_shape;
 };
 
 struct swappy_config {
@@ -144,6 +146,7 @@ struct swappy_config {
   char *save_dir;
   char *save_filename_format;
   gint8 paint_mode;
+  gboolean fill_shape;
   gboolean show_panel;
   guint32 line_size;
   guint32 text_size;

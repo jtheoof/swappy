@@ -45,6 +45,13 @@ static void update_ui_panel_toggle_button(struct swappy_state *state) {
   gtk_widget_set_visible(painting_box, toggled);
 }
 
+static void update_ui_fill_shape_toggle_button(struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->fill_shape);
+  gboolean toggled = state->config->fill_shape;
+
+  gtk_toggle_button_set_active(button, toggled);
+}
+
 void application_finish(struct swappy_state *state) {
   g_debug("application finishing, cleaning up");
   paint_free_all(state);
@@ -200,6 +207,13 @@ static void action_text_size_increase(struct swappy_state *state) {
   }
 
   update_ui_text_size_widget(state);
+}
+
+static void action_fill_shape_toggle(struct swappy_state *state, gboolean *toggled) {
+  gboolean toggle = (toggled == NULL) ? !state->config->fill_shape : *toggled;
+  state->config->fill_shape = toggle;
+
+  update_ui_fill_shape_toggle_button(state);
 }
 
 static void save_state_to_file_or_folder(struct swappy_state *state,
@@ -613,6 +627,12 @@ void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
   action_text_size_increase(state);
 }
 
+void fill_shape_toggled_handler(GtkWidget *widget, struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
+  gboolean toggled = gtk_toggle_button_get_active(button);
+  action_fill_shape_toggle(state, &toggled);
+}
+
 static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   GdkRectangle workarea = {0};
   GdkDisplay *display = gdk_display_get_default();
@@ -748,6 +768,9 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
 
+  state->ui->fill_shape =
+      GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "fill-shape-toggle-button"));
+
   state->ui->brush = brush;
   state->ui->text = text;
   state->ui->rectangle = rectangle;
@@ -813,6 +836,7 @@ static bool init_gtk_window(struct swappy_state *state) {
   update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
   update_ui_panel_toggle_button(state);
+  update_ui_fill_shape_toggle_button(state);
 
   return true;
 }
