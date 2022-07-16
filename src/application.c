@@ -429,6 +429,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_Control_L:
         control_modifier_changed(true, state);
         break;
+      case GDK_KEY_f:
+        action_fill_shape_toggle(state, NULL);
+        break;
       default:
         break;
     }
