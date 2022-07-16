@@ -133,26 +133,32 @@ static void action_set_color_from_custom(struct swappy_state *state) {
 
 static void switch_mode_to_brush(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_text(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_TEXT;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_rectangle(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
 }
 
 static void switch_mode_to_ellipse(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ELLIPSE;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
 }
 
 static void switch_mode_to_arrow(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ARROW;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
@@ -794,22 +800,27 @@ static void set_paint_mode(struct swappy_state *state) {
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BRUSH:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
-                                   true);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
       break;
     case SWAPPY_PAINT_MODE_ELLIPSE:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
       break;
     case SWAPPY_PAINT_MODE_ARROW:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_BLUR:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     default:
       break;
