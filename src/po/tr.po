@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"POT-Creation-Date: 2022-12-04 22:52+0100\n"
 "PO-Revision-Date: 2022-11-25 10:36+0300\n"
 "Last-Translator: Oğuz Ersen <oguz@ersen.moe>\n"
 "Language-Team: Turkish <tr>\n"
@@ -17,42 +17,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: res/swappy.glade:456
+#: res/swappy.glade:461
 msgid "Line Width"
 msgstr "Çizgi Genişliği"
 
-#: res/swappy.glade:526
+#: res/swappy.glade:531
 msgid "Text Size"
 msgstr "Metin Boyutu"
 
-#: res/swappy.glade:592
+#: res/swappy.glade:597
 msgid "Fill shape"
 msgstr "Şekli Doldur"
 
-#: res/swappy.glade:597
+#: res/swappy.glade:602
 msgid "Toggle shape filling"
 msgstr "Şekil Doldurmayı Aç/Kapat"
 
-#: res/swappy.glade:671
+#: res/swappy.glade:676
 msgid "Toggle Paint Panel"
 msgstr "Boyama Panelini Aç/Kapat"
 
-#: res/swappy.glade:697
+#: res/swappy.glade:702
 msgid "Undo Last Paint"
 msgstr "Son Boyamayı Geri Al"
 
-#: res/swappy.glade:716
+#: res/swappy.glade:721
 msgid "Redo Previous Paint"
 msgstr "Önceki Boyamayı Tekrarla"
 
-#: res/swappy.glade:735
+#: res/swappy.glade:740
 msgid "Clear Paints"
 msgstr "Boyamaları Temizle"
 
-#: res/swappy.glade:763
+#: res/swappy.glade:768
 msgid "Copy Surface"
 msgstr "Yüzeyi Kopyala"
 
-#: res/swappy.glade:779
+#: res/swappy.glade:784
 msgid "Save Surface"
 msgstr "Yüzeyi Kaydet"
+
+#: res/swappy.glade:800
+#, fuzzy
+msgid "Save Surface As"
+msgstr "Yüzeyi Kaydet"
+
+#: src/application.c:327
+msgid "_Cancel"
+msgstr ""
+
+#: src/application.c:328
+msgid "_Save"
+msgstr ""
