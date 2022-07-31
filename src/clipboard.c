@@ -82,5 +82,9 @@ bool clipboard_copy_drawing_area_to_selection(struct swappy_state *state) {
 
   g_object_unref(pixbuf);
 
+  if (state->config->early_exit) {
+    gtk_main_quit();
+  }
+
   return true;
 }

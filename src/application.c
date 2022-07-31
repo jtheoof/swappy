@@ -45,6 +45,29 @@ static void update_ui_panel_toggle_button(struct swappy_state *state) {
   gtk_widget_set_visible(painting_box, toggled);
 }
 
+void application_finish(struct swappy_state *state) {
+  g_debug("application finishing, cleaning up");
+  paint_free_all(state);
+  pixbuf_free(state);
+  cairo_surface_destroy(state->rendering_surface);
+  cairo_surface_destroy(state->original_image_surface);
+  if (state->temp_file_str) {
+    g_info("deleting temporary file: %s", state->temp_file_str);
+    if (g_unlink(state->temp_file_str) != 0) {
+      g_warning("unable to delete temporary file: %s", state->temp_file_str);
+    }
+    g_free(state->temp_file_str);
+  }
+  g_free(state->file_str);
+  g_free(state->geometry);
+  g_free(state->window);
+  g_free(state->ui);
+
+  g_object_unref(state->app);
+
+  config_free(state);
+}
+
 static void action_undo(struct swappy_state *state) {
   GList *first = state->paints;
 
@@ -191,6 +214,10 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
   }
 
   g_object_unref(pixbuf);
+
+  if (state->config->early_exit) {
+    gtk_main_quit();
+  }
 }
 
 static void maybe_save_output_file(struct swappy_state *state) {
@@ -252,28 +279,6 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_blur(state);
-}
-
-void application_finish(struct swappy_state *state) {
-  paint_free_all(state);
-  pixbuf_free(state);
-  cairo_surface_destroy(state->rendering_surface);
-  cairo_surface_destroy(state->original_image_surface);
-  if (state->temp_file_str) {
-    g_info("deleting temporary file: %s", state->temp_file_str);
-    if (g_unlink(state->temp_file_str) != 0) {
-      g_warning("unable to delete temporary file: %s", state->temp_file_str);
-    }
-    g_free(state->temp_file_str);
-  }
-  g_free(state->file_str);
-  g_free(state->geometry);
-  g_free(state->window);
-  g_free(state->ui);
-
-  g_object_unref(state->app);
-
-  config_free(state);
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
