@@ -20,6 +20,7 @@ static void print_config(struct swappy_config *config) {
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
   g_info("paint_mode: %d", config->paint_mode);
+  g_info("early_exit: %d", config->early_exit);
 }
 
 static char *get_default_save_dir() {
@@ -77,6 +78,7 @@ static void load_config_from_file(struct swappy_config *config,
   guint64 line_size, text_size;
   gchar *text_font = NULL;
   gchar *paint_mode = NULL;
+  gboolean early_exit;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -182,6 +184,16 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  early_exit = g_key_file_get_boolean(gkf, group, "early_exit", &error);
+
+  if (error == NULL) {
+    config->early_exit = early_exit;
+  } else {
+    g_info("early_exit is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   paint_mode = g_key_file_get_string(gkf, group, "paint_mode", &error);
 
   if (error == NULL) {
@@ -223,6 +235,7 @@ static void load_default_config(struct swappy_config *config) {
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;
   config->show_panel = CONFIG_SHOW_PANEL_DEFAULT;
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
+  config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
