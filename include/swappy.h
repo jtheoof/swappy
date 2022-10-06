@@ -153,6 +153,7 @@ struct swappy_config {
   char *text_font;
   gboolean early_exit;
   gboolean auto_save;
+  char *custom_color;
 };
 
 struct swappy_state {

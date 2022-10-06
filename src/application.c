@@ -721,6 +721,8 @@ static bool load_css(struct swappy_state *state) {
 
 static bool load_layout(struct swappy_state *state) {
   GError *error = NULL;
+  // init color
+  GdkRGBA color;
 
   /* Construct a GtkBuilder instance and load our UI description */
   GtkBuilder *builder = gtk_builder_new();
@@ -784,6 +786,9 @@ static bool load_layout(struct swappy_state *state) {
 
   state->ui->fill_shape = GTK_TOGGLE_BUTTON(
       gtk_builder_get_object(builder, "fill-shape-toggle-button"));
+
+  gdk_rgba_parse(&color, state->config->custom_color);
+  gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(state->ui->color), &color);
 
   state->ui->brush = brush;
   state->ui->text = text;
