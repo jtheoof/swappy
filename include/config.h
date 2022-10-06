@@ -7,6 +7,7 @@
 #define CONFIG_SAVE_FILENAME_FORMAT_DEFAULT "swappy-%Y%m%d_%H%M%S.png"
 #define CONFIG_PAINT_MODE_DEFAULT SWAPPY_PAINT_MODE_BRUSH
 #define CONFIG_EARLY_EXIT_DEFAULT false
+#define CONFIG_CUSTOM_COLOR_DEFAULT "rgba(193,125,17,1)"
 
 void config_load(struct swappy_state *state);
 void config_free(struct swappy_state *state);

@@ -50,6 +50,7 @@ text_size=20
 text_font=sans-serif
 paint_mode=brush
 early_exit=false
+custom_color=rgba(193,125,17,1)
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -60,6 +61,8 @@ early_exit=false
 - `text_font` is the font used to render text, its format is pango friendly
 - `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard 
+- `custom_color` is used to set a default value for the custom color
+
 
 ## Keyboard Shortcuts
 

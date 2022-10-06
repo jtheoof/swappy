@@ -21,6 +21,7 @@ static void print_config(struct swappy_config *config) {
   g_info("text_size: %d", config->text_size);
   g_info("paint_mode: %d", config->paint_mode);
   g_info("early_exit: %d", config->early_exit);
+  g_info("custom_color: %s", config->custom_color);
 }
 
 static char *get_default_save_dir() {
@@ -79,6 +80,7 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *text_font = NULL;
   gchar *paint_mode = NULL;
   gboolean early_exit;
+  gchar *custom_color = NULL;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -220,6 +222,15 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  custom_color = g_key_file_get_string(gkf, group, "custom_color", &error);
+  if (error == NULL) {
+    config->custom_color = custom_color;
+  } else {
+    g_info("custom_color is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -236,6 +247,7 @@ static void load_default_config(struct swappy_config *config) {
   config->show_panel = CONFIG_SHOW_PANEL_DEFAULT;
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
+  config->custom_color = CONFIG_CUSTOM_COLOR_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
@@ -262,6 +274,7 @@ void config_free(struct swappy_state *state) {
     g_free(state->config->save_dir);
     g_free(state->config->save_filename_format);
     g_free(state->config->text_font);
+    g_free(state->config->custom_color);
     g_free(state->config);
     state->config = NULL;
   }

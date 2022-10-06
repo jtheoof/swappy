@@ -748,6 +748,10 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
 
+  GdkRGBA color;
+  gdk_rgba_parse(&color,state->config->custom_color); 
+  gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(state->ui->color), &color);
+
   state->ui->brush = brush;
   state->ui->text = text;
   state->ui->rectangle = rectangle;
