@@ -216,6 +216,10 @@ static void action_text_size_increase(struct swappy_state *state) {
 }
 
 static void action_fill_shape_toggle(struct swappy_state *state, gboolean *toggled) {
+  // Don't allow changing the state via a shortcut if the button can't be clicked.
+  if(!gtk_widget_get_sensitive(GTK_WIDGET(state->ui->fill_shape)))
+    return;
+
   gboolean toggle = (toggled == NULL) ? !state->config->fill_shape : *toggled;
   state->config->fill_shape = toggle;
 
