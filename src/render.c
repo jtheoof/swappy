@@ -310,7 +310,19 @@ static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_scale(cr, x / n, y / n);
   cairo_arc(cr, 0, 0, r, 0, 2 * G_PI);
   cairo_set_matrix(cr, &save_matrix);
-  cairo_stroke(cr);
+
+  switch (shape.operation) {
+    case SWAPPY_PAINT_SHAPE_OPERATION_STROKE:
+      cairo_stroke(cr);
+      break;
+    case SWAPPY_PAINT_SHAPE_OPERATION_FILL:
+      cairo_fill(cr);
+      break;
+    default:
+      cairo_stroke(cr);
+      break;
+  }
+
   cairo_close_path(cr);
 }
 
