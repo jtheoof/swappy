@@ -118,7 +118,7 @@ Install dependencies (on Arch, name can vary for other distros):
 - ninja
 - cairo
 - pango
-- gtk
+- gtk3
 - glib2
 - scdoc
 
@@ -154,6 +154,24 @@ ninja -C build swappy-pot
 ```
 
 See the [meson documentation](https://mesonbuild.com/Localisation.html) for details.
+
+### Build for Ubuntu
+1. Build container
+```sh
+docker build -t swappy-develop Dockerfile.ubuntu .
+```
+2. Start the container
+```shell
+docker run -it -v $(pwd):/code swappy-develop
+```
+3. Then run the build scripts
+```shell
+meson build
+ninja -C build
+```
+
+Your executable will be in `build/swappy` and you can copy that directly to `/usr/bin/swappy` for your system to use
+
 
 ## Contributing
 
