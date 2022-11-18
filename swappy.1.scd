@@ -65,6 +65,7 @@ The following lines can be used as swappy's default:
 	text_font=sans-serif
 	paint_mode=brush
 	early_exit=false
+	fill_shape=false
 ```
 
 - *save_dir* is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -75,6 +76,7 @@ The following lines can be used as swappy's default:
 - *text_font* is the font used to render text, its format is pango friendly
 - *paint_mode* is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
 - *early_exit* is used to make the application exit after saving the picture or copying it to the clipboard
+- *fill_shape* is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 
 
 # KEY BINDINGS
@@ -99,6 +101,7 @@ The following lines can be used as swappy's default:
 - *Minus*: Reduce Stroke Size
 - *Plus*: Increase Stroke Size
 - *Equal*: Reset Stroke Size
+- *f*: Toggle Shape Filling
 - *k*: Clear Paints (cannot be undone)
 
 ## MODIFIERS

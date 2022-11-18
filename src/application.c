@@ -45,6 +45,13 @@ static void update_ui_panel_toggle_button(struct swappy_state *state) {
   gtk_widget_set_visible(painting_box, toggled);
 }
 
+static void update_ui_fill_shape_toggle_button(struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->fill_shape);
+  gboolean toggled = state->config->fill_shape;
+
+  gtk_toggle_button_set_active(button, toggled);
+}
+
 void application_finish(struct swappy_state *state) {
   g_debug("application finishing, cleaning up");
   paint_free_all(state);
@@ -126,26 +133,32 @@ static void action_set_color_from_custom(struct swappy_state *state) {
 
 static void switch_mode_to_brush(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BRUSH;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_text(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_TEXT;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_rectangle(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_RECTANGLE;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
 }
 
 static void switch_mode_to_ellipse(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ELLIPSE;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
 }
 
 static void switch_mode_to_arrow(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_ARROW;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
 static void action_stroke_size_decrease(struct swappy_state *state) {
@@ -200,6 +213,17 @@ static void action_text_size_increase(struct swappy_state *state) {
   }
 
   update_ui_text_size_widget(state);
+}
+
+static void action_fill_shape_toggle(struct swappy_state *state, gboolean *toggled) {
+  // Don't allow changing the state via a shortcut if the button can't be clicked.
+  if(!gtk_widget_get_sensitive(GTK_WIDGET(state->ui->fill_shape)))
+    return;
+
+  gboolean toggle = (toggled == NULL) ? !state->config->fill_shape : *toggled;
+  state->config->fill_shape = toggle;
+
+  update_ui_fill_shape_toggle_button(state);
 }
 
 static void save_state_to_file_or_folder(struct swappy_state *state,
@@ -409,6 +433,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_Control_L:
         control_modifier_changed(true, state);
         break;
+      case GDK_KEY_f:
+        action_fill_shape_toggle(state, NULL);
+        break;
       default:
         break;
     }
@@ -613,6 +640,12 @@ void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
   action_text_size_increase(state);
 }
 
+void fill_shape_toggled_handler(GtkWidget *widget, struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
+  gboolean toggled = gtk_toggle_button_get_active(button);
+  action_fill_shape_toggle(state, &toggled);
+}
+
 static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   GdkRectangle workarea = {0};
   GdkDisplay *display = gdk_display_get_default();
@@ -748,6 +781,9 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
 
+  state->ui->fill_shape =
+      GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "fill-shape-toggle-button"));
+
   state->ui->brush = brush;
   state->ui->text = text;
   state->ui->rectangle = rectangle;
@@ -771,22 +807,27 @@ static void set_paint_mode(struct swappy_state *state) {
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BRUSH:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
-                                   true);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
       break;
     case SWAPPY_PAINT_MODE_ELLIPSE:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), true);
       break;
     case SWAPPY_PAINT_MODE_ARROW:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_BLUR:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     default:
       break;
@@ -813,6 +854,7 @@ static bool init_gtk_window(struct swappy_state *state) {
   update_ui_text_size_widget(state);
   update_ui_undo_redo(state);
   update_ui_panel_toggle_button(state);
+  update_ui_fill_shape_toggle_button(state);
 
   return true;
 }
