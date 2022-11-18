@@ -1,0 +1,9 @@
+{
+  "name": "swappy",
+  "version": "1.4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jtheoof/swappy.git"
+  },
+  "author": "Jeremy Attali"
+}

@@ -3,6 +3,9 @@
     {
       "filename": "meson.build",
       "updater": "script/bump-meson-build.js"
+    },
+    {
+      "filename": "package.json"
     }
   ]
 }
