@@ -1,7 +1,7 @@
 project(
 	'swappy',
 	'c',
-	version: '1.4.0',
+	version: '1.5.0',
 	license: 'MIT',
 	meson_version: '>=0.48.0',
 	default_options: [

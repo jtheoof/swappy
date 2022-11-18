@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/jtheoof/swappy/compare/v1.4.0...v1.5.0) (2022-11-18)
+
+
+### Features
+
+* **config:** add early_exit option ([60da549](https://github.com/jtheoof/swappy/commit/60da5491e243c9edd85f6225326a68ae5e3edfd5))
+* **config:** allow paint_mode to be configured through config file ([2f35f02](https://github.com/jtheoof/swappy/commit/2f35f02b4e89bf67b6e9cc461e874331d8ce2a4c))
+* **config:** try to create `save_dir` if it does not exist ([4fb291a](https://github.com/jtheoof/swappy/commit/4fb291ad4b0b116afeaa7094b040083111b74674))
+* **ui:** allow filling rectangles and ellipsis ([8ee55f7](https://github.com/jtheoof/swappy/commit/8ee55f7d52ce6ac71752981863f5795fef460049)), closes [#120](https://github.com/jtheoof/swappy/issues/120)
+
 ## [1.4.0](https://github.com/jtheoof/swappy/compare/v1.3.1...v1.4.0) (2021-09-06)
 
 
