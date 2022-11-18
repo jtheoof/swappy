@@ -232,7 +232,6 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
-
   g_key_file_free(gkf);
 }
 
