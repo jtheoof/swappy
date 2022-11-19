@@ -5,57 +5,57 @@
   <object class="GtkImage" id="edit-redo">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">edit-redo</property>
+    <property name="icon_name">edit-redo-symbolic</property>
   </object>
   <object class="GtkImage" id="edit-undo">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">edit-undo</property>
+    <property name="icon_name">edit-undo-symbolic</property>
   </object>
   <object class="GtkImage" id="img-clear-paints">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">edit-delete</property>
+    <property name="icon_name">edit-delete-symbolic</property>
   </object>
   <object class="GtkImage" id="img-copy-surface">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">edit-copy</property>
+    <property name="icon_name">edit-copy-symbolic</property>
   </object>
   <object class="GtkImage" id="img-save-surface">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">document-save</property>
+    <property name="icon_name">document-save-symbolic</property>
   </object>
   <object class="GtkImage" id="img-toggle-panel">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">document-properties</property>
+    <property name="icon_name">document-properties-symbolic</property>
   </object>
   <object class="GtkImage" id="zoom-in">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">zoom-in</property>
+    <property name="icon_name">zoom-in-symbolic</property>
   </object>
   <object class="GtkImage" id="zoom-in1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">zoom-in</property>
+    <property name="icon_name">zoom-in-symbolic</property>
   </object>
   <object class="GtkImage" id="zoom-in2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">zoom-in</property>
+    <property name="icon_name">zoom-in-symbolic</property>
   </object>
   <object class="GtkImage" id="zoom-out">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">zoom-out</property>
+    <property name="icon_name">zoom-out-symbolic</property>
   </object>
   <object class="GtkImage" id="zoom-out1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="icon_name">zoom-out</property>
+    <property name="icon_name">zoom-out-symbolic</property>
   </object>
   <object class="GtkApplicationWindow" id="paint-window">
     <property name="visible">True</property>
@@ -816,10 +816,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="zoom-out2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="icon_name">zoom-out</property>
   </object>
 </interface>
