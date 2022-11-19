@@ -49,13 +49,15 @@ verify_sha256_checksums() {
 sign_release_source() {
   echo "signing source assets..."
   cd $release_folder
-  gpg --output $app_name-$version.tar.gz.sig --detach-sign github-$app_name-$version.tar.gz
+  gpg --output $app_name-$version.tar.gz.sig --detach-sign local-$app_name-$version.tar.gz
 }
 
 upload_signed_assets_to_release() {
-  echo "uploading signatures to github release..."
+  echo "uploading signature and archive to github release..."
   cd $release_folder
+  cp local-$app_name-$version.tar.gz $app_name-$version.tar.gz
   gh release upload v$version $app_name-$version.tar.gz.sig  --clobber
+  gh release upload v$version $app_name-$version.tar.gz --clobber
 }
 
 
@@ -69,8 +71,11 @@ main() {
   fi
 
   build_archives_from_source
-  download_source_for_release
-  verify_sha256_checksums
+  # Turning off manual downloading from github
+  # It looks like the tar.gz from github is generated in a non-standard way
+  # but I couldn't find proper documenation on this
+  #download_source_for_release
+  #verify_sha256_checksums
   sign_release_source
   upload_signed_assets_to_release
 }
