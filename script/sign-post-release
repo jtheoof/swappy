@@ -27,7 +27,8 @@ get_release_version() {
 build_archives_from_source() {
   echo "building source archives..."
   cd $git_root
-  git archive -o "$release_folder/local-$app_name-$version.tar.gz" --format tar.gz --prefix "$app_name-$version/" "v$version"
+  # Temporary -c command because github is still using git < v2.38.0
+  git -c tar.tar.gz.command="gzip -cn" archive -o "$release_folder/local-$app_name-$version.tar.gz" --format tar.gz --prefix "$app_name-$version/" "v$version" -6
 }
 
 
