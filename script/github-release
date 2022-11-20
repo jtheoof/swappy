@@ -73,16 +73,16 @@ gpg_sign_archive() {
 
 git_generate_changelog() {
   echo "generating changelog..."
-  git diff "v$version"^ -- CHANGELOG.md | tail -n +9 | head -n -4 | sed 's/^+//g' > $release_folder/CHANGELOG.md
+  git diff "v$version"^ -- CHANGELOG.md | tail -n +9 | head -n -4 | sed 's/^+//g' > $release_folder/CHANGELOG-$version.md
 }
 
 github_create_release() {
   echo "creating github release..."
   gh release create --draft "v$version" \
-    -F "$release_folder/CHANGELOG.md" \
+    -F "$release_folder/CHANGELOG-$version.md" \
     "$release_folder/$app_name-$version.tar.gz" \
     "$release_folder/$app_name-$version.tar.gz.sig" \
-    "$release_folder/CHANGELOG.md"
+    "$release_folder/CHANGELOG-$version.md"
 }
 
 main() {
