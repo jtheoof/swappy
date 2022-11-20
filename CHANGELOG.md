@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/jtheoof/swappy/compare/v1.5.0...v1.5.1) (2022-11-20)
+
+
+### Bug Fixes
+
+* **ui:** use *-symbolic variant of toolbar icons ([5dc44f8](https://github.com/jtheoof/swappy/commit/5dc44f8970b0f6cdf21466bc2689ec2aa93a4385)), closes [#34](https://github.com/jtheoof/swappy/issues/34)
+
 ## [1.5.0](https://github.com/jtheoof/swappy/compare/v1.4.0...v1.5.0) (2022-11-18)
 
 
