@@ -1,0 +1,104 @@
+#!/bin/bash
+
+set -e
+
+declare -r git_root=$(git rev-parse --show-toplevel)
+declare -r app_name="swappy"
+declare -r release_folder="$git_root/release"
+
+declare version=""
+
+die() {
+  echo "$*" 1>&2
+  exit 1
+}
+
+init() {
+  command -v git >/dev/null 2>&1 || { echo >&2 "git required: pacman -S git"; exit 1; }
+  command -v gh >/dev/null 2>&1 || { echo >&2 "github cli tool required to publish the release: pacman -S github-cli"; exit 1; }
+  command -v npx >/dev/null 2>&1 || { echo >&2 "npx required for standard versionning the release: pacman -S npm"; exit 1; }
+  command -v gpg >/dev/null 2>&1 || { echo >&2 "gpg required to sign the archive: pacman -S gnupg"; exit 1; }
+
+  mkdir -p $release_folder
+}
+
+git_get_release_version() {
+  version=$(git describe --tags --abbrev=0 | sed 's/^v//')
+
+  if [ -z "$version" ]
+  then
+    die "version not found, is the git tag valid?"
+  fi
+
+  echo "found latest version: $version"
+}
+
+npx_standard_version() {
+  echo "setting up new standard version with npx..."
+  npx standard-version --sign
+}
+
+git_push_tags() {
+  echo "pushing git tags..."
+  git push --follow-tags
+}
+
+
+git_build_archive() {
+  echo "building source archives..."
+  cd $git_root
+  git archive -o "$release_folder/$app_name-$version.tar.gz" --format tar.gz --prefix "$app_name-$version/" "v$version"
+}
+
+download_source_for_release() {
+  echo "downloading source assets..."
+  cd $release_folder
+  curl --location --output github-$app_name-$version.tar.gz https://github.com/jtheoof/$app_name/archive/v$version.tar.gz
+}
+
+verify_sha256_checksums() {
+  echo "verifying signatures..."
+  cd $release_folder
+  sha256sum $app_name-$version.tar.gz | awk '{ print $1 }' > $app_name-$version.tar.gz.sha256
+
+  # sha256sum --check will exit if the checksums do not match
+  echo "$(cat $app_name-$version.tar.gz.sha256) github-$app_name-$version.tar.gz" | sha256sum --check
+}
+
+gpg_sign_archive() {
+  echo "signing source assets..."
+  cd $release_folder
+  gpg --output $app_name-$version.tar.gz.sig --detach-sign $app_name-$version.tar.gz
+}
+
+git_generate_changelog() {
+  echo "generating changelog..."
+  git diff "v$version"^ -- CHANGELOG.md | tail -n +9 | head -n -4 | sed 's/^+//g' > $release_folder/CHANGELOG.md
+}
+
+github_create_release() {
+  echo "creating github release..."
+  gh release create --draft "v$version" \
+    -F "$release_folder/CHANGELOG.md" \
+    "$release_folder/$app_name-$version.tar.gz" \
+    "$release_folder/$app_name-$version.tar.gz.sig" \
+    "$release_folder/CHANGELOG.md"
+}
+
+main() {
+  init
+
+  npx_standard_version
+  git_push_tags
+  git_get_release_version
+  git_build_archive
+  # Turning off manual downloading from github
+  # doing all the steps, including archive, ourselves.
+  #download_source_for_release
+  #verify_sha256_checksums
+  git_generate_changelog
+  gpg_sign_archive
+  github_create_release
+}
+
+main "$@"

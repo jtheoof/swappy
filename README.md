@@ -166,12 +166,11 @@ Pull requests are welcome. This project uses [conventional commits](https://www.
 
 We rely on [standard-version](https://github.com/conventional-changelog/standard-version) which is part of the JavaScript ecosystem but works well with any project.
 
+```sh
+./script/github-release
 ```
-npx standard-version --sign
-git push --follow-tags
-# Do the release on Github with manual steps, then:
-./script/sign-post-release
-```
+
+Make sure everything is valid in the Draft release, then publish the draft.
 
 Release tarballs are signed with this PGP key: `F44D05A50F6C9EB5C81BCF966A6B35DBE9442683`
 
