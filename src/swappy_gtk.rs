@@ -15,8 +15,8 @@ pub struct UiState {
 }
 
 pub struct State {
-    config: Config,
-    ui: UiState,
+    pub config: Config,
+    pub ui: UiState,
 }
 
 impl UiState {
