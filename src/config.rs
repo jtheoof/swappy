@@ -1,4 +1,18 @@
 use std::string::String;
+use std::path::{PathBuf};
+use dirs::{home_dir, config_dir, desktop_dir};
+
+fn get_default_save_dir() -> String {
+    let storage_paths = vec!(
+        "XDG_DESKTOP_DIR",
+        "XDG_CONFIG_HOME/Desktop",
+        "HOME/Desktop",
+        "HOME",);
+
+    let maybe_desktop_dir = desktop_dir();
+    let maybe_config_dir = config_dir();
+    let home_dir = home_dir().unwrap();
+}
 
 pub struct Config {
     save_dir: String,
