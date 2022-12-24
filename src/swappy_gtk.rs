@@ -30,7 +30,7 @@ impl UiState {
 impl State {
     pub fn new() -> State {
         State {
-            config: Config::new("test"),
+            config: Config::new("~/.config/swappy/config"),
             ui: UiState::new(),
         }
     }
