@@ -188,7 +188,7 @@ Next stop, rust?
 * **ui:** small tweaks ([2b73777](https://github.com/jtheoof/swappy/commit/2b73777142141598c14d37d1b6fa9573de12d914))
 * **ui:** tweak button sizes ([425f455](https://github.com/jtheoof/swappy/commit/425f455ab7665a046060fe140c861aeb7ea8209b))
 * **ui/render:** adjust rendering based on window size ([445980b](https://github.com/jtheoof/swappy/commit/445980bbf4702e59113fab506b2e9e36ad931666)), closes [#6](https://github.com/jtheoof/swappy/issues/6)
-* **wayland:** initalize done copies to 0 ([65cefc1](https://github.com/jtheoof/swappy/commit/65cefc1da7fed86508301250ffc1b6dbc9fd3692))
+* **wayland:** initialize done copies to 0 ([65cefc1](https://github.com/jtheoof/swappy/commit/65cefc1da7fed86508301250ffc1b6dbc9fd3692))
 * **wayland:** replace g_error by g_warning ([64bfc2b](https://github.com/jtheoof/swappy/commit/64bfc2b3a71ed00d0dc1102501ac85792735833f))
 * **window:** quit when delete event is received ([0c5e458](https://github.com/jtheoof/swappy/commit/0c5e458d4c44a2e2e2b4451b4576724aef2a06b0))
 

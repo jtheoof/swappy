@@ -8,7 +8,7 @@ A Wayland native snapshot and editor tool, inspired by [Snappy] on macOS. Works 
 
 ## Example usage
 
-Output of `grim` (or any tool outputing an image file):
+Output of `grim` (or any tool outputting an image file):
 
 ```sh
 grim -g "$(slurp)" - | swappy -f -
@@ -60,7 +60,7 @@ fill_shape=false
 - `text_size` is the default text size (must be between 10 and 50)
 - `text_font` is the font used to render text, its format is pango friendly
 - `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
-- `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard 
+- `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 
 ## Keyboard Shortcuts

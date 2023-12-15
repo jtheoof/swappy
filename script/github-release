@@ -16,7 +16,7 @@ die() {
 init() {
   command -v git >/dev/null 2>&1 || { echo >&2 "git required: pacman -S git"; exit 1; }
   command -v gh >/dev/null 2>&1 || { echo >&2 "github cli tool required to publish the release: pacman -S github-cli"; exit 1; }
-  command -v npx >/dev/null 2>&1 || { echo >&2 "npx required for standard versionning the release: pacman -S npm"; exit 1; }
+  command -v npx >/dev/null 2>&1 || { echo >&2 "npx required for standard versioning the release: pacman -S npm"; exit 1; }
   command -v gpg >/dev/null 2>&1 || { echo >&2 "gpg required to sign the archive: pacman -S gnupg"; exit 1; }
 
   mkdir -p $release_folder
