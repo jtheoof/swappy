@@ -110,6 +110,7 @@ fill_shape=false
 - [Arch Linux](https://archlinux.org/packages/community/x86_64/swappy/)
 - [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 - [Fedora](https://src.fedoraproject.org/rpms/swappy)
+- [Gentoo](https://packages.gentoo.org/packages/gui-apps/swappy)
 - [openSUSE](https://build.opensuse.org/package/show/X11:Wayland/swappy)
 - [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/swappy)
 
