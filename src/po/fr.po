@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"POT-Creation-Date: 2022-12-04 22:52+0100\n"
 "PO-Revision-Date: 2021-02-20 21:00-0500\n"
 "Last-Translator: Jeremy Attali <contact@jtheoof.me>\n"
 "Language-Team: none\n"
@@ -17,42 +17,55 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: res/swappy.glade:456
+#: res/swappy.glade:461
 msgid "Line Width"
 msgstr "Epaisseur de ligne"
 
-#: res/swappy.glade:526
+#: res/swappy.glade:531
 msgid "Text Size"
 msgstr "Taille du texte"
 
-#: res/swappy.glade:592
+#: res/swappy.glade:597
 msgid "Fill shape"
 msgstr "Remplir la forme"
 
-#: res/swappy.glade:597
+#: res/swappy.glade:602
 msgid "Toggle shape filling"
 msgstr "Activer/Désactiver le remplissage de forme"
 
-#: res/swappy.glade:671
+#: res/swappy.glade:676
 msgid "Toggle Paint Panel"
 msgstr "Afficher/Cacher le panneau de peinture"
 
-#: res/swappy.glade:697
+#: res/swappy.glade:702
 msgid "Undo Last Paint"
 msgstr "Annuler la dernière peinture"
 
-#: res/swappy.glade:716
+#: res/swappy.glade:721
 msgid "Redo Previous Paint"
 msgstr "Rétablir la dernière peinture"
 
-#: res/swappy.glade:735
+#: res/swappy.glade:740
 msgid "Clear Paints"
 msgstr "Supprimer les peintures"
 
-#: res/swappy.glade:763
+#: res/swappy.glade:768
 msgid "Copy Surface"
 msgstr "Copier la surface"
 
-#: res/swappy.glade:779
+#: res/swappy.glade:784
 msgid "Save Surface"
 msgstr "Sauvegarder la surface"
+
+#: res/swappy.glade:800
+#, fuzzy
+msgid "Save Surface As"
+msgstr "Sauvegarder la surface"
+
+#: src/application.c:327
+msgid "_Cancel"
+msgstr ""
+
+#: src/application.c:328
+msgid "_Save"
+msgstr ""
