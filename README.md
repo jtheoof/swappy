@@ -32,6 +32,12 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | swappy -f -
 ```
 
+UTC date and time with `TZ` environment variable:
+
+```
+grim -g "$(slurp)" - | TZ=UTC0 swappy -f -
+```
+
 ## Config
 
 The config file is located at `$XDG_CONFIG_HOME/swappy/config` or at `$HOME/.config/swappy/config`.
