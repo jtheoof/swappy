@@ -379,9 +379,12 @@ static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_restore(cr);
 }
 
-static void render_background(cairo_t *cr, struct swappy_state *state) {
-  cairo_set_source_rgb(cr, 0, 0, 0);
+static void clear_surface(cairo_t *cr) { 
+  cairo_save(cr);
+  cairo_set_source_rgba(cr, 0, 0, 0, 0);
+  cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(cr);
+  cairo_restore(cr);
 }
 
 static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
@@ -509,8 +512,8 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
 void render_state(struct swappy_state *state) {
   cairo_surface_t *surface = state->rendering_surface;
   cairo_t *cr = cairo_create(surface);
-
-  render_background(cr, state);
+  
+  clear_surface(cr);
   render_image(cr, state);
   render_paints(cr, state);
 
