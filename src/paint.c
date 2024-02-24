@@ -182,6 +182,7 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
       break;
     case SWAPPY_PAINT_MODE_ARROW:
       paint->can_draw = true;  // all set
+      paint->content.shape.should_center_at_from = is_control_pressed;
 
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
