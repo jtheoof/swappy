@@ -22,6 +22,7 @@ static void print_config(struct swappy_config *config) {
   g_info("paint_mode: %d", config->paint_mode);
   g_info("early_exit: %d", config->early_exit);
   g_info("fill_shape: %d", config->fill_shape);
+  g_info("transparent: %d", config->transparent);
 }
 
 static char *get_default_save_dir() {
@@ -81,6 +82,7 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *paint_mode = NULL;
   gboolean early_exit;
   gboolean fill_shape;
+  gboolean transparent;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -232,6 +234,16 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  transparent = g_key_file_get_boolean(gkf, group, "transparent", &error);
+
+  if (error == NULL) {
+    config->transparent = transparent;
+  } else {
+    g_info("transparent is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -249,6 +261,7 @@ static void load_default_config(struct swappy_config *config) {
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
+  config->transparent = CONFIG_FILL_SHAPE_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {

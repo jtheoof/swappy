@@ -93,8 +93,7 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
   GdkPixbuf *image = state->original_image;
   gtk_widget_get_allocation(widget, alloc);
 
-  gboolean has_alpha = gdk_pixbuf_get_has_alpha(image);
-  cairo_format_t format = has_alpha ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
+  cairo_format_t format = CAIRO_FORMAT_ARGB32;
   gint image_width = gdk_pixbuf_get_width(image);
   gint image_height = gdk_pixbuf_get_height(image);
 

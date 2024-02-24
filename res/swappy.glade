@@ -604,6 +604,23 @@
                         <property name="position">1</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkToggleButton" id="transparent-toggle-button">
+                        <property name="label" translatable="yes">Transparent</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="focus-on-click">False</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Toggle transparency</property>
+                        <property name="always-show-image">True</property>
+                        <signal name="toggled" handler="transparent_toggled_handler" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
