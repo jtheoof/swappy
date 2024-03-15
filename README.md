@@ -51,6 +51,7 @@ text_font=sans-serif
 paint_mode=brush
 early_exit=false
 fill_shape=false
+auto_save=false
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -62,6 +63,7 @@ fill_shape=false
 - `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
+- `auto_save` is used to toggle auto saving on exit the application
 
 ## Keyboard Shortcuts
 
