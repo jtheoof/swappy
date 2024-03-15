@@ -152,6 +152,7 @@ struct swappy_config {
   guint32 text_size;
   char *text_font;
   gboolean early_exit;
+  gboolean auto_save;
 };
 
 struct swappy_state {
