@@ -107,7 +107,7 @@ fill_shape=false
 
 ## Installation
 
-- [Arch Linux](https://archlinux.org/packages/community/x86_64/swappy/)
+- [Arch Linux](https://archlinux.org/packages/extra/x86_64/swappy/)
 - [Arch Linux (git)](https://aur.archlinux.org/packages/swappy-git)
 - [Fedora](https://src.fedoraproject.org/rpms/swappy)
 - [Gentoo](https://packages.gentoo.org/packages/gui-apps/swappy)
