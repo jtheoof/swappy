@@ -32,7 +32,7 @@ Grab a swappshot from a specific window under Sway, using `swaymsg` and `jq`:
 grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | swappy -f -
 ```
 
-UTC date and time with `TZ` environment variable:
+UTC date and time for file name:
 
 ```
 grim -g "$(slurp)" - | TZ=UTC0 swappy -f -
