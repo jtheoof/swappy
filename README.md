@@ -63,7 +63,7 @@ auto_save=false
 - `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
-- `auto_save` is used to toggle auto saving on exit the application
+- `auto_save` is used to toggle auto saving of final buffer to `save_dir` on exit the application
 
 ## Keyboard Shortcuts
 
