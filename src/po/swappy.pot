@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"POT-Creation-Date: 2024-02-24 18:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,26 +33,34 @@ msgstr ""
 msgid "Toggle shape filling"
 msgstr ""
 
-#: res/swappy.glade:671
+#: res/swappy.glade:609
+msgid "Transparent"
+msgstr ""
+
+#: res/swappy.glade:614
+msgid "Toggle transparency"
+msgstr ""
+
+#: res/swappy.glade:688
 msgid "Toggle Paint Panel"
 msgstr ""
 
-#: res/swappy.glade:697
+#: res/swappy.glade:714
 msgid "Undo Last Paint"
 msgstr ""
 
-#: res/swappy.glade:716
+#: res/swappy.glade:733
 msgid "Redo Previous Paint"
 msgstr ""
 
-#: res/swappy.glade:735
+#: res/swappy.glade:752
 msgid "Clear Paints"
 msgstr ""
 
-#: res/swappy.glade:763
+#: res/swappy.glade:780
 msgid "Copy Surface"
 msgstr ""
 
-#: res/swappy.glade:779
+#: res/swappy.glade:796
 msgid "Save Surface"
 msgstr ""
