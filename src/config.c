@@ -22,6 +22,7 @@ static void print_config(struct swappy_config *config) {
   g_info("paint_mode: %d", config->paint_mode);
   g_info("early_exit: %d", config->early_exit);
   g_info("fill_shape: %d", config->fill_shape);
+  g_info("auto_save: %d", config->auto_save);
 }
 
 static char *get_default_save_dir() {
@@ -81,6 +82,7 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *paint_mode = NULL;
   gboolean early_exit;
   gboolean fill_shape;
+  gboolean auto_save;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -232,6 +234,16 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  auto_save = g_key_file_get_boolean(gkf, group, "auto_save", &error);
+
+  if (error == NULL) {
+    config->auto_save = auto_save;
+  } else {
+    g_info("auto_save is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -249,6 +261,7 @@ static void load_default_config(struct swappy_config *config) {
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
+  config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
