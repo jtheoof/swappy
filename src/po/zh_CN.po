@@ -40,11 +40,11 @@ msgstr "切换绘图板状态"
 
 #: res/swappy.glade:697
 msgid "Undo Last Paint"
-msgstr "撤消最后绘图"
+msgstr "撤销"
 
 #: res/swappy.glade:716
 msgid "Redo Previous Paint"
-msgstr "重复上次绘图"
+msgstr "恢复"
 
 #: res/swappy.glade:735
 msgid "Clear Paints"
