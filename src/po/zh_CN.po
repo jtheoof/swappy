@@ -52,7 +52,7 @@ msgstr "清除绘图"
 
 #: res/swappy.glade:763
 msgid "Copy Surface"
-msgstr "复制到剪贴板"
+msgstr "复制"
 
 #: res/swappy.glade:779
 msgid "Save Surface"
