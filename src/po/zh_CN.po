@@ -32,7 +32,7 @@ msgstr "填充"
 
 #: res/swappy.glade:597
 msgid "Toggle shape filling"
-msgstr "切换形状填充"
+msgstr "切换填充状态"
 
 #: res/swappy.glade:671
 msgid "Toggle Paint Panel"
