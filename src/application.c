@@ -68,6 +68,7 @@ void application_finish(struct swappy_state *state) {
   g_free(state->file_str);
   g_free(state->geometry);
   g_free(state->window);
+  g_object_unref(state->ui->im_context);
   g_free(state->ui);
 
   g_object_unref(state->app);
@@ -335,6 +336,16 @@ void control_modifier_changed(bool pressed, struct swappy_state *state) {
       default:
         break;
     }
+  }
+}
+
+static void im_context_commit(GtkIMContext *imc, gchar *str,
+                              gpointer user_data) {
+  struct swappy_state *state = (struct swappy_state *)(user_data);
+  if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
+    paint_update_temporary_str(state, str);
+    render_state(state);
+    return;
   }
 }
 
@@ -741,6 +752,12 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWindow *window =
       GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
+  GtkIMContext *im_context = gtk_im_multicontext_new();
+  gtk_im_context_set_client_window(im_context,
+                                   gtk_widget_get_window(GTK_WIDGET(window)));
+  g_signal_connect(G_OBJECT(im_context), "commit",
+                   G_CALLBACK(im_context_commit), state);
+  state->ui->im_context = im_context;
 
   g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 

@@ -179,7 +179,8 @@ static void convert_pango_rectangle_to_swappy_box(pango_rectangle_t rectangle,
   box->height = pango_units_to_double(rectangle.height);
 }
 
-static void render_text(cairo_t *cr, struct swappy_paint_text text) {
+static void render_text(cairo_t *cr, struct swappy_paint_text text,
+                        struct swappy_state *state) {
   char pango_font[255];
   double x = fmin(text.from.x, text.to.x);
   double y = fmin(text.from.y, text.to.y);
@@ -214,6 +215,9 @@ static void render_text(cairo_t *cr, struct swappy_paint_text text) {
     cairo_set_source_rgba(crt, 0.3, 0.3, 0.3, 1);
     cairo_line_to(crt, cursor_box.x, cursor_box.y + cursor_box.height);
     cairo_stroke(crt);
+    GdkRectangle area = {x + cursor_box.x, y + cursor_box.y + cursor_box.height,
+                         0, 0};
+    gtk_im_context_set_cursor_location(state->ui->im_context, &area);
   }
 
   cairo_rectangle(crt, 0, 0, w, h);
@@ -473,7 +477,8 @@ static void render_image(cairo_t *cr, struct swappy_state *state) {
   cairo_restore(cr);
 }
 
-static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
+static void render_paint(cairo_t *cr, struct swappy_paint *paint,
+                         struct swappy_state *state) {
   if (!paint->can_draw) {
     return;
   }
@@ -490,7 +495,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
       render_shape(cr, paint->content.shape);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
-      render_text(cr, paint->content.text);
+      render_text(cr, paint->content.text, state);
       break;
     default:
       g_info("unable to render paint with type: %d", paint->type);
@@ -501,11 +506,11 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
 static void render_paints(cairo_t *cr, struct swappy_state *state) {
   for (GList *elem = g_list_last(state->paints); elem; elem = elem->prev) {
     struct swappy_paint *paint = elem->data;
-    render_paint(cr, paint);
+    render_paint(cr, paint, state);
   }
 
   if (state->temp_paint) {
-    render_paint(cr, state->temp_paint);
+    render_paint(cr, state->temp_paint, state);
   }
 }
 

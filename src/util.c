@@ -5,6 +5,7 @@
 
 gchar *string_remove_at(gchar *str, glong pos) {
   glong str_len = strlen(str);
+  glong ustr_len = g_utf8_strlen(str, -1);
   gchar *new_str = g_new0(gchar, MAX(str_len, 1));
   gchar *buffer_source = str;
   gchar *buffer_copy = new_str;
@@ -12,7 +13,7 @@ gchar *string_remove_at(gchar *str, glong pos) {
   gint bytes;
   gunichar c;
 
-  if (pos <= str_len && g_utf8_validate(str, -1, NULL)) {
+  if (pos <= ustr_len && g_utf8_validate(str, -1, NULL)) {
     while (*buffer_source != '\0') {
       c = g_utf8_get_char(buffer_source);
       buffer_source = g_utf8_next_char(buffer_source);
