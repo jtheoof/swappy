@@ -250,6 +250,9 @@ void paint_update_temporary_text(struct swappy_state *state,
     case GDK_KEY_Right:
       cursor_move_forward(text);
       break;
+    case GDK_KEY_V:
+      cursor_move_forward(text);
+      break;
     default:
       unicode = gdk_keyval_to_unicode(event->keyval);
       if (unicode != 0) {
