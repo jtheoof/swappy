@@ -407,10 +407,24 @@ static void im_context_commit(GtkIMContext *imc, gchar *str,
   }
 }
 
+static void clipboard_paste_selection(struct swappy_state *state) {
+  GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+  gchar *text = gtk_clipboard_wait_for_text(clipboard);
+  if (text) {
+    paint_update_temporary_str(state, text);
+    g_free(text);
+  }
+}
+
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
-    paint_update_temporary_text(state, event);
+    /* ctrl-v: paste */
+    if (event->state & GDK_CONTROL_MASK && event->keyval == GDK_KEY_v) {
+      clipboard_paste_selection(state);
+    } else {
+      paint_update_temporary_text(state, event);
+    }
     render_state(state);
     return;
   }
