@@ -1,7 +1,9 @@
 #include "paint.h"
 
 #include <glib.h>
+#include <stdio.h>
 
+#include "gtk/gtk.h"
 #include "util.h"
 
 static void cursor_move_backward(struct swappy_paint_text *text) {
@@ -194,6 +196,22 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
   }
 }
 
+void paint_update_temporary_str(struct swappy_state *state, char *str) {
+  struct swappy_paint *paint = state->temp_paint;
+  struct swappy_paint_text *text;
+  char *new_text;
+  if (!paint || paint->type != SWAPPY_PAINT_MODE_TEXT) {
+    g_warning("trying to update text but not in text mode");
+    return;
+  }
+
+  text = &paint->content.text;
+  new_text = string_insert_chars_at(text->text, str, text->cursor);
+  g_free(text->text);
+  text->text = new_text;
+  text->cursor += g_utf8_strlen(str, -1);
+}
+
 void paint_update_temporary_text(struct swappy_state *state,
                                  GdkEventKey *event) {
   struct swappy_paint *paint = state->temp_paint;
@@ -262,6 +280,7 @@ void paint_update_temporary_text_clip(struct swappy_state *state, gdouble x,
   paint->can_draw = true;
   paint->content.text.to.x = x;
   paint->content.text.to.y = y;
+  gtk_im_context_focus_in(state->ui->im_context);
 }
 
 void paint_commit_temporary(struct swappy_state *state) {
@@ -289,6 +308,7 @@ void paint_commit_temporary(struct swappy_state *state) {
     state->paints = g_list_prepend(state->paints, paint);
   }
 
+  gtk_im_context_focus_out(state->ui->im_context);
   // Set the temporary paint to NULL but keep the content in memory
   // because it's now part of the GList.
   state->temp_paint = NULL;

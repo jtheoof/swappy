@@ -116,6 +116,8 @@ struct swappy_state_ui {
   gboolean panel_toggled;
 
   GtkWindow *window;
+  GtkIMContext *im_context;
+
   GtkWidget *area;
 
   GtkToggleButton *panel_toggle_button;
