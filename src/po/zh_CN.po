@@ -1,0 +1,59 @@
+
+# English translations for swappy package.
+# Copyright (C) 2020 THE swappy'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the swappy package.
+# Automatically generated, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: swappy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"PO-Revision-Date: 2020-06-21 21:57-0400\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: res/swappy.glade:456
+msgid "Line Width"
+msgstr "行宽"
+
+#: res/swappy.glade:526
+msgid "Text Size"
+msgstr "文本大小"
+
+#: res/swappy.glade:592
+msgid "Fill shape"
+msgstr "填充"
+
+#: res/swappy.glade:597
+msgid "Toggle shape filling"
+msgstr "切换填充状态"
+
+#: res/swappy.glade:671
+msgid "Toggle Paint Panel"
+msgstr "切换绘图板状态"
+
+#: res/swappy.glade:697
+msgid "Undo Last Paint"
+msgstr "撤销"
+
+#: res/swappy.glade:716
+msgid "Redo Previous Paint"
+msgstr "恢复"
+
+#: res/swappy.glade:735
+msgid "Clear Paints"
+msgstr "清除绘图"
+
+#: res/swappy.glade:763
+msgid "Copy Surface"
+msgstr "复制"
+
+#: res/swappy.glade:779
+msgid "Save Surface"
+msgstr "保存"
