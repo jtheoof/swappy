@@ -9,6 +9,7 @@
 #define CONFIG_EARLY_EXIT_DEFAULT false
 #define CONFIG_FILL_SHAPE_DEFAULT false
 #define CONFIG_AUTO_SAVE_DEFAULT false
+#define CONFIG_CUSTOM_COLOR_DEFAULT "rgba(193,125,17,1)"
 
 void config_load(struct swappy_state *state);
 void config_free(struct swappy_state *state);
