@@ -80,7 +80,8 @@ The following lines can be used as swappy's default:
 - *early_exit* is used to make the application exit after saving the picture or copying it to the clipboard
 - *fill_shape* is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 - *auto_save* is used to toggle auto saving of final buffer to *save_dir* upon exit
-- *custom_color* is used to set a default value for the custom color
+- *custom_color* is used to set a default value for the custom color. Accepted
+formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/root/etc/X11/rgb.txt),  #rgb, #rrggbb, #rrrgggbbb, #rrrrggggbbbb, rgb(r,b,g), rgba(r,g,b,a)
 
 
 # KEY BINDINGS
