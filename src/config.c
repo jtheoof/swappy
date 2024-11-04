@@ -272,7 +272,7 @@ static void load_default_config(struct swappy_config *config) {
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
   config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
-  config->custom_color = CONFIG_CUSTOM_COLOR_DEFAULT;
+  config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
 }
 
 void config_load(struct swappy_state *state) {
