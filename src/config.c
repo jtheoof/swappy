@@ -242,6 +242,8 @@ static void load_config_from_file(struct swappy_config *config,
     config->auto_save = auto_save;
   } else {
     g_info("auto_save is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
   }
 
   custom_color = g_key_file_get_string(gkf, group, "custom_color", &error);
@@ -272,7 +274,7 @@ static void load_default_config(struct swappy_config *config) {
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
   config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
-  config->custom_color = CONFIG_CUSTOM_COLOR_DEFAULT;
+  config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
 }
 
 void config_load(struct swappy_state *state) {
