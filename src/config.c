@@ -242,6 +242,8 @@ static void load_config_from_file(struct swappy_config *config,
     config->auto_save = auto_save;
   } else {
     g_info("auto_save is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
   }
 
   custom_color = g_key_file_get_string(gkf, group, "custom_color", &error);
