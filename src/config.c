@@ -24,6 +24,7 @@ static void print_config(struct swappy_config *config) {
   g_info("fill_shape: %d", config->fill_shape);
   g_info("auto_save: %d", config->auto_save);
   g_info("custom_color: %s", config->custom_color);
+  g_info("transparent: %d", config->transparent);
 }
 
 static char *get_default_save_dir() {
@@ -85,6 +86,7 @@ static void load_config_from_file(struct swappy_config *config,
   gboolean fill_shape;
   gboolean auto_save;
   gchar *custom_color = NULL;
+  gboolean transparent;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -256,6 +258,16 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  transparent = g_key_file_get_boolean(gkf, group, "transparent", &error);
+
+  if (error == NULL) {
+    config->transparent = transparent;
+  } else {
+    g_info("transparent is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -275,6 +287,7 @@ static void load_default_config(struct swappy_config *config) {
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
   config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
   config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
+  config->transparent = CONFIG_TRANSPARENT_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {

@@ -52,6 +52,13 @@ static void update_ui_fill_shape_toggle_button(struct swappy_state *state) {
   gtk_toggle_button_set_active(button, toggled);
 }
 
+static void update_ui_transparent_toggle_button(struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->transparent);
+  gboolean toggled = state->config->transparent;
+
+  gtk_toggle_button_set_active(button, toggled);
+}
+
 void application_finish(struct swappy_state *state) {
   g_debug("application finishing, cleaning up");
   paint_free_all(state);
@@ -119,6 +126,7 @@ static void action_update_color_state(struct swappy_state *state, double r,
   state->settings.g = g;
   state->settings.b = b;
   state->settings.a = a;
+  if (state->config->transparent) state->settings.a *= 0.5;
 
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->color), custom);
 }
@@ -225,6 +233,19 @@ static void action_fill_shape_toggle(struct swappy_state *state,
   state->config->fill_shape = toggle;
 
   update_ui_fill_shape_toggle_button(state);
+}
+
+static void action_transparent_toggle(struct swappy_state *state,
+                                      gboolean *toggled) {
+  gboolean toggle = (toggled == NULL) ? !state->config->transparent : *toggled;
+  state->config->transparent = toggle;
+
+  if (toggle)
+    state->settings.a *= 0.5;
+  else
+    state->settings.a *= 2;
+
+  update_ui_transparent_toggle_button(state);
 }
 
 static void save_state_to_file_or_folder(struct swappy_state *state,
@@ -437,6 +458,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_f:
         action_fill_shape_toggle(state, NULL);
         break;
+      case GDK_KEY_T:
+        action_transparent_toggle(state, NULL);
+        break;
       default:
         break;
     }
@@ -647,6 +671,13 @@ void fill_shape_toggled_handler(GtkWidget *widget, struct swappy_state *state) {
   action_fill_shape_toggle(state, &toggled);
 }
 
+void transparent_toggled_handler(GtkWidget *widget,
+                                 struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
+  gboolean toggled = gtk_toggle_button_get_active(button);
+  action_transparent_toggle(state, &toggled);
+}
+
 static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   GdkRectangle workarea = {0};
   GdkDisplay *display = gdk_display_get_default();
@@ -789,6 +820,8 @@ static bool load_layout(struct swappy_state *state) {
 
   gdk_rgba_parse(&color, state->config->custom_color);
   gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(state->ui->color), &color);
+  state->ui->transparent = GTK_TOGGLE_BUTTON(
+      gtk_builder_get_object(builder, "transparent-toggle-button"));
 
   state->ui->brush = brush;
   state->ui->text = text;
@@ -862,6 +895,7 @@ static bool init_gtk_window(struct swappy_state *state) {
   update_ui_undo_redo(state);
   update_ui_panel_toggle_button(state);
   update_ui_fill_shape_toggle_button(state);
+  update_ui_transparent_toggle_button(state);
 
   return true;
 }
