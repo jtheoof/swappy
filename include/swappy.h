@@ -14,6 +14,9 @@
 #define SWAPPY_TEXT_SIZE_MIN 10
 #define SWAPPY_TEXT_SIZE_MAX 50
 
+#define SWAPPY_TRANSPARENCY_MIN 5
+#define SWAPPY_TRANSPARENCY_MAX 95
+
 enum swappy_paint_type {
   SWAPPY_PAINT_MODE_BRUSH = 0, /* Brush mode to draw arbitrary shapes */
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
@@ -106,6 +109,7 @@ struct swappy_state_settings {
   double a;
   double w;
   double t;
+  int32_t tr;
 };
 
 struct swappy_state_ui {
@@ -137,6 +141,9 @@ struct swappy_state_ui {
 
   GtkButton *line_size;
   GtkButton *text_size;
+  GtkButton *transparency;
+  GtkButton *transparency_plus;
+  GtkButton *transparency_minus;
 
   GtkToggleButton *fill_shape;
   GtkToggleButton *transparent;
@@ -152,6 +159,7 @@ struct swappy_config {
   gboolean show_panel;
   guint32 line_size;
   guint32 text_size;
+  guint32 transparency;
   char *text_font;
   gboolean early_exit;
   gboolean auto_save;

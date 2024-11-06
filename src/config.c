@@ -19,6 +19,7 @@ static void print_config(struct swappy_config *config) {
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
+  g_info("transparency: %d", config->transparency);
   g_info("paint_mode: %d", config->paint_mode);
   g_info("early_exit: %d", config->early_exit);
   g_info("fill_shape: %d", config->fill_shape);
@@ -80,6 +81,7 @@ static void load_config_from_file(struct swappy_config *config,
   gboolean show_panel;
   gchar *save_dir_expanded = NULL;
   guint64 line_size, text_size;
+  guint64 transparency;
   gchar *text_font = NULL;
   gchar *paint_mode = NULL;
   gboolean early_exit;
@@ -178,6 +180,23 @@ static void load_config_from_file(struct swappy_config *config,
     config->text_font = text_font;
   } else {
     g_info("text_font is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
+  transparency = g_key_file_get_uint64(gkf, group, "transparency", &error);
+
+  if (error == NULL) {
+    if (transparency >= SWAPPY_TRANSPARENCY_MIN &&
+        transparency <= SWAPPY_TRANSPARENCY_MAX) {
+      config->transparency = transparency;
+    } else {
+      g_warning("transparency is not a valid value: %" PRIu64
+                " - see man page for details",
+                transparency);
+    }
+  } else {
+    g_info("transparency is missing in %s (%s)", file, error->message);
     g_error_free(error);
     error = NULL;
   }
@@ -288,6 +307,7 @@ static void load_default_config(struct swappy_config *config) {
   config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
   config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
   config->transparent = CONFIG_TRANSPARENT_DEFAULT;
+  config->transparency = CONFIG_TRANSPARENCY_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
