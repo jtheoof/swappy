@@ -65,7 +65,6 @@ custom_color=rgba(193,125,17,1)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 - `auto_save` is used to toggle auto saving of final buffer to `save_dir` upon exit
-- `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard 
 - `custom_color` is used to set a default value for the custom color
 
 
