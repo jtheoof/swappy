@@ -102,6 +102,7 @@ custom_color=rgba(193,125,17,1)
 - `Ctrl+z`: Undo
 - `Ctrl+Shift+z` or `Ctrl+y`: Redo
 - `Ctrl+s`: Save to file (see man page)
+- `Ctrl+Shift+s`: Open "Save As" dialog
 - `Ctrl+c`: Copy to clipboard
 - `Escape` or `q` or `Ctrl+w`: Quit swappy
 
