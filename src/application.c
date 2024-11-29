@@ -338,10 +338,34 @@ void control_modifier_changed(bool pressed, struct swappy_state *state) {
   }
 }
 
+static void im_context_commit(GtkIMContext *imc, gchar *str,
+                              gpointer user_data) {
+  struct swappy_state *state = (struct swappy_state *)(user_data);
+  if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
+    paint_update_temporary_str(state, str);
+    render_state(state);
+    return;
+  }
+}
+
+static void clipboard_paste_selection(struct swappy_state *state) {
+  GtkClipboard *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+  gchar *text = gtk_clipboard_wait_for_text(clipboard);
+  if (text) {
+    paint_update_temporary_str(state, text);
+    g_free(text);
+  }
+}
+
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
-    paint_update_temporary_text(state, event);
+    /* ctrl-v: paste */
+    if (event->state & GDK_CONTROL_MASK && event->keyval == GDK_KEY_v) {
+      clipboard_paste_selection(state);
+    } else {
+      paint_update_temporary_text(state, event);
+    }
     render_state(state);
     return;
   }
@@ -741,6 +765,12 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWindow *window =
       GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
+  GtkIMContext *im_context = gtk_im_multicontext_new();
+  gtk_im_context_set_client_window(im_context,
+                                   gtk_widget_get_window(GTK_WIDGET(window)));
+  g_signal_connect(G_OBJECT(im_context), "commit",
+                   G_CALLBACK(im_context_commit), state);
+  state->ui->im_context = im_context;
 
   g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 
