@@ -380,6 +380,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         switch_mode_to_brush(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->brush), true);
         break;
+      case GDK_KEY_e:
       case GDK_KEY_t:
         switch_mode_to_text(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->text), true);
@@ -389,6 +390,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
                                      true);
         break;
+      case GDK_KEY_c:
       case GDK_KEY_o:
         switch_mode_to_ellipse(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse),
@@ -402,6 +404,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         switch_mode_to_blur(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
         break;
+      case GDK_KEY_x:
       case GDK_KEY_k:
         action_clear(state);
         break;
