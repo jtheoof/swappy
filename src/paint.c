@@ -68,6 +68,8 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   double w = state->settings.w;
   double t = state->settings.t;
 
+  if (state->config->transparent) a *= (1 - state->settings.tr / 100.0);
+
   paint->type = type;
   paint->is_committed = false;
 

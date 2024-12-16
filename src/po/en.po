@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"POT-Creation-Date: 2024-11-06 23:00+0100\n"
 "PO-Revision-Date: 2020-06-21 21:57-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,42 +17,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: res/swappy.glade:456
+#: res/swappy.glade:461
 msgid "Line Width"
 msgstr "Line Width"
 
-#: res/swappy.glade:526
+#: res/swappy.glade:531
 msgid "Text Size"
 msgstr "Text Size"
 
-#: res/swappy.glade:592
+#: res/swappy.glade:601
+msgid "Transparency"
+msgstr ""
+
+#: res/swappy.glade:667
 msgid "Fill shape"
 msgstr "Fill shape"
 
-#: res/swappy.glade:597
+#: res/swappy.glade:672
 msgid "Toggle shape filling"
 msgstr "Toggle shape filling"
 
-#: res/swappy.glade:671
+#: res/swappy.glade:684
+msgid "Transparent"
+msgstr ""
+
+#: res/swappy.glade:689
+msgid "Toggle transparency"
+msgstr ""
+
+#: res/swappy.glade:763
 msgid "Toggle Paint Panel"
 msgstr "Toggle Paint Panel"
 
-#: res/swappy.glade:697
+#: res/swappy.glade:789
 msgid "Undo Last Paint"
 msgstr "Undo Last Paint"
 
-#: res/swappy.glade:716
+#: res/swappy.glade:808
 msgid "Redo Previous Paint"
 msgstr "Redo Previous Paint"
 
-#: res/swappy.glade:735
+#: res/swappy.glade:827
 msgid "Clear Paints"
 msgstr "Clear Paints"
 
-#: res/swappy.glade:763
+#: res/swappy.glade:855
 msgid "Copy Surface"
 msgstr "Copy Surface"
 
-#: res/swappy.glade:779
+#: res/swappy.glade:871
 msgid "Save Surface"
 msgstr "Save Surface"

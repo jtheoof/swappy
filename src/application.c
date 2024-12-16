@@ -2,6 +2,7 @@
 #include <glib-2.0/glib.h>
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -36,6 +37,13 @@ static void update_ui_text_size_widget(struct swappy_state *state) {
   gtk_button_set_label(button, label);
 }
 
+static void update_ui_transparency_widget(struct swappy_state *state) {
+  GtkButton *button = GTK_BUTTON(state->ui->transparency);
+  char label[255];
+  g_snprintf(label, 255, "%" PRId32, state->settings.tr);
+  gtk_button_set_label(button, label);
+}
+
 static void update_ui_panel_toggle_button(struct swappy_state *state) {
   GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
   GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->panel_toggle_button);
@@ -50,6 +58,16 @@ static void update_ui_fill_shape_toggle_button(struct swappy_state *state) {
   gboolean toggled = state->config->fill_shape;
 
   gtk_toggle_button_set_active(button, toggled);
+}
+
+static void update_ui_transparent_toggle_button(struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(state->ui->transparent);
+  gboolean toggled = state->config->transparent;
+
+  gtk_toggle_button_set_active(button, toggled);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->transparency), toggled);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->transparency_minus), toggled);
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->transparency_plus), toggled);
 }
 
 void application_finish(struct swappy_state *state) {
@@ -215,6 +233,38 @@ static void action_text_size_increase(struct swappy_state *state) {
   update_ui_text_size_widget(state);
 }
 
+static void action_transparency_decrease(struct swappy_state *state) {
+  state->settings.tr -= 10;
+
+  if (state->settings.tr < SWAPPY_TRANSPARENCY_MIN) {
+    state->settings.tr = SWAPPY_TRANSPARENCY_MIN;
+  } else {
+    // ceil to 10
+    state->settings.tr += 5;
+    state->settings.tr /= 10;
+    state->settings.tr *= 10;
+  }
+
+  update_ui_transparency_widget(state);
+}
+static void action_transparency_reset(struct swappy_state *state) {
+  state->settings.tr = state->config->transparency;
+  update_ui_transparency_widget(state);
+}
+static void action_transparency_increase(struct swappy_state *state) {
+  state->settings.tr += 10;
+
+  if (state->settings.tr > SWAPPY_TRANSPARENCY_MAX) {
+    state->settings.tr = SWAPPY_TRANSPARENCY_MAX;
+  } else {
+    // floor to 10
+    state->settings.tr /= 10;
+    state->settings.tr *= 10;
+  }
+
+  update_ui_transparency_widget(state);
+}
+
 static void action_fill_shape_toggle(struct swappy_state *state,
                                      gboolean *toggled) {
   // Don't allow changing the state via a shortcut if the button can't be
@@ -225,6 +275,14 @@ static void action_fill_shape_toggle(struct swappy_state *state,
   state->config->fill_shape = toggle;
 
   update_ui_fill_shape_toggle_button(state);
+}
+
+static void action_transparent_toggle(struct swappy_state *state,
+                                      gboolean *toggled) {
+  gboolean toggle = (toggled == NULL) ? !state->config->transparent : *toggled;
+  state->config->transparent = toggle;
+
+  update_ui_transparent_toggle_button(state);
 }
 
 static void save_state_to_file_or_folder(struct swappy_state *state,
@@ -437,6 +495,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_f:
         action_fill_shape_toggle(state, NULL);
         break;
+      case GDK_KEY_T:
+        action_transparent_toggle(state, NULL);
+        break;
       default:
         break;
     }
@@ -641,10 +702,29 @@ void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state) {
   action_text_size_increase(state);
 }
 
+void transparency_decrease_handler(GtkWidget *widget,
+                                   struct swappy_state *state) {
+  action_transparency_decrease(state);
+}
+void transparency_reset_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_transparency_reset(state);
+}
+void transparency_increase_handler(GtkWidget *widget,
+                                   struct swappy_state *state) {
+  action_transparency_increase(state);
+}
+
 void fill_shape_toggled_handler(GtkWidget *widget, struct swappy_state *state) {
   GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
   gboolean toggled = gtk_toggle_button_get_active(button);
   action_fill_shape_toggle(state, &toggled);
+}
+
+void transparent_toggled_handler(GtkWidget *widget,
+                                 struct swappy_state *state) {
+  GtkToggleButton *button = GTK_TOGGLE_BUTTON(widget);
+  gboolean toggled = gtk_toggle_button_get_active(button);
+  action_transparent_toggle(state, &toggled);
 }
 
 static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
@@ -783,12 +863,20 @@ static bool load_layout(struct swappy_state *state) {
       GTK_BUTTON(gtk_builder_get_object(builder, "stroke-size-button"));
   state->ui->text_size =
       GTK_BUTTON(gtk_builder_get_object(builder, "text-size-button"));
+  state->ui->transparency =
+      GTK_BUTTON(gtk_builder_get_object(builder, "transparency-button"));
+  state->ui->transparency_plus =
+      GTK_BUTTON(gtk_builder_get_object(builder, "transparency-plus-button"));
+  state->ui->transparency_minus =
+      GTK_BUTTON(gtk_builder_get_object(builder, "transparency-minus-button"));
 
   state->ui->fill_shape = GTK_TOGGLE_BUTTON(
       gtk_builder_get_object(builder, "fill-shape-toggle-button"));
 
   gdk_rgba_parse(&color, state->config->custom_color);
   gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(state->ui->color), &color);
+  state->ui->transparent = GTK_TOGGLE_BUTTON(
+      gtk_builder_get_object(builder, "transparent-toggle-button"));
 
   state->ui->brush = brush;
   state->ui->text = text;
@@ -859,9 +947,11 @@ static bool init_gtk_window(struct swappy_state *state) {
 
   update_ui_stroke_size_widget(state);
   update_ui_text_size_widget(state);
+  update_ui_transparency_widget(state);
   update_ui_undo_redo(state);
   update_ui_panel_toggle_button(state);
   update_ui_fill_shape_toggle_button(state);
+  update_ui_transparent_toggle_button(state);
 
   return true;
 }
@@ -881,6 +971,7 @@ static void init_settings(struct swappy_state *state) {
   state->settings.a = 1;
   state->settings.w = state->config->line_size;
   state->settings.t = state->config->text_size;
+  state->settings.tr = state->config->transparency;
   state->mode = state->config->paint_mode;
 }
 

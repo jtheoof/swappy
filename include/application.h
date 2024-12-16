@@ -57,3 +57,9 @@ void stroke_size_increase_handler(GtkWidget *widget,
 void text_size_decrease_handler(GtkWidget *widget, struct swappy_state *state);
 void text_size_reset_handler(GtkWidget *widget, struct swappy_state *state);
 void text_size_increase_handler(GtkWidget *widget, struct swappy_state *state);
+
+void transparency_decrease_handler(GtkWidget *widget,
+                                   struct swappy_state *state);
+void transparency_reset_handler(GtkWidget *widget, struct swappy_state *state);
+void transparency_increase_handler(GtkWidget *widget,
+                                   struct swappy_state *state);
