@@ -237,7 +237,7 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   double fty = shape.to.y - shape.from.y;
   double ftn = sqrt(ftx * ftx + fty * fty);
 
-  double r = 20;
+  double r = shape.should_center_at_from ? 0 : 20;
   double scaling_factor = shape.w / 4;
 
   double alpha = G_PI / 6;
@@ -269,16 +269,18 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_restore(cr);
 
   // Draw arrow
-  cairo_save(cr);
-  cairo_translate(cr, shape.to.x, shape.to.y);
-  cairo_rotate(cr, theta);
-  cairo_scale(cr, scaling_factor, scaling_factor);
-  cairo_move_to(cr, 0, 0);
-  cairo_line_to(cr, xa, ya);
-  cairo_line_to(cr, xb, yb);
-  cairo_line_to(cr, 0, 0);
-  cairo_fill(cr);
-  cairo_restore(cr);
+  if (!shape.should_center_at_from) {
+    cairo_save(cr);
+    cairo_translate(cr, shape.to.x, shape.to.y);
+    cairo_rotate(cr, theta);
+    cairo_scale(cr, scaling_factor, scaling_factor);
+    cairo_move_to(cr, 0, 0);
+    cairo_line_to(cr, xa, ya);
+    cairo_line_to(cr, xb, yb);
+    cairo_line_to(cr, 0, 0);
+    cairo_fill(cr);
+    cairo_restore(cr);
+  }
 }
 
 static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
