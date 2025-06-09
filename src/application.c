@@ -638,7 +638,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
 
-  gboolean shift = event->state & GDK_SHIFT_MASK;
+  gboolean is_shift_pressed = event->state & GDK_SHIFT_MASK;
 
   if (event->button == 1) {
     switch (state->mode) {
@@ -653,26 +653,57 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
         update_ui_undo_redo(state);
         break;
       case SWAPPY_PAINT_MODE_CROP:
-        paint_start_crop(&state->crop, x, y, shift);
+        paint_start_crop(&state->crop, x, y, is_shift_pressed);
         render_state(state);
       default:
         return;
     }
   }
 }
+
+static
+void set_cursor(GdkWindow *window, GdkCursorType cursor_type) {
+  GdkDisplay *display = gdk_display_get_default();
+  GdkCursor *cursor = gdk_cursor_new_for_display(display, cursor_type);
+  gdk_window_set_cursor(window, cursor);
+  g_object_unref(cursor);
+}
+
+static
+GdkCursorType get_crop_cursor_type(struct swappy_state *state,
+                                   gdouble x, gdouble y,
+                                   gboolean is_shift_pressed) {
+  if (is_shift_pressed)
+    return GDK_CROSSHAIR;
+
+  gdouble mid_x = (state->crop.left_x + state->crop.right_x) / 2;
+  gdouble mid_y = (state->crop.top_y + state->crop.bottom_y) / 2;
+
+  gboolean is_left = x <= mid_x;
+  gboolean is_top = y <= mid_y;
+
+  if (is_top) {
+    return (is_left)
+      ? GDK_TOP_LEFT_CORNER
+      : GDK_TOP_RIGHT_CORNER;
+  } else {
+    return (is_left)
+      ? GDK_BOTTOM_LEFT_CORNER
+      : GDK_BOTTOM_RIGHT_CORNER;
+  }
+}
+
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state) {
   gdouble x, y;
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
 
-  GdkDisplay *display = gdk_display_get_default();
-  GdkWindow *window = event->window;
-  GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
-  gdk_window_set_cursor(window, crosshair);
+  GdkCursorType cursor_type = GDK_CROSSHAIR;
 
   gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
   gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
+  gboolean is_shift_pressed = event->state & GDK_SHIFT_MASK;
 
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BLUR:
@@ -692,14 +723,16 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       }
       break;
     case SWAPPY_PAINT_MODE_CROP:
+      cursor_type = get_crop_cursor_type(state, x, y, is_shift_pressed);
       if (is_button1_pressed) {
         paint_update_crop(&state->crop, x, y);
         render_state(state);
       }
     default:
-      return;
+      break;
   }
-  g_object_unref(crosshair);
+
+  set_cursor(event->window, cursor_type);
 }
 void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
                                       struct swappy_state *state) {
