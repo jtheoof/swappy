@@ -316,3 +316,45 @@ void paint_commit_temporary(struct swappy_state *state) {
   // because it's now part of the GList.
   state->temp_paint = NULL;
 }
+
+void paint_start_crop(struct swappy_crop *crop, gdouble x, gdouble y, gboolean recreate) {
+  if (recreate) {
+    crop->left_x = x;
+    crop->top_y = y;
+    crop->updating_x_hi = true;
+    crop->updating_y_hi = true;
+  } else {
+    gdouble mid_x = (crop->left_x + crop->right_x) / 2;
+    gdouble mid_y = (crop->top_y + crop->bottom_y) / 2;
+
+    crop->updating_x_hi = x > mid_x;
+    crop->updating_y_hi = y > mid_y;
+  }
+  paint_update_crop(crop, x, y);
+}
+
+void paint_update_crop(struct swappy_crop *crop, gdouble x, gdouble y) {
+  if (crop->updating_x_hi)
+    crop->right_x = x;
+  else
+    crop->left_x = x;
+
+  if (crop->updating_y_hi)
+    crop->bottom_y = y;
+  else
+    crop->top_y = y;
+
+  uint32_t k;
+  if (crop->left_x > crop->right_x) {
+    k = crop->left_x;
+    crop->left_x = crop->right_x;
+    crop->right_x = k;
+    crop->updating_x_hi = !crop->updating_x_hi;
+  }
+  if (crop->top_y > crop->bottom_y) {
+    k = crop->top_y;
+    crop->top_y = crop->bottom_y;
+    crop->bottom_y = k;
+    crop->updating_y_hi = !crop->updating_y_hi;
+  }
+}

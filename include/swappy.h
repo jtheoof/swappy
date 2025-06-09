@@ -24,6 +24,7 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_ELLIPSE,   /* Ellipse shapes */
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
   SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
+  SWAPPY_PAINT_MODE_CROP,      /* Crop mode */
 };
 
 enum swappy_paint_shape_operation {
@@ -119,6 +120,7 @@ struct swappy_state_ui {
   GtkIMContext *im_context;
 
   GtkWidget *area;
+  GtkWidget *visual_area;
 
   GtkToggleButton *panel_toggle_button;
 
@@ -134,6 +136,7 @@ struct swappy_state_ui {
   GtkRadioButton *ellipse;
   GtkRadioButton *arrow;
   GtkRadioButton *blur;
+  GtkRadioButton *crop;
 
   GtkRadioButton *red;
   GtkRadioButton *green;
@@ -168,6 +171,16 @@ struct swappy_config {
   char *custom_color;
 };
 
+struct swappy_crop {
+  uint32_t left_x;
+  uint32_t top_y;
+  uint32_t right_x;
+  uint32_t bottom_y;
+
+  gboolean updating_x_hi;
+  gboolean updating_y_hi;
+};
+
 struct swappy_state {
   GtkApplication *app;
 
@@ -177,6 +190,9 @@ struct swappy_state {
   GdkPixbuf *original_image;
   cairo_surface_t *original_image_surface;
   cairo_surface_t *rendering_surface;
+  cairo_surface_t *visual_surface;
+
+  struct swappy_crop crop;
 
   gdouble scaling_factor;
 
