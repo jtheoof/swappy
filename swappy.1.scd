@@ -113,6 +113,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 ## MODIFIERS
 
 - *Ctrl*: Center Shape (Rectangle & Ellipse) based on draw start
+- *Shift*: Paint a new cropping rectangle instead of dragging the corners of the current one
 
 ## HEADER BAR
 
