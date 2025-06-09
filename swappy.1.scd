@@ -78,7 +78,7 @@ The following lines can be used as swappy's default:
 - *line_size* is the default line size (must be between 1 and 50)
 - *text_size* is the default text size (must be between 10 and 50)
 - *text_font* is the font used to render text, its format is pango friendly
-- *paint_mode* is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
+- *paint_mode* is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur|crop, matching is case-insensitive)
 - *early_exit* is used to make the application exit after saving the picture or copying it to the clipboard
 - *fill_shape* is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 - *auto_save* is used to toggle auto saving of final buffer to *save_dir* upon exit
@@ -102,6 +102,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - `c` `o`: Switch to Ellipse (Circle)
 - *a*: Switch to Arrow
 - *d*: Switch to Blur (d stands for droplet)
+- *c*: Switch to Crop
 
 - *R*: Use Red Color
 - *G*: Use Green Color
@@ -116,7 +117,9 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 
 ## MODIFIERS
 
-- *Ctrl*: Center Shape (Rectangle & Ellipse) based on draw start
+- *Ctrl*:
+	- Rectangle & Ellipse: Center Shape based on draw start
+	- Crop: Draw a new crop rectangle instead of changing the existing one
 
 ## HEADER BAR
 

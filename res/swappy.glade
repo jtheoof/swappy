@@ -166,6 +166,18 @@
                         <property name="position">5</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="no">C</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -274,6 +286,22 @@
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="crop">
+                        <property name="label" translatable="no"></property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">False</property>
+                        <property name="group">brush</property>
+                        <signal name="clicked" handler="crop_clicked_handler" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                     <style>
@@ -729,6 +757,17 @@
                     <signal name="configure-event" handler="draw_area_configure_handler" swapped="no"/>
                     <signal name="draw" handler="draw_area_handler" swapped="no"/>
                     <signal name="motion-notify-event" handler="draw_area_motion_notify_handler" swapped="no"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkDrawingArea" id="visual-area">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">10</property>
+                    <property name="margin_right">10</property>
+                    <property name="margin_top">10</property>
+                    <property name="margin_bottom">10</property>
+                    <signal name="draw" handler="crop_area_handler" swapped="no"/>
                   </object>
                 </child>
               </object>

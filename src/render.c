@@ -391,6 +391,13 @@ static void clear_surface(cairo_t *cr) {
   cairo_restore(cr);
 }
 
+static void render_clear(cairo_t *cr) {
+  cairo_save(cr);
+  cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+  cairo_paint(cr);
+  cairo_restore(cr);
+}
+
 static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
   struct swappy_paint_blur blur = paint->content.blur;
 
@@ -514,16 +521,59 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static void render_crop(cairo_t *cr, struct swappy_state *state) {
+  double x = state->crop.left_x;
+  double y = state->crop.top_y;
+  double w = state->crop.right_x - state->crop.left_x;
+  double h = state->crop.bottom_y - state->crop.top_y;
+
+  double iw = cairo_image_surface_get_width(state->rendering_surface);
+  double ih = cairo_image_surface_get_height(state->rendering_surface);
+
+  cairo_save(cr);
+
+  // Darkening overlay
+  cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
+  cairo_rectangle(cr, 0, 0, x, ih);
+  cairo_rectangle(cr, state->crop.right_x, 0, iw - state->crop.right_x, ih);
+  cairo_rectangle(cr, state->crop.left_x, 0, w, state->crop.top_y);
+  cairo_rectangle(cr, state->crop.left_x, state->crop.bottom_y, w,
+                  ih - state->crop.bottom_y);
+  cairo_close_path(cr);
+  cairo_fill(cr);
+
+  cairo_restore(cr);
+  cairo_save(cr);
+
+  // Crop border
+  cairo_set_source_rgba(cr, 1, 1, 1, 1);
+  cairo_set_line_width(cr, 3);
+  cairo_rectangle(cr, x, y, w, h);
+  cairo_close_path(cr);
+  cairo_stroke(cr);
+
+  cairo_restore(cr);
+}
+
 void render_state(struct swappy_state *state) {
-  cairo_surface_t *surface = state->rendering_surface;
-  cairo_t *cr = cairo_create(surface);
+  // Render what goes into the actual image
+  cairo_t *rendering_cr = cairo_create(state->rendering_surface);
 
-  clear_surface(cr);
-  render_image(cr, state);
-  render_paints(cr, state);
+  clear_surface(rendering_cr);
+  render_image(rendering_cr, state);
+  render_paints(rendering_cr, state);
 
-  cairo_destroy(cr);
+  cairo_destroy(rendering_cr);
+
+  // Render visual guides
+  cairo_t *visual_cr = cairo_create(state->visual_surface);
+
+  render_clear(visual_cr);
+  render_crop(visual_cr, state);
+
+  cairo_destroy(visual_cr);
 
   // Drawing is finished, notify the GtkDrawingArea it needs to be redrawn.
   gtk_widget_queue_draw(state->ui->area);
+  gtk_widget_queue_draw(state->ui->visual_area);
 }

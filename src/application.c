@@ -74,6 +74,7 @@ void application_finish(struct swappy_state *state) {
   g_debug("application finishing, cleaning up");
   paint_free_all(state);
   pixbuf_free(state);
+  cairo_surface_destroy(state->visual_surface);
   cairo_surface_destroy(state->rendering_surface);
   cairo_surface_destroy(state->original_image_surface);
   if (state->temp_file_str) {
@@ -177,6 +178,11 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
 
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+}
+
+static void switch_mode_to_crop(struct swappy_state *state) {
+  state->mode = SWAPPY_PAINT_MODE_CROP;
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
@@ -371,6 +377,10 @@ void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_blur(state);
 }
 
+void crop_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_crop(state);
+}
+
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   // Commit a potential paint (e.g. text being written)
   commit_state(state);
@@ -494,6 +504,10 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         switch_mode_to_blur(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
         break;
+      case GDK_KEY_z:
+        switch_mode_to_crop(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->crop), true);
+        break;
       case GDK_KEY_x:
       case GDK_KEY_k:
         action_clear(state);
@@ -577,8 +591,8 @@ void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_redo(state);
 }
 
-gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
-                           struct swappy_state *state) {
+static void area_handler(GtkWidget *widget, cairo_t *cr,
+                         cairo_surface_t *surface, struct swappy_state *state) {
   GtkAllocation *alloc = g_new(GtkAllocation, 1);
   gtk_widget_get_allocation(widget, alloc);
 
@@ -589,9 +603,19 @@ gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
   double scale_y = (double)alloc->height / image_height;
 
   cairo_scale(cr, scale_x, scale_y);
-  cairo_set_source_surface(cr, state->rendering_surface, 0, 0);
+  cairo_set_source_surface(cr, surface, 0, 0);
   cairo_paint(cr);
+}
 
+gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
+                           struct swappy_state *state) {
+  area_handler(widget, cr, state->rendering_surface, state);
+  return FALSE;
+}
+
+gboolean crop_area_handler(GtkWidget *widget, cairo_t *cr,
+                           struct swappy_state *state) {
+  area_handler(widget, cr, state->visual_surface, state);
   return FALSE;
 }
 
@@ -607,11 +631,18 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
   return TRUE;
 }
 
+static bool should_crop_recreate(const struct swappy_state *state,
+                                 bool is_control_pressed) {
+  return is_control_pressed || !state->crop_ever_changed;
+}
+
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
   gdouble x, y;
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
+
+  gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
 
   if (event->button == 1) {
     switch (state->mode) {
@@ -625,21 +656,95 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
         render_state(state);
         update_ui_undo_redo(state);
         break;
+      case SWAPPY_PAINT_MODE_CROP: {
+        gboolean recreate = should_crop_recreate(state, is_control_pressed);
+        paint_start_crop(state, x, y, recreate);
+        state->crop_ever_changed = true;
+        render_state(state);
+        break;
+      }
       default:
         return;
     }
   }
 }
+
+static void set_cursor(GdkWindow *window, GdkCursorType cursor_type) {
+  GdkDisplay *display = gdk_display_get_default();
+  GdkCursor *cursor = gdk_cursor_new_for_display(display, cursor_type);
+  gdk_window_set_cursor(window, cursor);
+  g_object_unref(cursor);
+}
+
+static GdkCursorType get_crop_cursor_type(struct swappy_state *state, gdouble x,
+                                          gdouble y, gboolean recreate,
+                                          gboolean currently_resizing) {
+  enum swappy_resize resize_x, resize_y;
+
+  if (currently_resizing) {
+    resize_x = state->crop.resize_x;
+    resize_y = state->crop.resize_y;
+  } else {
+    if (recreate) return GDK_CROSSHAIR;
+
+    paint_get_crop_resize(&resize_x, &resize_y, state, x, y);
+    if (!resize_x && !resize_y) return GDK_CROSSHAIR;
+  }
+
+  switch (resize_x) {
+    case SWAPPY_RESIZE_NONE:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_ARROW;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_SIDE;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_SIDE;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
+      }
+      break;
+
+    case SWAPPY_RESIZE_LOW:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_LEFT_SIDE;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_LEFT_CORNER;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_LEFT_CORNER;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
+      }
+      break;
+
+    case SWAPPY_RESIZE_HIGH:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_RIGHT_SIDE;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_RIGHT_CORNER;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_RIGHT_CORNER;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
+      }
+      break;
+
+    case SWAPPY_RESIZE_BOTH:
+      return GDK_FLEUR;
+  }
+
+  return GDK_ARROW;
+}
+
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state) {
   gdouble x, y;
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
 
-  GdkDisplay *display = gdk_display_get_default();
-  GdkWindow *window = event->window;
-  GdkCursor *crosshair = gdk_cursor_new_for_display(display, GDK_CROSSHAIR);
-  gdk_window_set_cursor(window, crosshair);
+  GdkCursorType cursor_type = GDK_CROSSHAIR;
 
   gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
   gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
@@ -661,10 +766,24 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
         render_state(state);
       }
       break;
+    case SWAPPY_PAINT_MODE_CROP: {
+      gboolean recreate = should_crop_recreate(state, is_control_pressed);
+      cursor_type =
+          get_crop_cursor_type(state, x, y, recreate, is_button1_pressed);
+      if (is_button1_pressed) {
+        paint_update_crop(state, x - state->last_mouse_x,
+                          y - state->last_mouse_y);
+        render_state(state);
+      }
+      break;
+    }
     default:
-      return;
+      break;
   }
-  g_object_unref(crosshair);
+
+  set_cursor(event->window, cursor_type);
+  state->last_mouse_x = x;
+  state->last_mouse_y = y;
 }
 void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
                                       struct swappy_state *state) {
@@ -873,6 +992,8 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWidget *area =
       GTK_WIDGET(gtk_builder_get_object(builder, "painting-area"));
+  GtkWidget *visual_area =
+      GTK_WIDGET(gtk_builder_get_object(builder, "visual-area"));
 
   state->ui->painting_box =
       GTK_BOX(gtk_builder_get_object(builder, "painting-box"));
@@ -888,6 +1009,8 @@ static bool load_layout(struct swappy_state *state) {
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
   GtkRadioButton *blur =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "blur"));
+  GtkRadioButton *crop =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "crop"));
 
   state->ui->red =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-red-button"));
@@ -925,13 +1048,27 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->ellipse = ellipse;
   state->ui->arrow = arrow;
   state->ui->blur = blur;
+  state->ui->crop = crop;
   state->ui->area = area;
+  state->ui->visual_area = visual_area;
   state->ui->window = window;
 
   compute_window_size_and_scaling_factor(state);
   gtk_widget_set_size_request(area, state->window->width,
                               state->window->height);
+  gtk_widget_set_size_request(visual_area, state->window->width,
+                              state->window->height);
   action_toggle_painting_panel(state, &state->config->show_panel);
+
+  // The `visual_area` is laid over `area` for visualizations that do not go
+  // into the resulting image. Mouse controls are handled by `area`, so we want
+  // to hereby make `visual_area` "click-through".
+  GdkWindow *w = gtk_widget_get_window(visual_area);
+  if (w) {
+    cairo_region_t *empty = cairo_region_create();
+    gdk_window_input_shape_combine_region(w, empty, 0, 0);
+    cairo_region_destroy(empty);
+  }
 
   g_object_unref(G_OBJECT(builder));
 
@@ -963,6 +1100,10 @@ static void set_paint_mode(struct swappy_state *state) {
       break;
     case SWAPPY_PAINT_MODE_BLUR:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->crop), true);
       gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     default:
