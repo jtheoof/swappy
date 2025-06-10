@@ -96,8 +96,9 @@ custom_color=rgba(193,125,17,1)
 
 <hr>
 
-- `Ctrl`: Center Shape (Rectangle & Ellipse) based on draw start
-- `Shift`: Paint a new cropping rectangle instead of dragging the corners of the current one
+- `Ctrl`:
+	- Rectangle & Ellipse: Center Shape based on draw start
+	- Crop: Draw a new crop rectangle instead of changing the existing one
 
 <hr>
 

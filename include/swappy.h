@@ -181,6 +181,7 @@ struct swappy_state {
   cairo_surface_t *visual_surface;
 
   struct swappy_crop crop;
+  gboolean crop_ever_changed;
 
   gdouble scaling_factor;
 

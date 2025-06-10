@@ -542,7 +542,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
 
-  gboolean is_shift_pressed = event->state & GDK_SHIFT_MASK;
+  gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
 
   if (event->button == 1) {
     switch (state->mode) {
@@ -557,7 +557,9 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
         update_ui_undo_redo(state);
         break;
       case SWAPPY_PAINT_MODE_CROP:
-        paint_start_crop(&state->crop, x, y, is_shift_pressed);
+        paint_start_crop(&state->crop, x, y,
+                         is_control_pressed || !state->crop_ever_changed);
+        state->crop_ever_changed = true;
         render_state(state);
       default:
         return;
@@ -576,8 +578,8 @@ void set_cursor(GdkWindow *window, GdkCursorType cursor_type) {
 static
 GdkCursorType get_crop_cursor_type(struct swappy_state *state,
                                    gdouble x, gdouble y,
-                                   gboolean is_shift_pressed) {
-  if (is_shift_pressed)
+                                   gboolean is_control_pressed) {
+  if (is_control_pressed || !state->crop_ever_changed)
     return GDK_CROSSHAIR;
 
   gdouble mid_x = (state->crop.left_x + state->crop.right_x) / 2;
@@ -607,7 +609,6 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
 
   gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
   gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
-  gboolean is_shift_pressed = event->state & GDK_SHIFT_MASK;
 
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BLUR:
@@ -627,7 +628,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       }
       break;
     case SWAPPY_PAINT_MODE_CROP:
-      cursor_type = get_crop_cursor_type(state, x, y, is_shift_pressed);
+      cursor_type = get_crop_cursor_type(state, x, y, is_control_pressed);
       if (is_button1_pressed) {
         paint_update_crop(&state->crop, x, y);
         render_state(state);
