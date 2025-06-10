@@ -1010,6 +1010,9 @@ static bool load_layout(struct swappy_state *state) {
                               state->window->height);
   action_toggle_painting_panel(state, &state->config->show_panel);
 
+  // The `visual_area` is laid over `area` for visualizations that do not go
+  // into the resulting image. Mouse controls are handled by `area`, so we want
+  // to hereby make `visual_area` "click-through".
   GdkWindow *w = gtk_widget_get_window(visual_area);
   if (w) {
     cairo_region_t *empty = cairo_region_create();
