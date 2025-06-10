@@ -101,8 +101,9 @@ transparency=50
 
 <hr>
 
-- `Ctrl`: Center Shape (Rectangle & Ellipse) based on draw start
-- `Shift`: Paint a new cropping rectangle instead of dragging the corners of the current one
+- `Ctrl`:
+	- Rectangle & Ellipse: Center Shape based on draw start
+	- Crop: Draw a new crop rectangle instead of changing the existing one
 
 <hr>
 
