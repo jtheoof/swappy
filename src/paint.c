@@ -292,44 +292,74 @@ void paint_commit_temporary(struct swappy_state *state) {
   state->temp_paint = NULL;
 }
 
-void paint_start_crop(struct swappy_crop *crop, gdouble x, gdouble y, gboolean recreate) {
+void paint_get_crop_resize(enum swappy_resize *out_resize_x,
+                           enum swappy_resize *out_resize_y,
+                           const struct swappy_crop *crop,
+                           double x, double y) {
+  double crop_width_part = (double)(crop->right_x - crop->left_x) / 4;
+  double crop_height_part = (double)(crop->bottom_y - crop->top_y) / 4;
+
+  if (x < crop->left_x + crop_width_part)
+    *out_resize_x = SWAPPY_RESIZE_LOW;
+  else if (x > crop->right_x - crop_width_part)
+    *out_resize_x = SWAPPY_RESIZE_HIGH;
+  else
+    *out_resize_x = SWAPPY_RESIZE_NONE;
+
+  if (y < crop->top_y + crop_height_part)
+    *out_resize_y = SWAPPY_RESIZE_LOW;
+  else if (y > crop->bottom_y - crop_height_part)
+    *out_resize_y = SWAPPY_RESIZE_HIGH;
+  else
+    *out_resize_y = SWAPPY_RESIZE_NONE;
+}
+
+void paint_start_crop(struct swappy_crop *crop, double x, double y,
+                      gboolean recreate) {
   if (recreate) {
     crop->left_x = x;
     crop->top_y = y;
-    crop->updating_x_hi = true;
-    crop->updating_y_hi = true;
+    crop->resize_x = SWAPPY_RESIZE_HIGH;
+    crop->resize_y = SWAPPY_RESIZE_HIGH;
+    paint_update_crop(crop, x, y);
   } else {
-    gdouble mid_x = (crop->left_x + crop->right_x) / 2;
-    gdouble mid_y = (crop->top_y + crop->bottom_y) / 2;
-
-    crop->updating_x_hi = x > mid_x;
-    crop->updating_y_hi = y > mid_y;
+    paint_get_crop_resize(&crop->resize_x, &crop->resize_y, crop, x, y);
   }
-  paint_update_crop(crop, x, y);
 }
 
-void paint_update_crop(struct swappy_crop *crop, gdouble x, gdouble y) {
-  if (crop->updating_x_hi)
-    crop->right_x = x;
-  else
-    crop->left_x = x;
-
-  if (crop->updating_y_hi)
-    crop->bottom_y = y;
-  else
-    crop->top_y = y;
+void paint_update_crop(struct swappy_crop *crop, double x, double y) {
+  switch (crop->resize_x) {
+    case SWAPPY_RESIZE_NONE:
+      break;
+    case SWAPPY_RESIZE_LOW:
+      crop->left_x = x;
+      break;
+    case SWAPPY_RESIZE_HIGH:
+      crop->right_x = x;
+      break;
+  }
+  switch (crop->resize_y) {
+    case SWAPPY_RESIZE_NONE:
+      break;
+    case SWAPPY_RESIZE_LOW:
+      crop->top_y = y;
+      break;
+    case SWAPPY_RESIZE_HIGH:
+      crop->bottom_y = y;
+      break;
+  }
 
   uint32_t k;
   if (crop->left_x > crop->right_x) {
     k = crop->left_x;
     crop->left_x = crop->right_x;
     crop->right_x = k;
-    crop->updating_x_hi = !crop->updating_x_hi;
+    crop->resize_x = -crop->resize_x;
   }
   if (crop->top_y > crop->bottom_y) {
     k = crop->top_y;
     crop->top_y = crop->bottom_y;
     crop->bottom_y = k;
-    crop->updating_y_hi = !crop->updating_y_hi;
+    crop->resize_y = -crop->resize_y;
   }
 }

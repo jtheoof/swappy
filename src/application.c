@@ -582,21 +582,45 @@ GdkCursorType get_crop_cursor_type(struct swappy_state *state,
   if (is_control_pressed || !state->crop_ever_changed)
     return GDK_CROSSHAIR;
 
-  gdouble mid_x = (state->crop.left_x + state->crop.right_x) / 2;
-  gdouble mid_y = (state->crop.top_y + state->crop.bottom_y) / 2;
+  enum swappy_resize resize_x, resize_y;
+  paint_get_crop_resize(&resize_x, &resize_y, &state->crop, x, y);
 
-  gboolean is_left = x <= mid_x;
-  gboolean is_top = y <= mid_y;
+  switch (resize_x) {
+    case SWAPPY_RESIZE_NONE:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_ARROW;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_SIDE;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_SIDE;
+      }
+      break;
 
-  if (is_top) {
-    return (is_left)
-      ? GDK_TOP_LEFT_CORNER
-      : GDK_TOP_RIGHT_CORNER;
-  } else {
-    return (is_left)
-      ? GDK_BOTTOM_LEFT_CORNER
-      : GDK_BOTTOM_RIGHT_CORNER;
+    case SWAPPY_RESIZE_LOW:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_LEFT_SIDE;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_LEFT_CORNER;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_LEFT_CORNER;
+      }
+      break;
+
+    case SWAPPY_RESIZE_HIGH:
+      switch (resize_y) {
+        case SWAPPY_RESIZE_NONE:
+          return GDK_RIGHT_SIDE;
+        case SWAPPY_RESIZE_LOW:
+          return GDK_TOP_RIGHT_CORNER;
+        case SWAPPY_RESIZE_HIGH:
+          return GDK_BOTTOM_RIGHT_CORNER;
+      }
+      break;
   }
+
+  return GDK_ARROW;
 }
 
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
