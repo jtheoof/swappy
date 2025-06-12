@@ -37,6 +37,12 @@ enum swappy_text_mode {
   SWAPPY_TEXT_MODE_DONE,
 };
 
+enum swappy_resize {
+  SWAPPY_RESIZE_NONE =  0, /* No resize along the axis. */
+  SWAPPY_RESIZE_LOW  = -1, /* Changing the lower bound on the axis. */
+  SWAPPY_RESIZE_HIGH = +1, /* Changing the higher bound on the axis. */
+};
+
 struct swappy_point {
   gdouble x;
   gdouble y;
@@ -177,8 +183,8 @@ struct swappy_crop {
   uint32_t right_x;
   uint32_t bottom_y;
 
-  gboolean updating_x_hi;
-  gboolean updating_y_hi;
+  enum swappy_resize resize_x;
+  enum swappy_resize resize_y;
 };
 
 struct swappy_state {

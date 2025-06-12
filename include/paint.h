@@ -15,8 +15,13 @@ void paint_update_temporary_text_clip(struct swappy_state *state, gdouble x,
                                       gdouble y);
 void paint_commit_temporary(struct swappy_state *state);
 
-void paint_start_crop(struct swappy_crop *crop, gdouble x, gdouble y, gboolean new);
-void paint_update_crop(struct swappy_crop *crop, gdouble x, gdouble y);
+void paint_get_crop_resize(enum swappy_resize *out_resize_x,
+                           enum swappy_resize *out_resize_y,
+                           const struct swappy_crop *crop,
+                           double x, double y);
+void paint_start_crop(struct swappy_crop *crop, double x, double y,
+                      gboolean recreate);
+void paint_update_crop(struct swappy_crop *crop, double x, double y);
 
 void paint_free(gpointer data);
 void paint_free_all(struct swappy_state *state);
