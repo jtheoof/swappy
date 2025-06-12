@@ -290,7 +290,7 @@
                     </child>
                     <child>
                       <object class="GtkRadioButton" id="crop">
-                        <property name="label" translatable="no"></property>
+                        <property name="label" translatable="no"></property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
