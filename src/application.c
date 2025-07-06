@@ -590,12 +590,19 @@ void set_cursor(GdkWindow *window, GdkCursorType cursor_type) {
 static
 GdkCursorType get_crop_cursor_type(struct swappy_state *state,
                                    gdouble x, gdouble y,
-                                   gboolean recreate) {
-  if (recreate)
-    return GDK_CROSSHAIR;
-
+                                   gboolean recreate,
+                                   gboolean currently_resizing) {
   enum swappy_resize resize_x, resize_y;
-  paint_get_crop_resize(&resize_x, &resize_y, &state->crop, x, y);
+
+  if (currently_resizing) {
+    resize_x = state->crop.resize_x;
+    resize_y = state->crop.resize_y;
+  } else {
+    if (recreate)
+      return GDK_CROSSHAIR;
+
+    paint_get_crop_resize(&resize_x, &resize_y, &state->crop, x, y);
+  }
 
   switch (resize_x) {
     case SWAPPY_RESIZE_NONE:
@@ -665,7 +672,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       break;
     case SWAPPY_PAINT_MODE_CROP: {
       gboolean recreate = should_crop_recreate(state, x, y, is_control_pressed);
-      cursor_type = get_crop_cursor_type(state, x, y, recreate);
+      cursor_type = get_crop_cursor_type(state, x, y, recreate, is_button1_pressed);
       if (is_button1_pressed) {
         paint_update_crop(&state->crop, x, y);
         render_state(state);
