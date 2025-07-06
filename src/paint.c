@@ -328,6 +328,8 @@ void paint_get_crop_resize(enum swappy_resize *out_resize_x,
     *out_resize_x = SWAPPY_RESIZE_LOW;
   else if (x > crop->right_x - crop_width_part)
     *out_resize_x = SWAPPY_RESIZE_HIGH;
+  else if (x >= crop->left_x && x <= crop->right_x)
+    *out_resize_x = SWAPPY_RESIZE_BOTH;
   else
     *out_resize_x = SWAPPY_RESIZE_NONE;
 
@@ -335,7 +337,14 @@ void paint_get_crop_resize(enum swappy_resize *out_resize_x,
     *out_resize_y = SWAPPY_RESIZE_LOW;
   else if (y > crop->bottom_y - crop_height_part)
     *out_resize_y = SWAPPY_RESIZE_HIGH;
+  else if (y >= crop->top_y && y <= crop->bottom_y)
+    *out_resize_y = SWAPPY_RESIZE_BOTH;
   else
+    *out_resize_y = SWAPPY_RESIZE_NONE;
+
+  if (*out_resize_x == SWAPPY_RESIZE_BOTH && *out_resize_y != SWAPPY_RESIZE_BOTH)
+    *out_resize_x = SWAPPY_RESIZE_NONE;
+  if (*out_resize_y == SWAPPY_RESIZE_BOTH && *out_resize_x != SWAPPY_RESIZE_BOTH)
     *out_resize_y = SWAPPY_RESIZE_NONE;
 }
 
@@ -364,6 +373,10 @@ void paint_update_crop(struct swappy_crop *crop, double delta_x, double delta_y)
     case SWAPPY_RESIZE_HIGH:
       crop->right_x += delta_x;
       break;
+    case SWAPPY_RESIZE_BOTH:
+      crop->left_x += delta_x;
+      crop->right_x += delta_x;
+      break;
   }
   switch (crop->resize_y) {
     case SWAPPY_RESIZE_NONE:
@@ -372,6 +385,10 @@ void paint_update_crop(struct swappy_crop *crop, double delta_x, double delta_y)
       crop->top_y += delta_y;
       break;
     case SWAPPY_RESIZE_HIGH:
+      crop->bottom_y += delta_y;
+      break;
+    case SWAPPY_RESIZE_BOTH:
+      crop->top_y += delta_y;
       crop->bottom_y += delta_y;
       break;
   }

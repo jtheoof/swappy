@@ -709,6 +709,8 @@ GdkCursorType get_crop_cursor_type(struct swappy_state *state,
           return GDK_TOP_SIDE;
         case SWAPPY_RESIZE_HIGH:
           return GDK_BOTTOM_SIDE;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
       }
       break;
 
@@ -720,6 +722,8 @@ GdkCursorType get_crop_cursor_type(struct swappy_state *state,
           return GDK_TOP_LEFT_CORNER;
         case SWAPPY_RESIZE_HIGH:
           return GDK_BOTTOM_LEFT_CORNER;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
       }
       break;
 
@@ -731,8 +735,13 @@ GdkCursorType get_crop_cursor_type(struct swappy_state *state,
           return GDK_TOP_RIGHT_CORNER;
         case SWAPPY_RESIZE_HIGH:
           return GDK_BOTTOM_RIGHT_CORNER;
+        case SWAPPY_RESIZE_BOTH:
+          return GDK_FLEUR;
       }
       break;
+
+    case SWAPPY_RESIZE_BOTH:
+      return GDK_FLEUR;
   }
 
   return GDK_ARROW;
