@@ -338,33 +338,49 @@ void paint_start_crop(struct swappy_crop *crop, double x, double y,
   }
 }
 
-void paint_update_crop(struct swappy_crop *crop, double delta_x, double delta_y) {
+static inline
+void u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
+  if (*val + to_add > max) {
+    *val = max;
+  } else if (to_add < 0 && *val < -to_add) {
+    *val = 0;
+  } else {
+    *val += to_add;
+  }
+}
+
+void paint_update_crop(struct swappy_state *state,
+                       double delta_x, double delta_y) {
+  struct swappy_crop *crop = &state->crop;
+  double iw = cairo_image_surface_get_width(state->rendering_surface);
+  double ih = cairo_image_surface_get_height(state->rendering_surface);
+
   switch (crop->resize_x) {
     case SWAPPY_RESIZE_NONE:
       break;
     case SWAPPY_RESIZE_LOW:
-      crop->left_x += delta_x;
+      u32_add_clamped(&crop->left_x, delta_x, iw);
       break;
     case SWAPPY_RESIZE_HIGH:
-      crop->right_x += delta_x;
+      u32_add_clamped(&crop->right_x, delta_x, iw);
       break;
     case SWAPPY_RESIZE_BOTH:
-      crop->left_x += delta_x;
-      crop->right_x += delta_x;
+      u32_add_clamped(&crop->left_x, delta_x, iw);
+      u32_add_clamped(&crop->right_x, delta_x, iw);
       break;
   }
   switch (crop->resize_y) {
     case SWAPPY_RESIZE_NONE:
       break;
     case SWAPPY_RESIZE_LOW:
-      crop->top_y += delta_y;
+      u32_add_clamped(&crop->top_y, delta_y, ih);
       break;
     case SWAPPY_RESIZE_HIGH:
-      crop->bottom_y += delta_y;
+      u32_add_clamped(&crop->bottom_y, delta_y, ih);
       break;
     case SWAPPY_RESIZE_BOTH:
-      crop->top_y += delta_y;
-      crop->bottom_y += delta_y;
+      u32_add_clamped(&crop->top_y, delta_y, ih);
+      u32_add_clamped(&crop->bottom_y, delta_y, ih);
       break;
   }
 
