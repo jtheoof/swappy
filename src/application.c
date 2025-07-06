@@ -674,7 +674,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       gboolean recreate = should_crop_recreate(state, x, y, is_control_pressed);
       cursor_type = get_crop_cursor_type(state, x, y, recreate, is_button1_pressed);
       if (is_button1_pressed) {
-        paint_update_crop(&state->crop, x, y);
+        paint_update_crop(&state->crop, x - state->last_mouse_x, y - state->last_mouse_y);
         render_state(state);
       }
       break;
@@ -684,6 +684,8 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
   }
 
   set_cursor(event->window, cursor_type);
+  state->last_mouse_x = x;
+  state->last_mouse_y = y;
 }
 void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
                                       struct swappy_state *state) {

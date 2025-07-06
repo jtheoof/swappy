@@ -318,34 +318,36 @@ void paint_start_crop(struct swappy_crop *crop, double x, double y,
                       gboolean recreate) {
   if (recreate) {
     crop->left_x = x;
+    crop->right_x = x;
     crop->top_y = y;
+    crop->bottom_y = y;
+
     crop->resize_x = SWAPPY_RESIZE_HIGH;
     crop->resize_y = SWAPPY_RESIZE_HIGH;
-    paint_update_crop(crop, x, y);
   } else {
     paint_get_crop_resize(&crop->resize_x, &crop->resize_y, crop, x, y);
   }
 }
 
-void paint_update_crop(struct swappy_crop *crop, double x, double y) {
+void paint_update_crop(struct swappy_crop *crop, double delta_x, double delta_y) {
   switch (crop->resize_x) {
     case SWAPPY_RESIZE_NONE:
       break;
     case SWAPPY_RESIZE_LOW:
-      crop->left_x = x;
+      crop->left_x += delta_x;
       break;
     case SWAPPY_RESIZE_HIGH:
-      crop->right_x = x;
+      crop->right_x += delta_x;
       break;
   }
   switch (crop->resize_y) {
     case SWAPPY_RESIZE_NONE:
       break;
     case SWAPPY_RESIZE_LOW:
-      crop->top_y = y;
+      crop->top_y += delta_y;
       break;
     case SWAPPY_RESIZE_HIGH:
-      crop->bottom_y = y;
+      crop->bottom_y += delta_y;
       break;
   }
 

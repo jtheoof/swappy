@@ -186,6 +186,9 @@ struct swappy_state {
   cairo_surface_t *rendering_surface;
   cairo_surface_t *visual_surface;
 
+  double last_mouse_x;
+  double last_mouse_y;
+
   struct swappy_crop crop;
   gboolean crop_ever_changed;
 

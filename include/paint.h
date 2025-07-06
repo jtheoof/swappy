@@ -20,7 +20,7 @@ void paint_get_crop_resize(enum swappy_resize *out_resize_x,
                            double x, double y);
 void paint_start_crop(struct swappy_crop *crop, double x, double y,
                       gboolean recreate);
-void paint_update_crop(struct swappy_crop *crop, double x, double y);
+void paint_update_crop(struct swappy_crop *crop, double delta_x, double delta_y);
 
 void paint_free(gpointer data);
 void paint_free_all(struct swappy_state *state);
