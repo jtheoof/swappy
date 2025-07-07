@@ -17,10 +17,11 @@ void paint_commit_temporary(struct swappy_state *state);
 
 void paint_get_crop_resize(enum swappy_resize *out_resize_x,
                            enum swappy_resize *out_resize_y,
-                           const struct swappy_crop *crop,
+                           const struct swappy_state *state,
                            double x, double y);
-void paint_start_crop(struct swappy_crop *crop, double x, double y,
-                      gboolean recreate);
+bool paint_crop_should_recreate(const struct swappy_crop *crop);
+void paint_start_crop(struct swappy_state *state, double x, double y,
+                      gboolean recreate_requested);
 void paint_update_crop(struct swappy_state *state,
                        double delta_x, double delta_y);
 
