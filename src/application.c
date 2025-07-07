@@ -538,11 +538,8 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
 
 static
 bool should_crop_recreate(const struct swappy_state *state,
-                         double x, double y,
-                         bool is_control_pressed) {
-  return is_control_pressed || !state->crop_ever_changed ||
-         x < state->crop.left_x || x > state->crop.right_x ||
-         y < state->crop.top_y || y > state->crop.bottom_y;
+                          bool is_control_pressed) {
+  return is_control_pressed || !state->crop_ever_changed;
 }
 
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
@@ -566,9 +563,8 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
         update_ui_undo_redo(state);
         break;
       case SWAPPY_PAINT_MODE_CROP: {
-        gboolean recreate = should_crop_recreate(state, x, y,
-                                                 is_control_pressed);
-        paint_start_crop(&state->crop, x, y, recreate);
+        gboolean recreate = should_crop_recreate(state, is_control_pressed);
+        paint_start_crop(state, x, y, recreate);
         state->crop_ever_changed = true;
         render_state(state);
         break;
@@ -601,7 +597,9 @@ GdkCursorType get_crop_cursor_type(struct swappy_state *state,
     if (recreate)
       return GDK_CROSSHAIR;
 
-    paint_get_crop_resize(&resize_x, &resize_y, &state->crop, x, y);
+    paint_get_crop_resize(&resize_x, &resize_y, state, x, y);
+    if (!resize_x && !resize_y)
+      return GDK_CROSSHAIR;
   }
 
   switch (resize_x) {
@@ -680,7 +678,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       }
       break;
     case SWAPPY_PAINT_MODE_CROP: {
-      gboolean recreate = should_crop_recreate(state, x, y, is_control_pressed);
+      gboolean recreate = should_crop_recreate(state, is_control_pressed);
       cursor_type = get_crop_cursor_type(state, x, y, recreate, is_button1_pressed);
       if (is_button1_pressed) {
         paint_update_crop(state, x - state->last_mouse_x, y - state->last_mouse_y);

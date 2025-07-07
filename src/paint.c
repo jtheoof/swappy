@@ -294,23 +294,31 @@ void paint_commit_temporary(struct swappy_state *state) {
 
 void paint_get_crop_resize(enum swappy_resize *out_resize_x,
                            enum swappy_resize *out_resize_y,
-                           const struct swappy_crop *crop,
+                           const struct swappy_state *state,
                            double x, double y) {
-  double crop_width_part = (double)(crop->right_x - crop->left_x) / 4;
-  double crop_height_part = (double)(crop->bottom_y - crop->top_y) / 4;
+  const struct swappy_crop *crop = &state->crop;
+  const double part_size = 30 / state->scaling_factor;
 
-  if (x < crop->left_x + crop_width_part)
+  if (x < crop->left_x - part_size || x > crop->right_x + part_size ||
+      y < crop->top_y - part_size || y > crop->bottom_y + part_size)
+  {
+      *out_resize_x = SWAPPY_RESIZE_NONE;
+      *out_resize_y = SWAPPY_RESIZE_NONE;
+      return;
+  }
+
+  if (x < crop->left_x + part_size)
     *out_resize_x = SWAPPY_RESIZE_LOW;
-  else if (x > crop->right_x - crop_width_part)
+  else if (x > crop->right_x - part_size)
     *out_resize_x = SWAPPY_RESIZE_HIGH;
   else if (x >= crop->left_x && x <= crop->right_x)
     *out_resize_x = SWAPPY_RESIZE_BOTH;
   else
     *out_resize_x = SWAPPY_RESIZE_NONE;
 
-  if (y < crop->top_y + crop_height_part)
+  if (y < crop->top_y + part_size)
     *out_resize_y = SWAPPY_RESIZE_LOW;
-  else if (y > crop->bottom_y - crop_height_part)
+  else if (y > crop->bottom_y - part_size)
     *out_resize_y = SWAPPY_RESIZE_HIGH;
   else if (y >= crop->top_y && y <= crop->bottom_y)
     *out_resize_y = SWAPPY_RESIZE_BOTH;
@@ -323,19 +331,23 @@ void paint_get_crop_resize(enum swappy_resize *out_resize_x,
     *out_resize_y = SWAPPY_RESIZE_NONE;
 }
 
-void paint_start_crop(struct swappy_crop *crop, double x, double y,
-                      gboolean recreate) {
-  if (recreate) {
-    crop->left_x = x;
-    crop->right_x = x;
-    crop->top_y = y;
-    crop->bottom_y = y;
+void paint_start_crop(struct swappy_state *state, double x, double y,
+                      gboolean recreate_requested) {
+  if (!recreate_requested) {
+    paint_get_crop_resize(&state->crop.resize_x, &state->crop.resize_y,
+                          state, x, y);
 
-    crop->resize_x = SWAPPY_RESIZE_HIGH;
-    crop->resize_y = SWAPPY_RESIZE_HIGH;
-  } else {
-    paint_get_crop_resize(&crop->resize_x, &crop->resize_y, crop, x, y);
+    if (state->crop.resize_x || state->crop.resize_y)
+      return;
   }
+
+  state->crop.left_x = x;
+  state->crop.right_x = x;
+  state->crop.top_y = y;
+  state->crop.bottom_y = y;
+
+  state->crop.resize_x = SWAPPY_RESIZE_HIGH;
+  state->crop.resize_y = SWAPPY_RESIZE_HIGH;
 }
 
 static inline
