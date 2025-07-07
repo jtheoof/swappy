@@ -537,7 +537,7 @@ static void render_crop(cairo_t *cr, struct swappy_state *state) {
   cairo_rectangle(cr, 0, 0, x, ih);
   cairo_rectangle(cr, state->crop.right_x, 0, iw - state->crop.right_x, ih);
   cairo_rectangle(cr, state->crop.left_x, 0, w, state->crop.top_y);
-  cairo_rectangle(cr, state->crop.left_x, state->crop.bottom_y, w, iw - state->crop.bottom_y);
+  cairo_rectangle(cr, state->crop.left_x, state->crop.bottom_y, w, ih - state->crop.bottom_y);
   cairo_close_path(cr);
   cairo_fill(cr);
 
