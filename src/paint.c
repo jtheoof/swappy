@@ -351,13 +351,16 @@ void paint_start_crop(struct swappy_state *state, double x, double y,
 }
 
 static inline
-void u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
+bool u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
   if (*val + to_add > max) {
     *val = max;
+    return true;
   } else if (to_add < 0 && *val < -to_add) {
     *val = 0;
+    return true;
   } else {
     *val += to_add;
+    return false;
   }
 }
 
@@ -376,10 +379,15 @@ void paint_update_crop(struct swappy_state *state,
     case SWAPPY_RESIZE_HIGH:
       u32_add_clamped(&crop->right_x, delta_x, iw);
       break;
-    case SWAPPY_RESIZE_BOTH:
-      u32_add_clamped(&crop->left_x, delta_x, iw);
-      u32_add_clamped(&crop->right_x, delta_x, iw);
+    case SWAPPY_RESIZE_BOTH: {
+      uint32_t width = crop->right_x - crop->left_x;
+      if (u32_add_clamped(&crop->left_x, delta_x, iw)) {
+        crop->right_x = crop->left_x + width;
+      } else if (u32_add_clamped(&crop->right_x, delta_x, iw)) {
+        crop->left_x = crop->right_x - width;
+      }
       break;
+    }
   }
   switch (crop->resize_y) {
     case SWAPPY_RESIZE_NONE:
@@ -390,10 +398,15 @@ void paint_update_crop(struct swappy_state *state,
     case SWAPPY_RESIZE_HIGH:
       u32_add_clamped(&crop->bottom_y, delta_y, ih);
       break;
-    case SWAPPY_RESIZE_BOTH:
-      u32_add_clamped(&crop->top_y, delta_y, ih);
-      u32_add_clamped(&crop->bottom_y, delta_y, ih);
+    case SWAPPY_RESIZE_BOTH: {
+      uint32_t height = crop->bottom_y - crop->top_y;
+      if (u32_add_clamped(&crop->top_y, delta_y, ih)) {
+        crop->bottom_y = crop->top_y + height;
+      } else if (u32_add_clamped(&crop->bottom_y, delta_y, ih)) {
+        crop->top_y = crop->bottom_y - height;
+      }
       break;
+    }
   }
 
   uint32_t k;
