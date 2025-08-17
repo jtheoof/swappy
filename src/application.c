@@ -948,7 +948,7 @@ bool application_init(struct swappy_state *state) {
           .arg_data = GOptionArgFunc,
           .description = "Print version and quit",
       },
-      {NULL}};
+      {NULL}};  // NOLINT(clang-diagnostic-missing-field-initializers)
 
   state->app = gtk_application_new("me.jtheoof.swappy",
                                    G_APPLICATION_HANDLES_COMMAND_LINE);
