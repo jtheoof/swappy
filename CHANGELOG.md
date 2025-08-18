@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/jtheoof/swappy/compare/v1.5.1...v1.7.0) (2025-08-18)
+
+
+### Features
+
+* auto saving on quit app ([72a511c](https://github.com/jtheoof/swappy/commit/72a511c435e9e605b8269669df02996c6b2b5e10))
+* **config:** custom_color config option ([726159d](https://github.com/jtheoof/swappy/commit/726159d81b073f13c6e7661392c0440d4af162bf))
+* **i18n:** add zh_CN locale ([9e7f3b2](https://github.com/jtheoof/swappy/commit/9e7f3b2bbc5aa43723284d4ecfc75807f920cb74))
+
+
+### Bug Fixes
+
+* **config:** fix segfault at exit ([182322d](https://github.com/jtheoof/swappy/commit/182322dd5bbdc6779052a949f7813c5c348123e3))
+* **ui:** add non-versioned fontawesome ([3941fec](https://github.com/jtheoof/swappy/commit/3941feccf0720836c23566c7fcf9a96b27a62a37))
+
+## [1.6.0](https://github.com/jtheoof/swappy/compare/v1.5.1...v1.6.0) (2025-08-18)
+
+
+### Features
+
+* auto saving on quit app ([72a511c](https://github.com/jtheoof/swappy/commit/72a511c435e9e605b8269669df02996c6b2b5e10))
+* **config:** custom_color config option ([726159d](https://github.com/jtheoof/swappy/commit/726159d81b073f13c6e7661392c0440d4af162bf))
+* **i18n:** add zh_CN locale ([9e7f3b2](https://github.com/jtheoof/swappy/commit/9e7f3b2bbc5aa43723284d4ecfc75807f920cb74))
+
+
+### Bug Fixes
+
+* **config:** fix segfault at exit ([182322d](https://github.com/jtheoof/swappy/commit/182322dd5bbdc6779052a949f7813c5c348123e3))
+* **ui:** add non-versioned fontawesome ([3941fec](https://github.com/jtheoof/swappy/commit/3941feccf0720836c23566c7fcf9a96b27a62a37))
+
 ### [1.5.1](https://github.com/jtheoof/swappy/compare/v1.5.0...v1.5.1) (2022-11-20)
 
 
