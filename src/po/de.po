@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-18 16:07-0500\n"
+"POT-Creation-Date: 2022-12-04 22:52+0100\n"
 "PO-Revision-Date: 2020-11-19 18:03+0300\n"
 "Last-Translator: Brodi <me@brodi.ml>\n"
 "Language-Team: none\n"
@@ -17,42 +17,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: res/swappy.glade:456
+#: res/swappy.glade:461
 msgid "Line Width"
 msgstr "Linienstärke"
 
-#: res/swappy.glade:526
+#: res/swappy.glade:531
 msgid "Text Size"
 msgstr "Textgröße"
 
-#: res/swappy.glade:592
+#: res/swappy.glade:597
 msgid "Fill shape"
 msgstr ""
 
-#: res/swappy.glade:597
+#: res/swappy.glade:602
 msgid "Toggle shape filling"
 msgstr ""
 
-#: res/swappy.glade:671
+#: res/swappy.glade:676
 msgid "Toggle Paint Panel"
 msgstr "Farbtafel umschalten"
 
-#: res/swappy.glade:697
+#: res/swappy.glade:702
 msgid "Undo Last Paint"
 msgstr "Letzte Bemalung rückgängig machen"
 
-#: res/swappy.glade:716
+#: res/swappy.glade:721
 msgid "Redo Previous Paint"
 msgstr "Vorherige Bemalung wiederherstellen"
 
-#: res/swappy.glade:735
+#: res/swappy.glade:740
 msgid "Clear Paints"
 msgstr "Bemalung löschen"
 
-#: res/swappy.glade:763
+#: res/swappy.glade:768
 msgid "Copy Surface"
 msgstr "Fläche kopieren"
 
-#: res/swappy.glade:779
+#: res/swappy.glade:784
 msgid "Save Surface"
 msgstr "Fläche speichern"
+
+#: res/swappy.glade:800
+msgid "Save Surface As"
+msgstr "Fläche speichern unter"
+
+#: src/application.c:327
+msgid "_Cancel"
+msgstr "_Abbrechen"
+
+#: src/application.c:328
+msgid "_Save"
+msgstr "_Speichern"

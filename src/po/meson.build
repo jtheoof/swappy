@@ -1,7 +1,14 @@
 i18n = import('i18n')
 
+conf = configuration_data()
 # define GETTEXT_PACKAGE
-add_project_arguments('-DGETTEXT_PACKAGE="swappy"', language:'c')
+conf.set_quoted('GETTEXT_PACKAGE',  meson.project_name())
+conf.set_quoted('LOCALEDIR', join_paths(get_option('prefix'), get_option('localedir')))
+
+config_h = configure_file(
+        output : 'generated_config.h',
+        configuration : conf)
+add_project_arguments('-include', 'src/po/generated_config.h', language : 'c')
 
 i18n.gettext(meson.project_name(),
     args: '--directory=' + meson.source_root()
