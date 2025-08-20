@@ -53,6 +53,8 @@ early_exit=false
 fill_shape=false
 auto_save=false
 custom_color=rgba(193,125,17,1)
+transparent=false
+transparency=50
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -66,6 +68,8 @@ custom_color=rgba(193,125,17,1)
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 - `auto_save` is used to toggle auto saving of final buffer to `save_dir` upon exit
 - `custom_color` is used to set a default value for the custom color
+- `transparency` is used to set transparency of everything that is drawn during startup
+- `transparent` is used to toggle transparency during startup
 
 
 ## Keyboard Shortcuts
@@ -91,6 +95,7 @@ custom_color=rgba(193,125,17,1)
 - `Plus`: Increase Stroke Size
 - `Equal`: Reset Stroke Size
 - `f`: Toggle Shape Filling
+- `T`: Toggle Transparency
 - `k`: Clear Paints (cannot be undone)
 
 <hr>
