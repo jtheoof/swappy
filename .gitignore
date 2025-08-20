@@ -57,3 +57,4 @@ dkms.conf
 # Build folders
 build/
 release/
+.cache/
