@@ -97,9 +97,9 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 ## PAINT MODE
 
 - *b*: Switch to Brush
-- *t*: Switch to Text
-- *r*: Switch to Rectangle
-- *o*: Switch to Ellipse
+- `e` `t`: Switch to Text(Editor)
+- `r` `s`: Switch to Rectangle(Square)
+- `c` `o`: Switch to Ellipse(Circle)
 - *a*: Switch to Arrow
 - *d*: Switch to Blur (d stands for droplet)
 
@@ -112,7 +112,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *Equal*: Reset Stroke Size
 - *f*: Toggle Shape Filling
 - *T*: Toggle Transparency
-- *k*: Clear Paints (cannot be undone)
+- `x` `k`: Clear Paints (cannot be undone)
 
 ## MODIFIERS
 
