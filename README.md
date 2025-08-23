@@ -55,6 +55,9 @@ auto_save=false
 custom_color=rgba(193,125,17,1)
 transparent=false
 transparency=50
+# cmd for OCR, args split by ";", %s is replaced by image path
+# tesseract input.png  -
+ocr_cmd=tesseract;%s;-
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -70,6 +73,7 @@ transparency=50
 - `custom_color` is used to set a default value for the custom color
 - `transparency` is used to set transparency of everything that is drawn during startup
 - `transparent` is used to toggle transparency during startup
+- `ocr_cmd` is used to support OCR,args split by ";", %s is replaced by image path 
 
 
 ## Keyboard Shortcuts

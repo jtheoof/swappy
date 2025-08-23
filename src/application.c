@@ -9,6 +9,7 @@
 #include "clipboard.h"
 #include "config.h"
 #include "file.h"
+#include "ocr.h"
 #include "paint.h"
 #include "pixbuf.h"
 #include "render.h"
@@ -43,6 +44,20 @@ static void update_ui_transparency_widget(struct swappy_state *state) {
   g_snprintf(label, 255, "%" PRId32, state->settings.tr);
   gtk_button_set_label(button, label);
 }
+static void do_ocr(struct swappy_state *state) {
+  if (state->config->ocr_cmd_len == 0) {
+    return;
+  }
+  char *file =
+      state->temp_file_str != NULL ? state->temp_file_str : state->file_str;
+  char *text = execute_ocr_command(state->config->ocr_cmd,
+                                   state->config->ocr_cmd_len, file);
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(state->ui->ocr_text);
+  // 设置文本为 "hello"
+  gtk_text_buffer_set_text(buffer, text, -1);
+
+  g_free(text);
+}
 
 static void update_ui_panel_toggle_button(struct swappy_state *state) {
   GtkWidget *painting_box = GTK_WIDGET(state->ui->painting_box);
@@ -51,6 +66,10 @@ static void update_ui_panel_toggle_button(struct swappy_state *state) {
 
   gtk_toggle_button_set_active(button, toggled);
   gtk_widget_set_visible(painting_box, toggled);
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(state->ui->ocr_text);
+  if (toggled && gtk_text_buffer_get_char_count(buffer) == 0) {
+    do_ocr(state);
+  }
 }
 
 static void update_ui_fill_shape_toggle_button(struct swappy_state *state) {
@@ -285,7 +304,17 @@ static void action_transparent_toggle(struct swappy_state *state,
 
   update_ui_transparent_toggle_button(state);
 }
+static void action_text_select_all(struct swappy_state *state) {
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(state->ui->ocr_text);
 
+  GtkTextIter start, end;
+  // 获取缓冲区的起始迭代器
+  gtk_text_buffer_get_start_iter(buffer, &start);
+  // 获取缓冲区的结束迭代器
+  gtk_text_buffer_get_end_iter(buffer, &end);
+  // 执行全选操作
+  gtk_text_buffer_select_range(buffer, &start, &end);
+}
 static void save_state_to_file_or_folder(struct swappy_state *state,
                                          char *file) {
   GdkPixbuf *pixbuf = pixbuf_get_from_state(state);
@@ -378,7 +407,7 @@ void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   // Commit a potential paint (e.g. text being written)
   commit_state(state);
-  clipboard_copy_drawing_area_to_selection(state);
+  clipboard_copy_to_selection(state);
 }
 
 void control_modifier_changed(bool pressed, struct swappy_state *state) {
@@ -430,8 +459,11 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
   }
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
+      case GDK_KEY_a:
+        action_text_select_all(state);
+        break;
       case GDK_KEY_c:
-        clipboard_copy_drawing_area_to_selection(state);
+        clipboard_copy_to_selection(state);
         break;
       case GDK_KEY_s:
         save_state_to_file_or_folder(state, NULL);
@@ -920,6 +952,10 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->arrow = arrow;
   state->ui->blur = blur;
   state->ui->area = area;
+
+  state->ui->ocr_text =
+      GTK_TEXT_VIEW(gtk_builder_get_object(builder, "ocr_text"));
+
   state->ui->window = window;
 
   compute_window_size_and_scaling_factor(state);
@@ -931,7 +967,6 @@ static bool load_layout(struct swappy_state *state) {
 
   return true;
 }
-
 static void set_paint_mode(struct swappy_state *state) {
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BRUSH:
