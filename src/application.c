@@ -305,7 +305,7 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
 }
 
 static void maybe_save_output_file(struct swappy_state *state) {
-  if (state->config->auto_save) {
+  if (state->config->auto_save || state->output_file) {
     save_state_to_file_or_folder(state, state->output_file);
   }
 }
