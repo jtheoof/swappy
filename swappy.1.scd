@@ -97,7 +97,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 ## PAINT MODE
 
 - *b*: Switch to Brush
-- `e` `t`: Switch to Text(Editor)
+- `e` `t`: Switch to Text (Editor)
 - `r` `s`: Switch to Rectangle(Square)
 - `c` `o`: Switch to Ellipse(Circle)
 - *a*: Switch to Arrow
