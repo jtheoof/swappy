@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
   state.argc = argc;
   state.argv = argv;
   state.mode = SWAPPY_PAINT_MODE_BRUSH;
+  state.exit_code = 0;
 
   if (!application_init(&state)) {
     g_critical("failed to initialize gtk application");
@@ -24,5 +25,5 @@ int main(int argc, char *argv[]) {
 
   application_finish(&state);
 
-  return status;
+  return state.exit_code;
 }

@@ -33,6 +33,7 @@ void text_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void rectangle_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void ellipse_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state);
+void line_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 
 void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state);

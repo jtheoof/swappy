@@ -234,6 +234,8 @@ static void load_config_from_file(struct swappy_config *config,
       config->paint_mode = SWAPPY_PAINT_MODE_ELLIPSE;
     } else if (g_ascii_strcasecmp(paint_mode, "arrow") == 0) {
       config->paint_mode = SWAPPY_PAINT_MODE_ARROW;
+    } else if (g_ascii_strcasecmp(paint_mode, "line") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_LINE;
     } else if (g_ascii_strcasecmp(paint_mode, "blur") == 0) {
       config->paint_mode = SWAPPY_PAINT_MODE_BLUR;
     } else {
