@@ -99,7 +99,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *b*: Switch to Brush
 - `e` `t`: Switch to Text (Editor)
 - `r` `s`: Switch to Rectangle (Square)
-- `c` `o`: Switch to Ellipse(Circle)
+- `c` `o`: Switch to Ellipse (Circle)
 - *a*: Switch to Arrow
 - *d*: Switch to Blur (d stands for droplet)
 
