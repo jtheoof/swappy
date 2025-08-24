@@ -703,6 +703,28 @@
                     <property name="position">6</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkTextView" id="ocr_text">
+                        <property name="visible">True</property>
+                        <property name="margin">5</property>
+                        <property name="can_focus">False</property>
+                        <property name="wrap_mode">word</property>
+                        <property name="editable">False</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="resize">False</property>
