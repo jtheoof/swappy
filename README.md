@@ -79,9 +79,9 @@ transparency=50
 <hr>
 
 - `b`: Switch to Brush
-- `t`: Switch to Text
-- `r`: Switch to Rectangle
-- `o`: Switch to Ellipse
+- `e` `t`: Switch to Text (Editor)
+- `r` `s`: Switch to Rectangle (Square)
+- `c` `o`: Switch to Ellipse (Circle)
 - `a`: Switch to Arrow
 - `d`: Switch to Blur (`d` stands for droplet)
 
@@ -95,8 +95,8 @@ transparency=50
 - `Plus`: Increase Stroke Size
 - `Equal`: Reset Stroke Size
 - `f`: Toggle Shape Filling
+- `x` `k`: Clear Paints (cannot be undone)
 - `T`: Toggle Transparency
-- `k`: Clear Paints (cannot be undone)
 
 <hr>
 
