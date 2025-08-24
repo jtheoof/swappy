@@ -80,7 +80,7 @@ transparency=50
 
 - `b`: Switch to Brush
 - `e` `t`: Switch to Text (Editor)
-- `r` `s`: Switch to Rectangle(Square)
+- `r` `s`: Switch to Rectangle (Square)
 - `c` `o`: Switch to Ellipse(Circle)
 - `a`: Switch to Arrow
 - `d`: Switch to Blur (`d` stands for droplet)
