@@ -304,8 +304,14 @@ static void save_state_to_file_or_folder(struct swappy_state *state,
   }
 }
 
+// We might need to save twice, once for auto_save config
+// and one for the output_file from -o CLI option.
 static void maybe_save_output_file(struct swappy_state *state) {
-  if (state->config->auto_save || state->output_file) {
+  if (state->config->auto_save) {
+    save_state_to_file_or_folder(state, NULL);
+  }
+
+  if (state->output_file) {
     save_state_to_file_or_folder(state, state->output_file);
   }
 }
