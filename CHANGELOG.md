@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/jtheoof/swappy/compare/v1.7.1...v1.8.0) (2025-08-27)
+
+
+### Features
+
+* **config:** add left hand friendly keybinds ([e3b8bf6](https://github.com/jtheoof/swappy/commit/e3b8bf610fa64d21e053a8e25fb74acda334ba3d))
+* **ui:** add transparency feature ([0416812](https://github.com/jtheoof/swappy/commit/0416812d63453d3f23e1e1e354882032ef86590b))
+* **ui:** support input method when edit text ([5e3808c](https://github.com/jtheoof/swappy/commit/5e3808c7a3631c948c701a34de455cfaa3550757))
+* **ui:** text supports pasting using Ctrl-v ([59dca02](https://github.com/jtheoof/swappy/commit/59dca0244906cf276a69ed11f21b5ed635690766))
+
+
+### Bug Fixes
+
+* **application:** bring back output option ([061155c](https://github.com/jtheoof/swappy/commit/061155c9dee96c6dc4e7c3a4b4dc03d45e7fe192)), closes [#202](https://github.com/jtheoof/swappy/issues/202)
+* **application:** save twice if auto_save and -o option ([e5cde68](https://github.com/jtheoof/swappy/commit/e5cde680e6c5180e35c80c0868effda1b5b8b1d9))
+
 ### [1.7.1](https://github.com/jtheoof/swappy/compare/v1.7.0...v1.7.1) (2025-08-18)
 
 
