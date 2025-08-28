@@ -88,6 +88,8 @@ static void load_config_from_file(struct swappy_config *config,
   gboolean fill_shape;
   gboolean auto_save;
   gchar *custom_color = NULL;
+  gchar **ocr_cmd = NULL;
+  gsize ocr_cmd_len = 0;
   gboolean transparent;
   GError *error = NULL;
 
@@ -286,6 +288,17 @@ static void load_config_from_file(struct swappy_config *config,
     g_error_free(error);
     error = NULL;
   }
+  ocr_cmd =
+      g_key_file_get_string_list(gkf, group, "ocr_cmd", &ocr_cmd_len, &error);
+  if (error == NULL) {
+    config->ocr_cmd_len = ocr_cmd_len;
+    config->ocr_cmd = ocr_cmd;
+    printf("ocr_cmd_len: %zu\n", ocr_cmd_len);
+  } else {
+    g_info("ocr_cmd is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
 
   g_key_file_free(gkf);
 }
@@ -308,6 +321,9 @@ static void load_default_config(struct swappy_config *config) {
   config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
   config->transparent = CONFIG_TRANSPARENT_DEFAULT;
   config->transparency = CONFIG_TRANSPARENCY_DEFAULT;
+  config->ocr_cmd = NULL;
+  config->ocr_cmd_len = 0;
+  return;
 }
 
 void config_load(struct swappy_state *state) {
