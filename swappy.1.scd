@@ -97,6 +97,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *r*: Switch to Rectangle
 - *o*: Switch to Ellipse
 - *a*: Switch to Arrow
+- *l*: Switch to Line
 - *d*: Switch to Blur (d stands for droplet)
 
 - *R*: Use Red Color

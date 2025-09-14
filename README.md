@@ -79,6 +79,7 @@ custom_color=rgba(193,125,17,1)
 - `r`: Switch to Rectangle
 - `o`: Switch to Ellipse
 - `a`: Switch to Arrow
+- `l`: Switch to Line
 - `d`: Switch to Blur (`d` stands for droplet)
 
 <hr>

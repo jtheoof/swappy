@@ -108,6 +108,7 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       paint->can_draw = false;  // need `to` vector
 
       paint->content.shape.from.x = x;
@@ -181,6 +182,7 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
       paint->content.shape.to.y = y;
       break;
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       paint->can_draw = true;  // all set
 
       paint->content.shape.to.x = x;

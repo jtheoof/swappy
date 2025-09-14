@@ -153,12 +153,24 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="no">D</property>
+                        <property name="label" translatable="no">L</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="no">D</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                   </object>
@@ -256,6 +268,22 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkRadioButton" id="line">
+                        <property name="label" translatable="no">󰕞</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">False</property>
+                        <property name="group">brush</property>
+                        <signal name="clicked" handler="line_clicked_handler" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">5</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkRadioButton" id="blur">
                         <property name="label" translatable="no"></property>
                         <property name="visible">True</property>
@@ -268,7 +296,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">5</property>
+                        <property name="position">6</property>
                       </packing>
                     </child>
                     <style>

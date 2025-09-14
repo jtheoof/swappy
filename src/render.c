@@ -281,6 +281,40 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_restore(cr);
 }
 
+static void render_shape_line(cairo_t *cr, struct swappy_paint_shape shape) {
+  cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
+  cairo_set_line_width(cr, shape.w);
+
+  double ftx = shape.to.x - shape.from.x;
+  double fty = shape.to.y - shape.from.y;
+  double ftn = sqrt(ftx * ftx + fty * fty);
+
+  double scaling_factor = shape.w / 4;
+
+  double alpha = G_PI / 6;
+  double ta = 5 * alpha;
+  double xc = ftn - fabs(cos(ta)) * scaling_factor;
+
+  if (xc < DBL_EPSILON) {
+    xc = 0;
+  }
+
+  if (ftn < DBL_EPSILON) {
+    return;
+  }
+
+  double theta = copysign(1.0, fty) * acos(ftx / ftn);
+
+  // Draw line
+  cairo_save(cr);
+  cairo_translate(cr, shape.from.x, shape.from.y);
+  cairo_rotate(cr, theta);
+  cairo_move_to(cr, 0, 0);
+  cairo_line_to(cr, xc, 0);
+  cairo_stroke(cr);
+  cairo_restore(cr);
+}
+
 static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
   double x = fabs(shape.from.x - shape.to.x);
   double y = fabs(shape.from.y - shape.to.y);
@@ -372,6 +406,9 @@ static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
       break;
     case SWAPPY_PAINT_MODE_ARROW:
       render_shape_arrow(cr, shape);
+      break;
+    case SWAPPY_PAINT_MODE_LINE:
+      render_shape_line(cr, shape);
       break;
     default:
       break;
@@ -484,6 +521,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint) {
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       render_shape(cr, paint->content.shape);
       break;
     case SWAPPY_PAINT_MODE_TEXT:

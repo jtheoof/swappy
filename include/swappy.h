@@ -20,6 +20,7 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
   SWAPPY_PAINT_MODE_ELLIPSE,   /* Ellipse shapes */
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
+  SWAPPY_PAINT_MODE_LINE,      /* Straight lines */
   SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
 };
 
@@ -127,6 +128,7 @@ struct swappy_state_ui {
   GtkRadioButton *rectangle;
   GtkRadioButton *ellipse;
   GtkRadioButton *arrow;
+  GtkRadioButton *line;
   GtkRadioButton *blur;
 
   GtkRadioButton *red;
