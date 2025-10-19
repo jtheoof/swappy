@@ -1,14 +1,14 @@
 # Turkish translations for swappy package.
 # Copyright (C) 2020 THE swappy'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the swappy package.
-# Oğuz Ersen <oguz@ersen.moe>, 2020-2022.
+# Oğuz Ersen <oguz@ersen.moe>, 2020-2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-06 23:00+0100\n"
-"PO-Revision-Date: 2022-11-25 10:36+0300\n"
+"PO-Revision-Date: 2025-10-19 18:19+0300\n"
 "Last-Translator: Oğuz Ersen <oguz@ersen.moe>\n"
 "Language-Team: Turkish <tr>\n"
 "Language: tr\n"
@@ -27,7 +27,7 @@ msgstr "Metin Boyutu"
 
 #: res/swappy.glade:601
 msgid "Transparency"
-msgstr ""
+msgstr "Şeffaflık"
 
 #: res/swappy.glade:667
 msgid "Fill shape"
@@ -39,11 +39,11 @@ msgstr "Şekil Doldurmayı Aç/Kapat"
 
 #: res/swappy.glade:684
 msgid "Transparent"
-msgstr ""
+msgstr "Şeffaf"
 
 #: res/swappy.glade:689
 msgid "Toggle transparency"
-msgstr ""
+msgstr "Şeffaflığı değiştir"
 
 #: res/swappy.glade:763
 msgid "Toggle Paint Panel"
