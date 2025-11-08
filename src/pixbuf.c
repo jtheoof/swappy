@@ -22,26 +22,37 @@ static void write_file(GdkPixbuf *pixbuf, char *path) {
   }
 }
 
-void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
-                                 char *filename_format) {
+char *format_filename(char *filename_format) {
   time_t current_time = time(NULL);
-  char *c_time_string;
   char filename[255];
-  char path[MAX_PATH];
-  size_t bytes_formated;
+  size_t bytes_formatted;
 
-  c_time_string = ctime(&current_time);
-  c_time_string[strlen(c_time_string) - 1] = '\0';
-  bytes_formated = strftime(filename, sizeof(filename), filename_format,
-                            localtime(&current_time));
-  if (!bytes_formated) {
+  bytes_formatted = strftime(filename, sizeof(filename), filename_format,
+                             localtime(&current_time));
+
+  /* A return value of 0 does not necessarily indicate an error in strftime.
+   * An empty format string yields an empty string but as this is our file name,
+   * there should be at least one character.
+   */
+  if (!bytes_formatted) {
     g_warning(
         "filename_format: %s overflows filename limit - file cannot be saved",
         filename_format);
-    return;
+    return NULL;
   }
 
+  return g_strdup(filename);
+}
+
+void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
+                                 char *filename_format) {
+  char path[MAX_PATH];
+  char *filename;
+  filename = format_filename(filename_format);
+  if (filename == NULL) return;
+
   g_snprintf(path, MAX_PATH, "%s/%s", folder, filename);
+  g_free(filename);
   g_info("saving surface to path: %s", path);
   write_file(pixbuf, path);
 }

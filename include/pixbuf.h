@@ -4,6 +4,7 @@
 
 GdkPixbuf *pixbuf_init_from_file(struct swappy_state *state);
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state);
+char *format_filename(char *filename_format);
 void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
                                  char *filename_format);
 void pixbuf_save_to_file(GdkPixbuf *pixbuf, char *file);

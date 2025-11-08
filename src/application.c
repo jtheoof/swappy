@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <glib-2.0/glib.h>
+#include <glib/gi18n-lib.h>
 #include <glib/gstdio.h>
 #include <gtk/gtk.h>
 #include <inttypes.h>
@@ -377,6 +378,39 @@ void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   save_state_to_file_or_folder(state, NULL);
 }
 
+void save_as_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  gchar *filename_suggestion;
+  GtkWidget *dialog;
+  GtkFileChooser *chooser;
+  GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+  gint res;
+
+  commit_state(state);
+
+  dialog = gtk_file_chooser_dialog_new(NULL, state->ui->window, action,
+                                       _("_Cancel"), GTK_RESPONSE_CANCEL,
+                                       _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
+  chooser = GTK_FILE_CHOOSER(dialog);
+  gtk_file_chooser_set_do_overwrite_confirmation(chooser, TRUE);
+  gtk_file_chooser_set_current_folder(chooser, state->config->save_dir);
+  filename_suggestion = format_filename(state->config->save_filename_format);
+  if (filename_suggestion != NULL) {
+    gtk_file_chooser_set_current_name(chooser, filename_suggestion);
+    g_free(filename_suggestion);
+  }
+
+  res = gtk_dialog_run(GTK_DIALOG(dialog));
+  if (res == GTK_RESPONSE_ACCEPT) {
+    gchar *filename;
+
+    filename = gtk_file_chooser_get_filename(chooser);
+    save_state_to_file_or_folder(state, filename);
+    g_free(filename);
+  }
+
+  gtk_widget_destroy(dialog);
+}
+
 void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_clear(state);
 }
@@ -441,6 +475,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
       case GDK_KEY_s:
         save_state_to_file_or_folder(state, NULL);
+        break;
+      case GDK_KEY_S:
+        save_as_clicked_handler(NULL, state);
         break;
       case GDK_KEY_b:
         action_toggle_painting_panel(state, NULL);
