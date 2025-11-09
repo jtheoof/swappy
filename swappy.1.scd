@@ -123,6 +123,7 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *Ctrl+z*: Undo
 - *Ctrl+Shift+z* or *Ctrl+y*: Redo
 - *Ctrl+s*: Save to file (see man page)
+- *Ctrl+Shift+s*: Open "Save As" dialog
 - *Ctrl+c*: Copy to clipboard
 - *Escape* or *q* or *Ctrl+w*: Quit swappy
 
