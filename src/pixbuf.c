@@ -48,11 +48,21 @@ void pixbuf_save_state_to_folder(GdkPixbuf *pixbuf, char *folder,
                                  char *filename_format) {
   char path[MAX_PATH];
   char *filename;
+  int rc;
   filename = format_filename(filename_format);
   if (filename == NULL) return;
 
-  g_snprintf(path, MAX_PATH, "%s/%s", folder, filename);
+  rc = g_snprintf(path, MAX_PATH, "%s/%s", folder, filename);
   g_free(filename);
+  /* valid range of rc is 1 byte to (MAX_PATH-1) */
+  if (rc < 0) {
+    g_warning("error while building output file path: %s", g_strerror(errno));
+    return;
+  } else if (rc >= MAX_PATH) {
+    g_warning("not writing file because output file path was truncated");
+    return;
+  }
+
   g_info("saving surface to path: %s", path);
   write_file(pixbuf, path);
 }
