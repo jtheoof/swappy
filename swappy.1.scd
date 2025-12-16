@@ -70,6 +70,9 @@ The following lines can be used as swappy's default:
 	custom_color=rgba(192,125,17,1)
 	transparent=false
 	transparency=50
+    # cmd for OCR, args split by ";", %s for image path
+    # tesseract input.png  -
+    ocr_cmd=tesseract;%s;-
 ```
 
 - *save_dir* is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails

@@ -149,6 +149,7 @@ struct swappy_state_ui {
 
   GtkToggleButton *fill_shape;
   GtkToggleButton *transparent;
+  GtkTextView *ocr_text;
 };
 
 struct swappy_config {
@@ -166,6 +167,8 @@ struct swappy_config {
   gboolean early_exit;
   gboolean auto_save;
   char *custom_color;
+  char **ocr_cmd;
+  gsize ocr_cmd_len;
 };
 
 struct swappy_state {
