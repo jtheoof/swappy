@@ -11,6 +11,8 @@ project(
 	],
 )
 
+application_id = 'me.jtheoof.swappy'
+
 version = '"@0@"'.format(meson.project_version())
 git = find_program('git', native: true, required: false)
 if git.found()
@@ -42,6 +44,7 @@ pango = dependency('pango')
 math = cc.find_library('m')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
+appstream_util = find_program('appstreamcli', required: false)
 
 subdir('res')
 subdir('src/po')
@@ -74,6 +77,18 @@ executable(
 	install: true,
 )
 
+app_data_file ='@0@.metainfo.xml'.format(application_id)
+# Validate app data file
+if appstream_util.found()
+  test('Validate app data file', appstream_util,
+    args: ['validate', app_data_file]
+  )
+endif
+
+# Install app data file
+install_data(app_data_file, install_dir: get_option('datadir') + '/metainfo')
+
+# Build man pages
 scdoc = find_program('scdoc', required: get_option('man-pages'))
 
 if scdoc.found()
