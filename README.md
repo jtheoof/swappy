@@ -83,6 +83,7 @@ transparency=50
 - `r` `s`: Switch to Rectangle (Square)
 - `c` `o`: Switch to Ellipse (Circle)
 - `a`: Switch to Arrow
+- `l`: Switch to Line
 - `d`: Switch to Blur (`d` stands for droplet)
 
 <hr>

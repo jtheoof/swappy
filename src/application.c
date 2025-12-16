@@ -175,6 +175,11 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
+static void switch_mode_to_line(struct swappy_state *state) {
+  state->mode = SWAPPY_PAINT_MODE_LINE;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+}
+
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
@@ -367,6 +372,10 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_arrow(state);
 }
 
+void line_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_line(state);
+}
+
 void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_blur(state);
 }
@@ -489,6 +498,10 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_a:
         switch_mode_to_arrow(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+        break;
+      case GDK_KEY_l:
+        switch_mode_to_line(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->line), true);
         break;
       case GDK_KEY_d:
         switch_mode_to_blur(state);
@@ -620,6 +633,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
       case SWAPPY_PAINT_MODE_RECTANGLE:
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
+      case SWAPPY_PAINT_MODE_LINE:
       case SWAPPY_PAINT_MODE_TEXT:
         paint_add_temporary(state, x, y, state->mode);
         render_state(state);
@@ -650,6 +664,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       if (is_button1_pressed) {
         paint_update_temporary_shape(state, x, y, is_control_pressed);
         render_state(state);
@@ -678,6 +693,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       commit_state(state);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
@@ -886,6 +902,8 @@ static bool load_layout(struct swappy_state *state) {
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "ellipse"));
   GtkRadioButton *arrow =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
+  GtkRadioButton *line =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "line"));
   GtkRadioButton *blur =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "blur"));
 
@@ -924,6 +942,7 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->rectangle = rectangle;
   state->ui->ellipse = ellipse;
   state->ui->arrow = arrow;
+  state->ui->line = line;
   state->ui->blur = blur;
   state->ui->area = area;
   state->ui->window = window;
@@ -959,6 +978,10 @@ static void set_paint_mode(struct swappy_state *state) {
       break;
     case SWAPPY_PAINT_MODE_ARROW:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->arrow), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+      break;
+    case SWAPPY_PAINT_MODE_LINE:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->line), true);
       gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     case SWAPPY_PAINT_MODE_BLUR:
