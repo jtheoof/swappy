@@ -144,6 +144,14 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.text.text[0] = '\0';
       break;
 
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = false;
+
+      paint->content.crop.from.x = x;
+      paint->content.crop.from.y = y;
+      paint->content.crop.prev_crop = state->last_crop;
+      break;
+
     default:
       g_info("unable to add temporary paint: %d", type);
       break;
@@ -189,6 +197,12 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = true;  // all set
+
+      paint->content.crop.to.x = x;
+      paint->content.crop.to.y = y;
       break;
     default:
       g_info("unable to update temporary paint when type is: %d", paint->type);
@@ -309,6 +323,13 @@ void paint_commit_temporary(struct swappy_state *state) {
   } else {
     paint->is_committed = true;
     state->paints = g_list_prepend(state->paints, paint);
+    switch (paint->type) {
+      case SWAPPY_PAINT_MODE_CROP:
+        state->last_crop = paint;
+        break;
+      default:
+        break;
+    }
   }
 
   gtk_im_context_focus_out(state->ui->im_context);
