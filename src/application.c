@@ -99,8 +99,12 @@ static void action_undo(struct swappy_state *state) {
   GList *first = state->paints;
 
   if (first) {
+    struct swappy_paint *paint = first->data;
     state->paints = g_list_remove_link(state->paints, first);
-    state->redo_paints = g_list_prepend(state->redo_paints, first->data);
+    state->redo_paints = g_list_prepend(state->redo_paints, paint);
+    if (state->last_crop == paint) {
+      state->last_crop = paint->content.crop.prev_crop;
+    }
 
     render_state(state);
     update_ui_undo_redo(state);
@@ -111,8 +115,12 @@ static void action_redo(struct swappy_state *state) {
   GList *first = state->redo_paints;
 
   if (first) {
+    struct swappy_paint *paint = first->data;
     state->redo_paints = g_list_remove_link(state->redo_paints, first);
     state->paints = g_list_prepend(state->paints, first->data);
+    if (paint->type == SWAPPY_PAINT_MODE_CROP) {
+      state->last_crop = paint;
+    }
 
     render_state(state);
     update_ui_undo_redo(state);
@@ -631,18 +639,11 @@ gboolean draw_area_configure_handler(GtkWidget *widget,
   return TRUE;
 }
 
-static bool should_crop_recreate(const struct swappy_state *state,
-                                 bool is_control_pressed) {
-  return is_control_pressed || !state->crop_ever_changed;
-}
-
 void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
                                     struct swappy_state *state) {
   gdouble x, y;
 
   screen_coordinates_to_image_coordinates(state, event->x, event->y, &x, &y);
-
-  gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
 
   if (event->button == 1) {
     switch (state->mode) {
@@ -652,17 +653,11 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
       case SWAPPY_PAINT_MODE_TEXT:
+      case SWAPPY_PAINT_MODE_CROP:
         paint_add_temporary(state, x, y, state->mode);
         render_state(state);
         update_ui_undo_redo(state);
         break;
-      case SWAPPY_PAINT_MODE_CROP: {
-        gboolean recreate = should_crop_recreate(state, is_control_pressed);
-        paint_start_crop(state, x, y, recreate);
-        state->crop_ever_changed = true;
-        render_state(state);
-        break;
-      }
       default:
         return;
     }
@@ -674,68 +669,6 @@ static void set_cursor(GdkWindow *window, GdkCursorType cursor_type) {
   GdkCursor *cursor = gdk_cursor_new_for_display(display, cursor_type);
   gdk_window_set_cursor(window, cursor);
   g_object_unref(cursor);
-}
-
-static GdkCursorType get_crop_cursor_type(struct swappy_state *state, gdouble x,
-                                          gdouble y, gboolean recreate,
-                                          gboolean currently_resizing) {
-  enum swappy_resize resize_x, resize_y;
-
-  if (currently_resizing) {
-    resize_x = state->crop.resize_x;
-    resize_y = state->crop.resize_y;
-  } else {
-    if (recreate) return GDK_CROSSHAIR;
-
-    paint_get_crop_resize(&resize_x, &resize_y, state, x, y);
-    if (!resize_x && !resize_y) return GDK_CROSSHAIR;
-  }
-
-  switch (resize_x) {
-    case SWAPPY_RESIZE_NONE:
-      switch (resize_y) {
-        case SWAPPY_RESIZE_NONE:
-          return GDK_ARROW;
-        case SWAPPY_RESIZE_LOW:
-          return GDK_TOP_SIDE;
-        case SWAPPY_RESIZE_HIGH:
-          return GDK_BOTTOM_SIDE;
-        case SWAPPY_RESIZE_BOTH:
-          return GDK_FLEUR;
-      }
-      break;
-
-    case SWAPPY_RESIZE_LOW:
-      switch (resize_y) {
-        case SWAPPY_RESIZE_NONE:
-          return GDK_LEFT_SIDE;
-        case SWAPPY_RESIZE_LOW:
-          return GDK_TOP_LEFT_CORNER;
-        case SWAPPY_RESIZE_HIGH:
-          return GDK_BOTTOM_LEFT_CORNER;
-        case SWAPPY_RESIZE_BOTH:
-          return GDK_FLEUR;
-      }
-      break;
-
-    case SWAPPY_RESIZE_HIGH:
-      switch (resize_y) {
-        case SWAPPY_RESIZE_NONE:
-          return GDK_RIGHT_SIDE;
-        case SWAPPY_RESIZE_LOW:
-          return GDK_TOP_RIGHT_CORNER;
-        case SWAPPY_RESIZE_HIGH:
-          return GDK_BOTTOM_RIGHT_CORNER;
-        case SWAPPY_RESIZE_BOTH:
-          return GDK_FLEUR;
-      }
-      break;
-
-    case SWAPPY_RESIZE_BOTH:
-      return GDK_FLEUR;
-  }
-
-  return GDK_ARROW;
 }
 
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
@@ -755,6 +688,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_CROP:
       if (is_button1_pressed) {
         paint_update_temporary_shape(state, x, y, is_control_pressed);
         render_state(state);
@@ -766,17 +700,6 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
         render_state(state);
       }
       break;
-    case SWAPPY_PAINT_MODE_CROP: {
-      gboolean recreate = should_crop_recreate(state, is_control_pressed);
-      cursor_type =
-          get_crop_cursor_type(state, x, y, recreate, is_button1_pressed);
-      if (is_button1_pressed) {
-        paint_update_crop(state, x - state->last_mouse_x,
-                          y - state->last_mouse_y);
-        render_state(state);
-      }
-      break;
-    }
     default:
       break;
   }
@@ -797,6 +720,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_CROP:
       commit_state(state);
       break;
     case SWAPPY_PAINT_MODE_TEXT:

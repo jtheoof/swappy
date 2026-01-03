@@ -521,11 +521,27 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static bool is_usable_crop(const struct swappy_paint *paint) {
+  return paint && paint->type == SWAPPY_PAINT_MODE_CROP && paint->can_draw;
+}
+
 static void render_crop(cairo_t *cr, struct swappy_state *state) {
-  double x = state->crop.left_x;
-  double y = state->crop.top_y;
-  double w = state->crop.right_x - state->crop.left_x;
-  double h = state->crop.bottom_y - state->crop.top_y;
+  const struct swappy_paint *paint;
+  if (is_usable_crop(state->temp_paint)) {
+    paint = state->temp_paint;
+  } else if (is_usable_crop(state->last_crop)) {
+    paint = state->last_crop;
+  } else {
+    return;
+  }
+
+  const struct swappy_paint_crop *shape = &paint->content.crop;
+  double min_x = MIN(shape->from.x, shape->to.x);
+  double min_y = MIN(shape->from.y, shape->to.y);
+  double max_x = MAX(shape->from.x, shape->to.x);
+  double max_y = MAX(shape->from.y, shape->to.y);
+  double w = max_x - min_x;
+  double h = max_y - min_y;
 
   double iw = cairo_image_surface_get_width(state->rendering_surface);
   double ih = cairo_image_surface_get_height(state->rendering_surface);
@@ -534,11 +550,10 @@ static void render_crop(cairo_t *cr, struct swappy_state *state) {
 
   // Darkening overlay
   cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
-  cairo_rectangle(cr, 0, 0, x, ih);
-  cairo_rectangle(cr, state->crop.right_x, 0, iw - state->crop.right_x, ih);
-  cairo_rectangle(cr, state->crop.left_x, 0, w, state->crop.top_y);
-  cairo_rectangle(cr, state->crop.left_x, state->crop.bottom_y, w,
-                  ih - state->crop.bottom_y);
+  cairo_rectangle(cr, 0, 0, min_x, ih);
+  cairo_rectangle(cr, max_x, 0, iw - max_x, ih);
+  cairo_rectangle(cr, min_x, 0, w, min_y);
+  cairo_rectangle(cr, min_x, max_y, w, ih - max_y);
   cairo_close_path(cr);
   cairo_fill(cr);
 
@@ -548,7 +563,7 @@ static void render_crop(cairo_t *cr, struct swappy_state *state) {
   // Crop border
   cairo_set_source_rgba(cr, 1, 1, 1, 1);
   cairo_set_line_width(cr, 3);
-  cairo_rectangle(cr, x, y, w, h);
+  cairo_rectangle(cr, min_x, min_y, w, h);
   cairo_close_path(cr);
   cairo_stroke(cr);
 

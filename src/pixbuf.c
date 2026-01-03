@@ -3,12 +3,30 @@
 #include <cairo/cairo.h>
 #include <gio/gunixoutputstream.h>
 
+static void get_last_crop(struct swappy_point *out_min,
+                          struct swappy_point *out_max,
+                          const struct swappy_state *state) {
+  if (state->last_crop) {
+    const struct swappy_paint_crop *crop = &state->last_crop->content.crop;
+    out_min->x = MIN(crop->from.x, crop->to.x);
+    out_min->y = MIN(crop->from.y, crop->to.y);
+    out_max->x = MAX(crop->from.x, crop->to.x);
+    out_max->y = MAX(crop->from.y, crop->to.y);
+  } else {
+    out_min->x = 0;
+    out_min->y = 0;
+    out_max->x = gdk_pixbuf_get_width(state->original_image);
+    out_max->y = gdk_pixbuf_get_height(state->original_image);
+  }
+}
+
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
-  guint width = state->crop.right_x - state->crop.left_x;
-  guint height = state->crop.bottom_y - state->crop.top_y;
-  GdkPixbuf *pixbuf =
-      gdk_pixbuf_get_from_surface(state->rendering_surface, state->crop.left_x,
-                                  state->crop.top_y, width, height);
+  struct swappy_point min, max;
+  get_last_crop(&min, &max, state);
+  guint width = max.x - min.x;
+  guint height = max.y - min.y;
+  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(state->rendering_surface,
+                                                  min.x, min.y, width, height);
 
   return pixbuf;
 }
@@ -148,13 +166,6 @@ finish:
     state->visual_surface = NULL;
   }
   state->visual_surface = visual_surface;
-
-  state->crop = (struct swappy_crop){
-      .left_x = 0,
-      .top_y = 0,
-      .right_x = image_width,
-      .bottom_y = image_height,
-  };
 
   g_free(alloc);
 }
