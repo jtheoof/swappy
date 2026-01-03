@@ -38,9 +38,9 @@ enum swappy_text_mode {
 };
 
 enum swappy_resize {
-  SWAPPY_RESIZE_NONE =   0, /* No resize along the axis. */
-  SWAPPY_RESIZE_LOW  =  -1, /* Changing the lower bound on the axis. */
-  SWAPPY_RESIZE_HIGH =  +1, /* Changing the higher bound on the axis. */
+  SWAPPY_RESIZE_NONE = 0,   /* No resize along the axis. */
+  SWAPPY_RESIZE_LOW = -1,   /* Changing the lower bound on the axis. */
+  SWAPPY_RESIZE_HIGH = +1,  /* Changing the higher bound on the axis. */
   SWAPPY_RESIZE_BOTH = 127, /* Moving both bounds on the axis. */
 };
 

@@ -319,17 +319,16 @@ void paint_commit_temporary(struct swappy_state *state) {
 
 void paint_get_crop_resize(enum swappy_resize *out_resize_x,
                            enum swappy_resize *out_resize_y,
-                           const struct swappy_state *state,
-                           double x, double y) {
+                           const struct swappy_state *state, double x,
+                           double y) {
   const struct swappy_crop *crop = &state->crop;
   const double part_size = 30 / state->scaling_factor;
 
   if (x < crop->left_x - part_size || x > crop->right_x + part_size ||
-      y < crop->top_y - part_size || y > crop->bottom_y + part_size)
-  {
-      *out_resize_x = SWAPPY_RESIZE_NONE;
-      *out_resize_y = SWAPPY_RESIZE_NONE;
-      return;
+      y < crop->top_y - part_size || y > crop->bottom_y + part_size) {
+    *out_resize_x = SWAPPY_RESIZE_NONE;
+    *out_resize_y = SWAPPY_RESIZE_NONE;
+    return;
   }
 
   if (x < crop->left_x + part_size)
@@ -350,20 +349,21 @@ void paint_get_crop_resize(enum swappy_resize *out_resize_x,
   else
     *out_resize_y = SWAPPY_RESIZE_NONE;
 
-  if (*out_resize_x == SWAPPY_RESIZE_BOTH && *out_resize_y != SWAPPY_RESIZE_BOTH)
+  if (*out_resize_x == SWAPPY_RESIZE_BOTH &&
+      *out_resize_y != SWAPPY_RESIZE_BOTH)
     *out_resize_x = SWAPPY_RESIZE_NONE;
-  if (*out_resize_y == SWAPPY_RESIZE_BOTH && *out_resize_x != SWAPPY_RESIZE_BOTH)
+  if (*out_resize_y == SWAPPY_RESIZE_BOTH &&
+      *out_resize_x != SWAPPY_RESIZE_BOTH)
     *out_resize_y = SWAPPY_RESIZE_NONE;
 }
 
 void paint_start_crop(struct swappy_state *state, double x, double y,
                       gboolean recreate_requested) {
   if (!recreate_requested) {
-    paint_get_crop_resize(&state->crop.resize_x, &state->crop.resize_y,
-                          state, x, y);
+    paint_get_crop_resize(&state->crop.resize_x, &state->crop.resize_y, state,
+                          x, y);
 
-    if (state->crop.resize_x || state->crop.resize_y)
-      return;
+    if (state->crop.resize_x || state->crop.resize_y) return;
   }
 
   state->crop.left_x = x;
@@ -375,8 +375,7 @@ void paint_start_crop(struct swappy_state *state, double x, double y,
   state->crop.resize_y = SWAPPY_RESIZE_HIGH;
 }
 
-static inline
-bool u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
+static inline bool u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
   if (*val + to_add > max) {
     *val = max;
     return true;
@@ -389,8 +388,8 @@ bool u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
   }
 }
 
-void paint_update_crop(struct swappy_state *state,
-                       double delta_x, double delta_y) {
+void paint_update_crop(struct swappy_state *state, double delta_x,
+                       double delta_y) {
   struct swappy_crop *crop = &state->crop;
   double iw = cairo_image_surface_get_width(state->rendering_surface);
   double ih = cairo_image_surface_get_height(state->rendering_surface);

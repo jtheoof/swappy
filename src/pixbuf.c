@@ -6,10 +6,9 @@
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
   guint width = state->crop.right_x - state->crop.left_x;
   guint height = state->crop.bottom_y - state->crop.top_y;
-  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(
-    state->rendering_surface,
-    state->crop.left_x, state->crop.top_y,
-    width, height);
+  GdkPixbuf *pixbuf =
+      gdk_pixbuf_get_from_surface(state->rendering_surface, state->crop.left_x,
+                                  state->crop.top_y, width, height);
 
   return pixbuf;
 }
@@ -121,8 +120,8 @@ void pixbuf_scale_surface_from_widget(struct swappy_state *state,
     goto finish;
   }
 
-  cairo_surface_t *visual_surface =
-      cairo_image_surface_create(CAIRO_FORMAT_ARGB32, image_width, image_height);
+  cairo_surface_t *visual_surface = cairo_image_surface_create(
+      CAIRO_FORMAT_ARGB32, image_width, image_height);
 
   if (!visual_surface) {
     g_error("unable to create visual surface");
@@ -151,10 +150,10 @@ finish:
   state->visual_surface = visual_surface;
 
   state->crop = (struct swappy_crop){
-    .left_x = 0,
-    .top_y = 0,
-    .right_x = image_width,
-    .bottom_y = image_height,
+      .left_x = 0,
+      .top_y = 0,
+      .right_x = image_width,
+      .bottom_y = image_height,
   };
 
   g_free(alloc);
