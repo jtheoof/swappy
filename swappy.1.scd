@@ -97,12 +97,12 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 ## PAINT MODE
 
 - *b*: Switch to Brush
-- `e` `t`: Switch to Text (Editor)
-- `r` `s`: Switch to Rectangle (Square)
-- `c` `o`: Switch to Ellipse (Circle)
+- *e* *t*: Switch to Text (Editor)
+- *r* *s*: Switch to Rectangle (Square)
+- *c* *o*: Switch to Ellipse (Circle)
 - *a*: Switch to Arrow
 - *d*: Switch to Blur (d stands for droplet)
-- *c*: Switch to Crop
+- *z*: Switch to Crop
 
 - *R*: Use Red Color
 - *G*: Use Green Color
@@ -113,13 +113,11 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *Equal*: Reset Stroke Size
 - *f*: Toggle Shape Filling
 - *T*: Toggle Transparency
-- `x` `k`: Clear Paints (cannot be undone)
+- *x* *k*: Clear Paints (cannot be undone)
 
 ## MODIFIERS
 
-- *Ctrl*:
-	- Rectangle & Ellipse: Center Shape based on draw start
-	- Crop: Draw a new crop rectangle instead of changing the existing one
+- *Ctrl*: Center Shape (Rectangle & Ellipse) based on draw start
 
 ## HEADER BAR
 

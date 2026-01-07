@@ -37,13 +37,6 @@ enum swappy_text_mode {
   SWAPPY_TEXT_MODE_DONE,
 };
 
-enum swappy_resize {
-  SWAPPY_RESIZE_NONE = 0,   /* No resize along the axis. */
-  SWAPPY_RESIZE_LOW = -1,   /* Changing the lower bound on the axis. */
-  SWAPPY_RESIZE_HIGH = +1,  /* Changing the higher bound on the axis. */
-  SWAPPY_RESIZE_BOTH = 127, /* Moving both bounds on the axis. */
-};
-
 struct swappy_point {
   gdouble x;
   gdouble y;
@@ -91,6 +84,12 @@ struct swappy_paint_blur {
   cairo_surface_t *surface;
 };
 
+struct swappy_paint_crop {
+  struct swappy_point from;
+  struct swappy_point to;
+  struct swappy_paint *prev_crop;
+};
+
 struct swappy_paint {
   enum swappy_paint_type type;
   bool can_draw;
@@ -100,6 +99,7 @@ struct swappy_paint {
     struct swappy_paint_shape shape;
     struct swappy_paint_text text;
     struct swappy_paint_blur blur;
+    struct swappy_paint_crop crop;
   } content;
 };
 
@@ -178,16 +178,6 @@ struct swappy_config {
   char *custom_color;
 };
 
-struct swappy_crop {
-  uint32_t left_x;
-  uint32_t top_y;
-  uint32_t right_x;
-  uint32_t bottom_y;
-
-  enum swappy_resize resize_x;
-  enum swappy_resize resize_y;
-};
-
 struct swappy_state {
   GtkApplication *app;
 
@@ -198,12 +188,6 @@ struct swappy_state {
   cairo_surface_t *original_image_surface;
   cairo_surface_t *rendering_surface;
   cairo_surface_t *visual_surface;
-
-  double last_mouse_x;
-  double last_mouse_y;
-
-  struct swappy_crop crop;
-  gboolean crop_ever_changed;
 
   gdouble scaling_factor;
 
@@ -221,6 +205,7 @@ struct swappy_state {
   GList *paints;
   GList *redo_paints;
   struct swappy_paint *temp_paint;
+  struct swappy_paint *last_crop;
 
   struct swappy_state_settings settings;
 

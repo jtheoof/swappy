@@ -144,6 +144,14 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.text.text[0] = '\0';
       break;
 
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = false;
+
+      paint->content.crop.from.x = x;
+      paint->content.crop.from.y = y;
+      paint->content.crop.prev_crop = state->last_crop;
+      break;
+
     default:
       g_info("unable to add temporary paint: %d", type);
       break;
@@ -189,6 +197,12 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = true;  // all set
+
+      paint->content.crop.to.x = x;
+      paint->content.crop.to.y = y;
       break;
     default:
       g_info("unable to update temporary paint when type is: %d", paint->type);
@@ -309,6 +323,13 @@ void paint_commit_temporary(struct swappy_state *state) {
   } else {
     paint->is_committed = true;
     state->paints = g_list_prepend(state->paints, paint);
+    switch (paint->type) {
+      case SWAPPY_PAINT_MODE_CROP:
+        state->last_crop = paint;
+        break;
+      default:
+        break;
+    }
   }
 
   gtk_im_context_focus_out(state->ui->im_context);
@@ -317,133 +338,27 @@ void paint_commit_temporary(struct swappy_state *state) {
   state->temp_paint = NULL;
 }
 
-void paint_get_crop_resize(enum swappy_resize *out_resize_x,
-                           enum swappy_resize *out_resize_y,
-                           const struct swappy_state *state, double x,
-                           double y) {
-  const struct swappy_crop *crop = &state->crop;
-  const double part_size = 30 / state->scaling_factor;
-
-  if (x < crop->left_x - part_size || x > crop->right_x + part_size ||
-      y < crop->top_y - part_size || y > crop->bottom_y + part_size) {
-    *out_resize_x = SWAPPY_RESIZE_NONE;
-    *out_resize_y = SWAPPY_RESIZE_NONE;
-    return;
-  }
-
-  if (x < crop->left_x + part_size)
-    *out_resize_x = SWAPPY_RESIZE_LOW;
-  else if (x > crop->right_x - part_size)
-    *out_resize_x = SWAPPY_RESIZE_HIGH;
-  else if (x >= crop->left_x && x <= crop->right_x)
-    *out_resize_x = SWAPPY_RESIZE_BOTH;
-  else
-    *out_resize_x = SWAPPY_RESIZE_NONE;
-
-  if (y < crop->top_y + part_size)
-    *out_resize_y = SWAPPY_RESIZE_LOW;
-  else if (y > crop->bottom_y - part_size)
-    *out_resize_y = SWAPPY_RESIZE_HIGH;
-  else if (y >= crop->top_y && y <= crop->bottom_y)
-    *out_resize_y = SWAPPY_RESIZE_BOTH;
-  else
-    *out_resize_y = SWAPPY_RESIZE_NONE;
-
-  if (*out_resize_x == SWAPPY_RESIZE_BOTH &&
-      *out_resize_y != SWAPPY_RESIZE_BOTH)
-    *out_resize_x = SWAPPY_RESIZE_NONE;
-  if (*out_resize_y == SWAPPY_RESIZE_BOTH &&
-      *out_resize_x != SWAPPY_RESIZE_BOTH)
-    *out_resize_y = SWAPPY_RESIZE_NONE;
-}
-
-void paint_start_crop(struct swappy_state *state, double x, double y,
-                      gboolean recreate_requested) {
-  if (!recreate_requested) {
-    paint_get_crop_resize(&state->crop.resize_x, &state->crop.resize_y, state,
-                          x, y);
-
-    if (state->crop.resize_x || state->crop.resize_y) return;
-  }
-
-  state->crop.left_x = x;
-  state->crop.right_x = x;
-  state->crop.top_y = y;
-  state->crop.bottom_y = y;
-
-  state->crop.resize_x = SWAPPY_RESIZE_HIGH;
-  state->crop.resize_y = SWAPPY_RESIZE_HIGH;
-}
-
-static inline bool u32_add_clamped(uint32_t *val, double to_add, uint32_t max) {
-  if (*val + to_add > max) {
-    *val = max;
-    return true;
-  } else if (to_add < 0 && *val < -to_add) {
-    *val = 0;
-    return true;
+void paint_get_last_crop(struct swappy_point *out_min,
+                         struct swappy_point *out_max,
+                         const struct swappy_state *state) {
+  if (state->last_crop) {
+    const struct swappy_paint_crop *crop = &state->last_crop->content.crop;
+    if (out_min) {
+      out_min->x = MIN(crop->from.x, crop->to.x);
+      out_min->y = MIN(crop->from.y, crop->to.y);
+    }
+    if (out_max) {
+      out_max->x = MAX(crop->from.x, crop->to.x);
+      out_max->y = MAX(crop->from.y, crop->to.y);
+    }
   } else {
-    *val += to_add;
-    return false;
-  }
-}
-
-void paint_update_crop(struct swappy_state *state, double delta_x,
-                       double delta_y) {
-  struct swappy_crop *crop = &state->crop;
-  double iw = cairo_image_surface_get_width(state->rendering_surface);
-  double ih = cairo_image_surface_get_height(state->rendering_surface);
-
-  switch (crop->resize_x) {
-    case SWAPPY_RESIZE_NONE:
-      break;
-    case SWAPPY_RESIZE_LOW:
-      u32_add_clamped(&crop->left_x, delta_x, iw);
-      break;
-    case SWAPPY_RESIZE_HIGH:
-      u32_add_clamped(&crop->right_x, delta_x, iw);
-      break;
-    case SWAPPY_RESIZE_BOTH: {
-      uint32_t width = crop->right_x - crop->left_x;
-      if (u32_add_clamped(&crop->left_x, delta_x, iw)) {
-        crop->right_x = crop->left_x + width;
-      } else if (u32_add_clamped(&crop->right_x, delta_x, iw)) {
-        crop->left_x = crop->right_x - width;
-      }
-      break;
+    if (out_min) {
+      out_min->x = 0;
+      out_min->y = 0;
     }
-  }
-  switch (crop->resize_y) {
-    case SWAPPY_RESIZE_NONE:
-      break;
-    case SWAPPY_RESIZE_LOW:
-      u32_add_clamped(&crop->top_y, delta_y, ih);
-      break;
-    case SWAPPY_RESIZE_HIGH:
-      u32_add_clamped(&crop->bottom_y, delta_y, ih);
-      break;
-    case SWAPPY_RESIZE_BOTH: {
-      uint32_t height = crop->bottom_y - crop->top_y;
-      if (u32_add_clamped(&crop->top_y, delta_y, ih)) {
-        crop->bottom_y = crop->top_y + height;
-      } else if (u32_add_clamped(&crop->bottom_y, delta_y, ih)) {
-        crop->top_y = crop->bottom_y - height;
-      }
-      break;
+    if (out_max) {
+      out_max->x = gdk_pixbuf_get_width(state->original_image);
+      out_max->y = gdk_pixbuf_get_height(state->original_image);
     }
-  }
-
-  uint32_t k;
-  if (crop->left_x > crop->right_x) {
-    k = crop->left_x;
-    crop->left_x = crop->right_x;
-    crop->right_x = k;
-    crop->resize_x = -crop->resize_x;
-  }
-  if (crop->top_y > crop->bottom_y) {
-    k = crop->top_y;
-    crop->top_y = crop->bottom_y;
-    crop->bottom_y = k;
-    crop->resize_y = -crop->resize_y;
   }
 }

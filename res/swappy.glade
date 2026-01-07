@@ -170,7 +170,7 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="no">C</property>
+                        <property name="label" translatable="no">Z</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -767,7 +767,7 @@
                     <property name="margin_right">10</property>
                     <property name="margin_top">10</property>
                     <property name="margin_bottom">10</property>
-                    <signal name="draw" handler="crop_area_handler" swapped="no"/>
+                    <signal name="draw" handler="visual_area_handler" swapped="no"/>
                   </object>
                 </child>
               </object>

@@ -3,12 +3,15 @@
 #include <cairo/cairo.h>
 #include <gio/gunixoutputstream.h>
 
+#include "paint.h"
+
 GdkPixbuf *pixbuf_get_from_state(struct swappy_state *state) {
-  guint width = state->crop.right_x - state->crop.left_x;
-  guint height = state->crop.bottom_y - state->crop.top_y;
-  GdkPixbuf *pixbuf =
-      gdk_pixbuf_get_from_surface(state->rendering_surface, state->crop.left_x,
-                                  state->crop.top_y, width, height);
+  struct swappy_point min, max;
+  paint_get_last_crop(&min, &max, state);
+  guint width = max.x - min.x;
+  guint height = max.y - min.y;
+  GdkPixbuf *pixbuf = gdk_pixbuf_get_from_surface(state->rendering_surface,
+                                                  min.x, min.y, width, height);
 
   return pixbuf;
 }
@@ -148,13 +151,6 @@ finish:
     state->visual_surface = NULL;
   }
   state->visual_surface = visual_surface;
-
-  state->crop = (struct swappy_crop){
-      .left_x = 0,
-      .top_y = 0,
-      .right_x = image_width,
-      .bottom_y = image_height,
-  };
 
   g_free(alloc);
 }
