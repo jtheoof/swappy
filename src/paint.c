@@ -1,6 +1,7 @@
 #include "paint.h"
 
 #include <glib.h>
+#include <math.h>
 #include <stdio.h>
 
 #include "gtk/gtk.h"
@@ -56,6 +57,7 @@ void paint_free_all(struct swappy_state *state) {
   paint_free_list(&state->redo_paints);
   paint_free(state->temp_paint);
   state->temp_paint = NULL;
+  state->last_crop = NULL;
 }
 
 void paint_add_temporary(struct swappy_state *state, double x, double y,
@@ -147,6 +149,14 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.text.text[0] = '\0';
       break;
 
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = false;
+
+      paint->content.crop.from.x = x;
+      paint->content.crop.from.y = y;
+      paint->content.crop.prev_crop = state->last_crop;
+      break;
+
     default:
       g_info("unable to add temporary paint: %d", type);
       break;
@@ -196,6 +206,12 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = true;  // all set
+
+      paint->content.crop.to.x = x;
+      paint->content.crop.to.y = y;
       break;
     default:
       g_info("unable to update temporary paint when type is: %d", paint->type);
@@ -307,6 +323,26 @@ void paint_commit_temporary(struct swappy_state *state) {
       }
       paint->content.text.mode = SWAPPY_TEXT_MODE_DONE;
       break;
+    case SWAPPY_PAINT_MODE_CROP:
+      // `to` is only set once the pointer moved.
+      if (paint->can_draw) {
+        // Keep whole pixels, ordered from the top-left corner, and drop a
+        // crop with no area: there would be nothing to save or copy.
+        struct swappy_paint_crop *crop = &paint->content.crop;
+        double x0 = round(MIN(crop->from.x, crop->to.x));
+        double y0 = round(MIN(crop->from.y, crop->to.y));
+        double x1 = round(MAX(crop->from.x, crop->to.x));
+        double y1 = round(MAX(crop->from.y, crop->to.y));
+
+        crop->from.x = x0;
+        crop->from.y = y0;
+        crop->to.x = x1;
+        crop->to.y = y1;
+        if (x1 - x0 < 1 || y1 - y0 < 1) {
+          paint->can_draw = false;
+        }
+      }
+      break;
     default:
       break;
   }
@@ -316,10 +352,42 @@ void paint_commit_temporary(struct swappy_state *state) {
   } else {
     paint->is_committed = true;
     state->paints = g_list_prepend(state->paints, paint);
+    switch (paint->type) {
+      case SWAPPY_PAINT_MODE_CROP:
+        state->last_crop = paint;
+        break;
+      default:
+        break;
+    }
   }
 
   gtk_im_context_focus_out(state->ui->im_context);
   // Set the temporary paint to NULL but keep the content in memory
   // because it's now part of the GList.
   state->temp_paint = NULL;
+}
+
+void paint_get_last_crop(struct swappy_point *out_min,
+                         struct swappy_point *out_max,
+                         const struct swappy_state *state) {
+  if (state->last_crop) {
+    const struct swappy_paint_crop *crop = &state->last_crop->content.crop;
+    if (out_min) {
+      out_min->x = MIN(crop->from.x, crop->to.x);
+      out_min->y = MIN(crop->from.y, crop->to.y);
+    }
+    if (out_max) {
+      out_max->x = MAX(crop->from.x, crop->to.x);
+      out_max->y = MAX(crop->from.y, crop->to.y);
+    }
+  } else {
+    if (out_min) {
+      out_min->x = 0;
+      out_min->y = 0;
+    }
+    if (out_max) {
+      out_max->x = gdk_pixbuf_get_width(state->original_image);
+      out_max->y = gdk_pixbuf_get_height(state->original_image);
+    }
+  }
 }

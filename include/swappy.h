@@ -24,6 +24,7 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_ELLIPSE,   /* Ellipse shapes */
   SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
   SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
+  SWAPPY_PAINT_MODE_CROP,      /* Crop mode */
 };
 
 enum swappy_paint_shape_operation {
@@ -86,6 +87,12 @@ struct swappy_paint_blur {
   cairo_surface_t *surface;
 };
 
+struct swappy_paint_crop {
+  struct swappy_point from;
+  struct swappy_point to;
+  struct swappy_paint *prev_crop;
+};
+
 struct swappy_paint {
   enum swappy_paint_type type;
   bool can_draw;
@@ -95,6 +102,7 @@ struct swappy_paint {
     struct swappy_paint_shape shape;
     struct swappy_paint_text text;
     struct swappy_paint_blur blur;
+    struct swappy_paint_crop crop;
   } content;
 };
 
@@ -137,6 +145,7 @@ struct swappy_state_ui {
   GtkRadioButton *ellipse;
   GtkRadioButton *arrow;
   GtkRadioButton *blur;
+  GtkRadioButton *crop;
 
   GtkRadioButton *red;
   GtkRadioButton *green;
@@ -199,6 +208,7 @@ struct swappy_state {
   GList *paints;
   GList *redo_paints;
   struct swappy_paint *temp_paint;
+  struct swappy_paint *last_crop;
 
   struct swappy_state_settings settings;
 

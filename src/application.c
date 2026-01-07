@@ -99,8 +99,12 @@ static void action_undo(struct swappy_state *state) {
   GList *first = state->paints;
 
   if (first) {
+    struct swappy_paint *paint = first->data;
     state->paints = g_list_remove_link(state->paints, first);
-    state->redo_paints = g_list_prepend(state->redo_paints, first->data);
+    state->redo_paints = g_list_prepend(state->redo_paints, paint);
+    if (state->last_crop == paint) {
+      state->last_crop = paint->content.crop.prev_crop;
+    }
 
     render_state(state);
     update_ui_undo_redo(state);
@@ -111,8 +115,12 @@ static void action_redo(struct swappy_state *state) {
   GList *first = state->redo_paints;
 
   if (first) {
+    struct swappy_paint *paint = first->data;
     state->redo_paints = g_list_remove_link(state->redo_paints, first);
     state->paints = g_list_prepend(state->paints, first->data);
+    if (paint->type == SWAPPY_PAINT_MODE_CROP) {
+      state->last_crop = paint;
+    }
 
     render_state(state);
     update_ui_undo_redo(state);
@@ -178,6 +186,11 @@ static void switch_mode_to_arrow(struct swappy_state *state) {
 
 static void switch_mode_to_blur(struct swappy_state *state) {
   state->mode = SWAPPY_PAINT_MODE_BLUR;
+  gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+}
+
+static void switch_mode_to_crop(struct swappy_state *state) {
+  state->mode = SWAPPY_PAINT_MODE_CROP;
   gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
 }
 
@@ -319,24 +332,29 @@ static void maybe_save_output_file(struct swappy_state *state) {
   }
 }
 
-// Where the image sits in the drawing area: scaled uniformly to fit (no
-// stretching), never enlarged (an image that fits is drawn 1:1, pixel for
-// pixel, so it stays crisp), and centered on whole pixels.
+// Where the image sits in the drawing area. Only the view is shown: the last
+// crop, or the whole image. It is scaled uniformly to fit (no stretching),
+// never enlarged (a view that fits is drawn 1:1, pixel for pixel, so it stays
+// crisp), and centered on whole pixels. An image point lands on the screen at
+// offset + point * scale.
 static void get_image_placement(struct swappy_state *state, double *scale,
                                 double *offset_x, double *offset_y) {
   GtkAllocation alloc;
-  gint w = gdk_pixbuf_get_width(state->original_image);
-  gint h = gdk_pixbuf_get_height(state->original_image);
+  struct swappy_point min, max;
   double s = 1.0;
+
+  paint_get_last_crop(&min, &max, state);
+  double w = max.x - min.x;
+  double h = max.y - min.y;
 
   gtk_widget_get_allocation(state->ui->area, &alloc);
   if (alloc.width > 0 && alloc.height > 0 && w > 0 && h > 0) {
-    s = MIN(1.0, MIN((double)alloc.width / w, (double)alloc.height / h));
+    s = MIN(1.0, MIN(alloc.width / w, alloc.height / h));
   }
 
   *scale = s;
-  *offset_x = (int)((alloc.width - w * s) / 2);
-  *offset_y = (int)((alloc.height - h * s) / 2);
+  *offset_x = (int)((alloc.width - w * s) / 2) - min.x * s;
+  *offset_y = (int)((alloc.height - h * s) / 2) - min.y * s;
 }
 
 static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
@@ -345,17 +363,16 @@ static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
                                                     gdouble *image_x,
                                                     gdouble *image_y) {
   gdouble x, y;
-
-  gint w = gdk_pixbuf_get_width(state->original_image);
-  gint h = gdk_pixbuf_get_height(state->original_image);
+  struct swappy_point min, max;
 
   double scale, offset_x, offset_y;
   get_image_placement(state, &scale, &offset_x, &offset_y);
+  paint_get_last_crop(&min, &max, state);
 
-  // Clamp coordinates to original image properties to avoid side effects in
-  // rendering pipeline
-  x = CLAMP((screen_x - offset_x) / scale, 0, w);
-  y = CLAMP((screen_y - offset_y) / scale, 0, h);
+  // Clamp coordinates to the view (the last crop, or the whole image) to avoid
+  // side effects in rendering pipeline, and so that a new crop stays inside it
+  x = CLAMP((screen_x - offset_x) / scale, min.x, max.x);
+  y = CLAMP((screen_y - offset_y) / scale, min.y, max.y);
 
   *image_x = x;
   *image_y = y;
@@ -395,6 +412,10 @@ void arrow_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void blur_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   switch_mode_to_blur(state);
+}
+
+void crop_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  switch_mode_to_crop(state);
 }
 
 void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
@@ -575,7 +596,6 @@ gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->rectangle),
                                      true);
         break;
-      case GDK_KEY_c:
       case GDK_KEY_o:
         switch_mode_to_ellipse(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->ellipse),
@@ -588,6 +608,10 @@ gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_d:
         switch_mode_to_blur(state);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+        break;
+      case GDK_KEY_c:
+        switch_mode_to_crop(state);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->crop), true);
         break;
       case GDK_KEY_x:
       case GDK_KEY_k:
@@ -678,8 +702,17 @@ gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
 
   cairo_translate(cr, offset_x, offset_y);
   cairo_scale(cr, scale, scale);
+
+  // Show only the view: the last crop, or the whole image
+  struct swappy_point min, max;
+  paint_get_last_crop(&min, &max, state);
+  cairo_rectangle(cr, min.x, min.y, max.x - min.x, max.y - min.y);
+  cairo_clip(cr);
+
   cairo_set_source_surface(cr, state->rendering_surface, 0, 0);
   cairo_paint(cr);
+
+  render_crop_guides(cr, state);
 
   return FALSE;
 }
@@ -710,6 +743,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
       case SWAPPY_PAINT_MODE_ELLIPSE:
       case SWAPPY_PAINT_MODE_ARROW:
       case SWAPPY_PAINT_MODE_TEXT:
+      case SWAPPY_PAINT_MODE_CROP:
         paint_add_temporary(state, x, y, state->mode);
         render_state(state);
         update_ui_undo_redo(state);
@@ -719,6 +753,7 @@ void draw_area_button_press_handler(GtkWidget *widget, GdkEventButton *event,
     }
   }
 }
+
 void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
                                      struct swappy_state *state) {
   gdouble x, y;
@@ -740,6 +775,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_CROP:
       if (is_button1_pressed) {
         paint_update_temporary_shape(state, x, y, is_control_pressed,
                                      is_shift_pressed);
@@ -753,7 +789,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
       }
       break;
     default:
-      return;
+      break;
   }
   g_object_unref(crosshair);
 }
@@ -769,6 +805,7 @@ void draw_area_button_release_handler(GtkWidget *widget, GdkEventButton *event,
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_CROP:
       commit_state(state);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
@@ -1015,6 +1052,8 @@ static bool load_layout(struct swappy_state *state) {
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "arrow"));
   GtkRadioButton *blur =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "blur"));
+  GtkRadioButton *crop =
+      GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "crop"));
 
   state->ui->red =
       GTK_RADIO_BUTTON(gtk_builder_get_object(builder, "color-red-button"));
@@ -1052,6 +1091,7 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->ellipse = ellipse;
   state->ui->arrow = arrow;
   state->ui->blur = blur;
+  state->ui->crop = crop;
   state->ui->area = area;
   state->ui->window = window;
 
@@ -1109,6 +1149,10 @@ static void set_paint_mode(struct swappy_state *state) {
       break;
     case SWAPPY_PAINT_MODE_BLUR:
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->blur), true);
+      gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(state->ui->crop), true);
       gtk_widget_set_sensitive(GTK_WIDGET(state->ui->fill_shape), false);
       break;
     default:

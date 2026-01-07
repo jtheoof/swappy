@@ -67,7 +67,7 @@ transparency=50
 - `line_size` is the default line size (must be between 1 and 50)
 - `text_size` is the default text size (must be between 10 and 50)
 - `text_font` is the font used to render text, its format is pango friendly
-- `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
+- `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur|crop, matching is case-insensitive)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
 - `auto_save` is used to toggle auto saving of final buffer to `save_dir` upon exit
@@ -106,9 +106,10 @@ Other compositors usually have an equivalent rule that matches on app id.
 - `b`: Switch to Brush
 - `e` `t`: Switch to Text (Editor)
 - `r` `s`: Switch to Rectangle (Square)
-- `c` `o`: Switch to Ellipse (Circle)
+- `o`: Switch to Ellipse (Circle)
 - `a`: Switch to Arrow
 - `d`: Switch to Blur (`d` stands for droplet)
+- `c`: Switch to Crop
 
 <hr>
 
