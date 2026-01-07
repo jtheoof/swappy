@@ -135,6 +135,10 @@ struct swappy_state_ui {
   GtkRadioButton *arrow;
   GtkRadioButton *blur;
 
+  // Rotation
+  GtkButton *rot_left;
+  GtkButton *rot_right;
+
   GtkRadioButton *red;
   GtkRadioButton *green;
   GtkRadioButton *blue;
