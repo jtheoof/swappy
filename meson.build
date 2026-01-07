@@ -42,6 +42,7 @@ pango = dependency('pango')
 math = cc.find_library('m')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
+gio_unix = dependency('gio-unix-2.0')
 
 subdir('res')
 subdir('src/po')
@@ -66,6 +67,7 @@ executable(
 		cairo,
 		pango,
 		gio,
+		gio_unix,
 		gtk,
 		math,
 	],
