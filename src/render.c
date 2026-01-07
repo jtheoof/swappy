@@ -557,9 +557,54 @@ static void render_paints(cairo_t *cr, struct swappy_state *state) {
   }
 }
 
+static bool is_usable_crop(const struct swappy_paint *paint) {
+  return paint && paint->type == SWAPPY_PAINT_MODE_CROP && paint->can_draw;
+}
+
+void render_crop_guides(cairo_t *cr, struct swappy_state *state) {
+  // Only while dragging: once committed, the crop is the view itself.
+  const struct swappy_paint *paint = state->temp_paint;
+  if (!is_usable_crop(paint)) {
+    return;
+  }
+
+  const struct swappy_paint_crop *shape = &paint->content.crop;
+  double min_x = MIN(shape->from.x, shape->to.x);
+  double min_y = MIN(shape->from.y, shape->to.y);
+  double max_x = MAX(shape->from.x, shape->to.x);
+  double max_y = MAX(shape->from.y, shape->to.y);
+  double w = max_x - min_x;
+  double h = max_y - min_y;
+
+  double iw = cairo_image_surface_get_width(state->rendering_surface);
+  double ih = cairo_image_surface_get_height(state->rendering_surface);
+
+  cairo_save(cr);
+
+  // Darkening overlay
+  cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
+  cairo_rectangle(cr, 0, 0, min_x, ih);
+  cairo_rectangle(cr, max_x, 0, iw - max_x, ih);
+  cairo_rectangle(cr, min_x, 0, w, min_y);
+  cairo_rectangle(cr, min_x, max_y, w, ih - max_y);
+  cairo_close_path(cr);
+  cairo_fill(cr);
+
+  cairo_restore(cr);
+  cairo_save(cr);
+
+  // Crop border
+  cairo_set_source_rgba(cr, 1, 1, 1, 1);
+  cairo_set_line_width(cr, 3);
+  cairo_rectangle(cr, min_x, min_y, w, h);
+  cairo_close_path(cr);
+  cairo_stroke(cr);
+
+  cairo_restore(cr);
+}
+
 void render_state(struct swappy_state *state) {
-  cairo_surface_t *surface = state->rendering_surface;
-  cairo_t *cr = cairo_create(surface);
+  cairo_t *cr = cairo_create(state->rendering_surface);
 
   clear_surface(cr);
   render_image(cr, state);

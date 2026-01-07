@@ -1,1 +1,2 @@
 * **ui:** the window can now be resized, and the image scales to fit it. On tiling compositors such as Sway and Hyprland, swappy now opens as a tiled window instead of floating. To keep it floating, add a window rule that matches the `swappy` app id. See [Tiling window managers](README.md#tiling-window-managers) for examples.
+* **keys:** `c` now switches to the new Crop tool instead of Ellipse. Use `o` to switch to Ellipse.
