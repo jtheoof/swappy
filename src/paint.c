@@ -144,6 +144,14 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.text.text[0] = '\0';
       break;
 
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = false;
+
+      paint->content.crop.from.x = x;
+      paint->content.crop.from.y = y;
+      paint->content.crop.prev_crop = state->last_crop;
+      break;
+
     default:
       g_info("unable to add temporary paint: %d", type);
       break;
@@ -189,6 +197,12 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
 
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
+      break;
+    case SWAPPY_PAINT_MODE_CROP:
+      paint->can_draw = true;  // all set
+
+      paint->content.crop.to.x = x;
+      paint->content.crop.to.y = y;
       break;
     default:
       g_info("unable to update temporary paint when type is: %d", paint->type);
@@ -309,10 +323,42 @@ void paint_commit_temporary(struct swappy_state *state) {
   } else {
     paint->is_committed = true;
     state->paints = g_list_prepend(state->paints, paint);
+    switch (paint->type) {
+      case SWAPPY_PAINT_MODE_CROP:
+        state->last_crop = paint;
+        break;
+      default:
+        break;
+    }
   }
 
   gtk_im_context_focus_out(state->ui->im_context);
   // Set the temporary paint to NULL but keep the content in memory
   // because it's now part of the GList.
   state->temp_paint = NULL;
+}
+
+void paint_get_last_crop(struct swappy_point *out_min,
+                         struct swappy_point *out_max,
+                         const struct swappy_state *state) {
+  if (state->last_crop) {
+    const struct swappy_paint_crop *crop = &state->last_crop->content.crop;
+    if (out_min) {
+      out_min->x = MIN(crop->from.x, crop->to.x);
+      out_min->y = MIN(crop->from.y, crop->to.y);
+    }
+    if (out_max) {
+      out_max->x = MAX(crop->from.x, crop->to.x);
+      out_max->y = MAX(crop->from.y, crop->to.y);
+    }
+  } else {
+    if (out_min) {
+      out_min->x = 0;
+      out_min->y = 0;
+    }
+    if (out_max) {
+      out_max->x = gdk_pixbuf_get_width(state->original_image);
+      out_max->y = gdk_pixbuf_get_height(state->original_image);
+    }
+  }
 }

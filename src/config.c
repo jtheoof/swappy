@@ -236,6 +236,8 @@ static void load_config_from_file(struct swappy_config *config,
       config->paint_mode = SWAPPY_PAINT_MODE_ARROW;
     } else if (g_ascii_strcasecmp(paint_mode, "blur") == 0) {
       config->paint_mode = SWAPPY_PAINT_MODE_BLUR;
+    } else if (g_ascii_strcasecmp(paint_mode, "crop") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_CROP;
     } else {
       g_warning(
           "paint_mode is not a valid value: %s - see man page for details",

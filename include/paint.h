@@ -14,6 +14,9 @@ void paint_update_temporary_str(struct swappy_state *state, char *event);
 void paint_update_temporary_text_clip(struct swappy_state *state, gdouble x,
                                       gdouble y);
 void paint_commit_temporary(struct swappy_state *state);
+void paint_get_last_crop(struct swappy_point *out_min,
+                         struct swappy_point *out_max,
+                         const struct swappy_state *state);
 
 void paint_free(gpointer data);
 void paint_free_all(struct swappy_state *state);
