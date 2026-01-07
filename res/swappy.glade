@@ -12,6 +12,16 @@
     <property name="can_focus">False</property>
     <property name="icon_name">edit-undo-symbolic</property>
   </object>
+  <object class="GtkImage" id="edit-rot-left">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">object-rotate-left-symbolic</property>
+  </object>
+  <object class="GtkImage" id="edit-rot-right">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">object-rotate-right-symbolic</property>
+  </object>
   <object class="GtkImage" id="img-clear-paints">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -819,6 +829,47 @@
                 <property name="non_homogeneous">True</property>
               </packing>
             </child>
+
+            <child>
+              <object class="GtkButton" id="rot-left-button">
+                <property name="visible">True</property>
+                <property name="sensitive">True</property>
+                <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Rotate Left</property>
+                <property name="image">edit-rot-left</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="rot_left_clicked_handler" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+                <property name="non_homogeneous">True</property>
+              </packing>
+            </child>
+
+            <child>
+              <object class="GtkButton" id="rot-right-button">
+                <property name="visible">True</property>
+                <property name="sensitive">True</property>
+                <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Rotate Right</property>
+                <property name="image">edit-rot-right</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="rot_right_clicked_handler" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+                <property name="non_homogeneous">True</property>
+              </packing>
+            </child>
+
             <child>
               <object class="GtkButton" id="clear">
                 <property name="visible">True</property>
@@ -832,7 +883,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">4</property>
                 <property name="secondary">True</property>
                 <property name="non_homogeneous">True</property>
               </packing>
