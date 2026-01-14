@@ -117,6 +117,10 @@ guint keyboard_keysym_for_shortcuts(enum swappy_keyboard_shortcuts mode,
   }
 
   if (event->state & GDK_SHIFT_MASK) {
+    if (sym == GDK_KEY_equal) {
+      sym = GDK_KEY_plus;
+    }
+
     sym = gdk_keyval_to_upper(sym);
   } else {
     sym = gdk_keyval_to_lower(sym);
