@@ -36,6 +36,11 @@ enum swappy_text_mode {
   SWAPPY_TEXT_MODE_DONE,
 };
 
+enum swappy_keyboard_shortcuts {
+  SWAPPY_KEYBOARD_SHORTCUTS_LAYOUT = 0,
+  SWAPPY_KEYBOARD_SHORTCUTS_PHYSICAL,
+};
+
 struct swappy_point {
   gdouble x;
   gdouble y;
@@ -166,6 +171,7 @@ struct swappy_config {
   gboolean early_exit;
   gboolean auto_save;
   char *custom_color;
+  enum swappy_keyboard_shortcuts keyboard_shortcuts;
 };
 
 struct swappy_state {

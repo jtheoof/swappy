@@ -9,6 +9,7 @@
 #include "clipboard.h"
 #include "config.h"
 #include "file.h"
+#include "keyboard.h"
 #include "paint.h"
 #include "pixbuf.h"
 #include "render.h"
@@ -424,9 +425,15 @@ static void clipboard_paste_selection(struct swappy_state *state) {
 
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
+  if (event->keyval == GDK_KEY_Control_L ||
+      event->keyval == GDK_KEY_Control_R) {
+    control_modifier_changed(true, state);
+    return;
+  }
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
     /* ctrl-v: paste */
-    if (event->state & GDK_CONTROL_MASK && event->keyval == GDK_KEY_v) {
+    if ((event->state & GDK_CONTROL_MASK) &&
+        keyboard_keysym_for_shortcuts(state, event) == GDK_KEY_v) {
       clipboard_paste_selection(state);
     } else {
       paint_update_temporary_text(state, event);
@@ -435,7 +442,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
     return;
   }
   if (event->state & GDK_CONTROL_MASK) {
-    switch (event->keyval) {
+    switch (keyboard_keysym_for_shortcuts(state, event)) {
       case GDK_KEY_c:
         clipboard_copy_drawing_area_to_selection(state);
         break;
@@ -459,7 +466,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
     }
   } else {
-    switch (event->keyval) {
+    switch (keyboard_keysym_for_shortcuts(state, event)) {
       case GDK_KEY_Escape:
       case GDK_KEY_q:
         maybe_save_output_file(state);
@@ -524,9 +531,6 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_plus:
         action_stroke_size_increase(state);
         break;
-      case GDK_KEY_Control_L:
-        control_modifier_changed(true, state);
-        break;
       case GDK_KEY_f:
         action_fill_shape_toggle(state, NULL);
         break;
@@ -541,11 +545,13 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
 
 void window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
                                struct swappy_state *state) {
+  if (event->keyval == GDK_KEY_Control_L ||
+      event->keyval == GDK_KEY_Control_R) {
+    control_modifier_changed(false, state);
+    return;
+  }
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
-      case GDK_KEY_Control_L:
-        control_modifier_changed(false, state);
-        break;
       default:
         break;
     }
