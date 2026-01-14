@@ -26,6 +26,7 @@ static void print_config(struct swappy_config *config) {
   g_info("auto_save: %d", config->auto_save);
   g_info("custom_color: %s", config->custom_color);
   g_info("transparent: %d", config->transparent);
+  g_info("keyboard_shortcuts: %d", config->keyboard_shortcuts);
 }
 
 static char *get_default_save_dir() {
@@ -89,6 +90,7 @@ static void load_config_from_file(struct swappy_config *config,
   gboolean auto_save;
   gchar *custom_color = NULL;
   gboolean transparent;
+  gchar *keyboard_shortcuts = NULL;
   GError *error = NULL;
 
   if (file == NULL) {
@@ -287,6 +289,27 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  keyboard_shortcuts =
+      g_key_file_get_string(gkf, group, "keyboard_shortcuts", &error);
+
+  if (error == NULL) {
+    if (g_ascii_strcasecmp(keyboard_shortcuts, "layout") == 0) {
+      config->keyboard_shortcuts = SWAPPY_KEYBOARD_SHORTCUTS_LAYOUT;
+    } else if (g_ascii_strcasecmp(keyboard_shortcuts, "physical") == 0) {
+      config->keyboard_shortcuts = SWAPPY_KEYBOARD_SHORTCUTS_PHYSICAL;
+    } else {
+      g_warning(
+          "keyboard_shortcuts is not a valid value: %s - see man page for "
+          "details",
+          keyboard_shortcuts);
+    }
+    g_free(keyboard_shortcuts);
+  } else {
+    g_info("keyboard_shortcuts is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   g_key_file_free(gkf);
 }
 
@@ -308,6 +331,7 @@ static void load_default_config(struct swappy_config *config) {
   config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
   config->transparent = CONFIG_TRANSPARENT_DEFAULT;
   config->transparency = CONFIG_TRANSPARENCY_DEFAULT;
+  config->keyboard_shortcuts = CONFIG_KEYBOARD_SHORTCUTS_DEFAULT;
 }
 
 void config_load(struct swappy_state *state) {
