@@ -4,5 +4,5 @@
 
 #include "swappy.h"
 
-guint keyboard_keysym_for_shortcuts(struct swappy_state *state,
+guint keyboard_keysym_for_shortcuts(enum swappy_keyboard_shortcuts mode,
                                     GdkEventKey *event);

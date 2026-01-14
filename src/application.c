@@ -425,6 +425,9 @@ static void clipboard_paste_selection(struct swappy_state *state) {
 
 void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
                              struct swappy_state *state) {
+  enum swappy_keyboard_shortcuts shortcuts_mode =
+      state->config->keyboard_shortcuts;
+
   if (event->keyval == GDK_KEY_Control_L ||
       event->keyval == GDK_KEY_Control_R) {
     control_modifier_changed(true, state);
@@ -433,7 +436,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
     /* ctrl-v: paste */
     if ((event->state & GDK_CONTROL_MASK) &&
-        keyboard_keysym_for_shortcuts(state, event) == GDK_KEY_v) {
+        keyboard_keysym_for_shortcuts(shortcuts_mode, event) == GDK_KEY_v) {
       clipboard_paste_selection(state);
     } else {
       paint_update_temporary_text(state, event);
@@ -442,7 +445,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
     return;
   }
   if (event->state & GDK_CONTROL_MASK) {
-    switch (keyboard_keysym_for_shortcuts(state, event)) {
+    switch (keyboard_keysym_for_shortcuts(shortcuts_mode, event)) {
       case GDK_KEY_c:
         clipboard_copy_drawing_area_to_selection(state);
         break;
@@ -466,7 +469,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
     }
   } else {
-    switch (keyboard_keysym_for_shortcuts(state, event)) {
+    switch (keyboard_keysym_for_shortcuts(shortcuts_mode, event)) {
       case GDK_KEY_Escape:
       case GDK_KEY_q:
         maybe_save_output_file(state);
@@ -548,18 +551,6 @@ void window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
   if (event->keyval == GDK_KEY_Control_L ||
       event->keyval == GDK_KEY_Control_R) {
     control_modifier_changed(false, state);
-    return;
-  }
-  if (event->state & GDK_CONTROL_MASK) {
-    switch (event->keyval) {
-      default:
-        break;
-    }
-  } else {
-    switch (event->keyval) {
-      default:
-        break;
-    }
   }
 }
 
