@@ -856,6 +856,8 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWindow *window =
       GTK_WINDOW(gtk_builder_get_object(builder, "paint-window"));
+  GtkHeaderBar *header_bar =
+      GTK_HEADER_BAR(gtk_builder_get_object(builder, "header-bar"));
   GtkIMContext *im_context = gtk_im_multicontext_new();
   gtk_im_context_set_client_window(im_context,
                                    gtk_widget_get_window(GTK_WIDGET(window)));
@@ -865,6 +867,11 @@ static bool load_layout(struct swappy_state *state) {
 
   g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 
+  if (!state->config->show_decorations) {
+    gtk_window_set_titlebar(window, NULL);
+    gtk_widget_hide(GTK_WIDGET(header_bar));
+  }
+
   state->ui->panel_toggle_button =
       GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "btn-toggle-panel"));
 
@@ -873,6 +880,13 @@ static bool load_layout(struct swappy_state *state) {
 
   GtkWidget *area =
       GTK_WIDGET(gtk_builder_get_object(builder, "painting-area"));
+
+  if (!state->config->show_decorations) {
+    gtk_widget_set_margin_start(area, 0);
+    gtk_widget_set_margin_end(area, 0);
+    gtk_widget_set_margin_top(area, 0);
+    gtk_widget_set_margin_bottom(area, 0);
+  }
 
   state->ui->painting_box =
       GTK_BOX(gtk_builder_get_object(builder, "painting-box"));

@@ -16,6 +16,7 @@ static void print_config(struct swappy_config *config) {
   g_info("save_dir: %s", config->save_dir);
   g_info("save_filename_format: %s", config->save_filename_format);
   g_info("show_panel: %d", config->show_panel);
+  g_info("show_decorations: %d", config->show_decorations);
   g_info("line_size: %d", config->line_size);
   g_info("text_font: %s", config->text_font);
   g_info("text_size: %d", config->text_size);
@@ -79,6 +80,7 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *save_dir = NULL;
   gchar *save_filename_format = NULL;
   gboolean show_panel;
+  gboolean show_decorations;
   gchar *save_dir_expanded = NULL;
   guint64 line_size, text_size;
   guint64 transparency;
@@ -211,6 +213,17 @@ static void load_config_from_file(struct swappy_config *config,
     error = NULL;
   }
 
+  show_decorations =
+      g_key_file_get_boolean(gkf, group, "show_decorations", &error);
+
+  if (error == NULL) {
+    config->show_decorations = show_decorations;
+  } else {
+    g_info("show_decorations is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
   early_exit = g_key_file_get_boolean(gkf, group, "early_exit", &error);
 
   if (error == NULL) {
@@ -301,6 +314,7 @@ static void load_default_config(struct swappy_config *config) {
   config->text_font = g_strdup(CONFIG_TEXT_FONT_DEFAULT);
   config->text_size = CONFIG_TEXT_SIZE_DEFAULT;
   config->show_panel = CONFIG_SHOW_PANEL_DEFAULT;
+  config->show_decorations = CONFIG_SHOW_DECORATIONS_DEFAULT;
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
