@@ -159,6 +159,7 @@ struct swappy_config {
   gboolean fill_shape;
   gboolean transparent;
   gboolean show_panel;
+  gboolean show_decorations;
   guint32 line_size;
   guint32 text_size;
   guint32 transparency;

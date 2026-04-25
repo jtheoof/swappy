@@ -1,5 +1,6 @@
 [Default]
 save_dir=$HOME/Desktop
+show_decorations=true
 line_size=5
 text_size=20
 text_font=sans-serif
