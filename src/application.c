@@ -377,6 +377,44 @@ void save_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   save_state_to_file_or_folder(state, NULL);
 }
 
+void save_as_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  // Commit a potential paint (e.g. text being written)
+  commit_state(state);
+
+  GtkFileChooserNative *dialog = gtk_file_chooser_native_new(
+      "Save Screenshot As", state->ui->window, GTK_FILE_CHOOSER_ACTION_SAVE,
+      "_Save", "_Cancel");
+  GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+
+  gtk_file_chooser_set_do_overwrite_confirmation(chooser, TRUE);
+
+  if (state->config->save_dir) {
+    gtk_file_chooser_set_current_folder(chooser, state->config->save_dir);
+  }
+
+  if (state->config->save_filename_format) {
+    char filename[255];
+    time_t current_time = time(NULL);
+    size_t bytes =
+        strftime(filename, sizeof(filename),
+                 state->config->save_filename_format, localtime(&current_time));
+    if (bytes > 0) {
+      gtk_file_chooser_set_current_name(chooser, filename);
+    }
+  }
+
+  gint response = gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialog));
+  if (response == GTK_RESPONSE_ACCEPT) {
+    char *path = gtk_file_chooser_get_filename(chooser);
+    if (path) {
+      save_state_to_file_or_folder(state, path);
+      g_free(path);
+    }
+  }
+
+  g_object_unref(dialog);
+}
+
 void clear_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_clear(state);
 }
@@ -441,6 +479,9 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
       case GDK_KEY_s:
         save_state_to_file_or_folder(state, NULL);
+        break;
+      case GDK_KEY_S:
+        save_as_clicked_handler(NULL, state);
         break;
       case GDK_KEY_b:
         action_toggle_painting_panel(state, NULL);

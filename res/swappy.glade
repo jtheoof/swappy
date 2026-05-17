@@ -27,6 +27,11 @@
     <property name="can_focus">False</property>
     <property name="icon_name">document-save-symbolic</property>
   </object>
+  <object class="GtkImage" id="img-save-as-surface">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">document-save-as-symbolic</property>
+  </object>
   <object class="GtkImage" id="img-toggle-panel">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -877,6 +882,22 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="save-as">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Save Surface As...</property>
+                <property name="image">img-save-as-surface</property>
+                <property name="always_show_image">True</property>
+                <signal name="clicked" handler="save_as_clicked_handler" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
