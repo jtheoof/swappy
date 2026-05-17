@@ -133,6 +133,7 @@ Other compositors usually have an equivalent rule that matches on app id.
 - `Ctrl+z`: Undo
 - `Ctrl+Shift+z` or `Ctrl+y`: Redo
 - `Ctrl+s`: Save to file (see man page)
+- `Ctrl+Shift+s`: Save to file with a "Save As" dialog
 - `Ctrl+c`: Copy to clipboard
 - `Escape` or `q` or `Ctrl+w`: Quit swappy
 
