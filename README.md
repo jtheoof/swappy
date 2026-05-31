@@ -125,7 +125,8 @@ Other compositors usually have an equivalent rule that matches on app id.
 
 <hr>
 
-- `Ctrl`: Center Shape (Rectangle & Ellipse) based on draw start
+- `Ctrl`: Center Shape (Rectangle, Ellipse & Blur) based on draw start
+- `Shift`: Constrain Shape to Square (Rectangle & Blur) or Circle (Ellipse)
 
 <hr>
 

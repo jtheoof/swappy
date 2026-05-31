@@ -7,7 +7,8 @@
 void paint_add_temporary(struct swappy_state *state, double x, double y,
                          enum swappy_paint_type type);
 void paint_update_temporary_shape(struct swappy_state *state, double x,
-                                  double y, gboolean is_control_pressed);
+                                  double y, gboolean is_control_pressed,
+                                  gboolean is_shift_pressed);
 void paint_update_temporary_text(struct swappy_state *state,
                                  GdkEventKey *event);
 void paint_update_temporary_str(struct swappy_state *state, char *event);
