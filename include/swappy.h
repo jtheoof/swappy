@@ -62,6 +62,7 @@ struct swappy_paint_shape {
   double a;
   double w;
   bool should_center_at_from;
+  bool should_constrain_to_square;
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_type type;
@@ -78,6 +79,8 @@ struct swappy_paint_brush {
 };
 
 struct swappy_paint_blur {
+  bool should_center_at_from;
+  bool should_constrain_to_square;
   struct swappy_point from;
   struct swappy_point to;
   cairo_surface_t *surface;

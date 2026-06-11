@@ -116,7 +116,8 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 
 ## MODIFIERS
 
-- *Ctrl*: Center Shape (Rectangle & Ellipse) based on draw start
+- *Ctrl*: Center Shape (Rectangle, Ellipse & Blur) based on draw start
+- *Shift*: Constrain Shape to Square (Rectangle & Blur) or Circle (Ellipse)
 
 ## HEADER BAR
 

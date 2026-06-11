@@ -387,19 +387,27 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   clipboard_copy_drawing_area_to_selection(state);
 }
 
-void control_modifier_changed(bool pressed, struct swappy_state *state) {
-  if (state->temp_paint != NULL) {
-    switch (state->temp_paint->type) {
-      case SWAPPY_PAINT_MODE_ELLIPSE:
-      case SWAPPY_PAINT_MODE_RECTANGLE:
-        paint_update_temporary_shape(
-            state, state->temp_paint->content.shape.to.x,
-            state->temp_paint->content.shape.to.y, pressed);
-        render_state(state);
-        break;
-      default:
-        break;
-    }
+static void modifier_changed(struct swappy_state *state,
+                             gboolean is_control_pressed,
+                             gboolean is_shift_pressed) {
+  if (state->temp_paint == NULL) return;
+
+  switch (state->temp_paint->type) {
+    case SWAPPY_PAINT_MODE_ELLIPSE:
+    case SWAPPY_PAINT_MODE_RECTANGLE:
+      paint_update_temporary_shape(state, state->temp_paint->content.shape.to.x,
+                                   state->temp_paint->content.shape.to.y,
+                                   is_control_pressed, is_shift_pressed);
+      render_state(state);
+      break;
+    case SWAPPY_PAINT_MODE_BLUR:
+      paint_update_temporary_shape(state, state->temp_paint->content.blur.to.x,
+                                   state->temp_paint->content.blur.to.y,
+                                   is_control_pressed, is_shift_pressed);
+      render_state(state);
+      break;
+    default:
+      break;
   }
 }
 
@@ -525,7 +533,11 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         action_stroke_size_increase(state);
         break;
       case GDK_KEY_Control_L:
-        control_modifier_changed(true, state);
+        modifier_changed(state, true, event->state & GDK_SHIFT_MASK);
+        break;
+      case GDK_KEY_Shift_L:
+      case GDK_KEY_Shift_R:
+        modifier_changed(state, event->state & GDK_CONTROL_MASK, true);
         break;
       case GDK_KEY_f:
         action_fill_shape_toggle(state, NULL);
@@ -541,19 +553,16 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
 
 void window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
                                struct swappy_state *state) {
-  if (event->state & GDK_CONTROL_MASK) {
-    switch (event->keyval) {
-      case GDK_KEY_Control_L:
-        control_modifier_changed(false, state);
-        break;
-      default:
-        break;
-    }
-  } else {
-    switch (event->keyval) {
-      default:
-        break;
-    }
+  switch (event->keyval) {
+    case GDK_KEY_Control_L:
+      modifier_changed(state, false, event->state & GDK_SHIFT_MASK);
+      break;
+    case GDK_KEY_Shift_L:
+    case GDK_KEY_Shift_R:
+      modifier_changed(state, event->state & GDK_CONTROL_MASK, false);
+      break;
+    default:
+      break;
   }
 }
 
@@ -643,6 +652,7 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
 
   gboolean is_button1_pressed = event->state & GDK_BUTTON1_MASK;
   gboolean is_control_pressed = event->state & GDK_CONTROL_MASK;
+  gboolean is_shift_pressed = event->state & GDK_SHIFT_MASK;
 
   switch (state->mode) {
     case SWAPPY_PAINT_MODE_BLUR:
@@ -651,7 +661,8 @@ void draw_area_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event,
     case SWAPPY_PAINT_MODE_ELLIPSE:
     case SWAPPY_PAINT_MODE_ARROW:
       if (is_button1_pressed) {
-        paint_update_temporary_shape(state, x, y, is_control_pressed);
+        paint_update_temporary_shape(state, x, y, is_control_pressed,
+                                     is_shift_pressed);
         render_state(state);
       }
       break;

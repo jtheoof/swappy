@@ -285,7 +285,19 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_restore(cr);
 }
 
+static void constrain_to_square(struct swappy_point from,
+                                struct swappy_point *to) {
+  double dx = to->x - from.x;
+  double dy = to->y - from.y;
+  double side = fmax(fabs(dx), fabs(dy));
+  to->x = from.x + ((dx >= 0) ? 1.0 : -1.0) * side;
+  to->y = from.y + ((dy >= 0) ? 1.0 : -1.0) * side;
+}
+
 static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
+  if (shape.should_constrain_to_square) {
+    constrain_to_square(shape.from, &shape.to);
+  }
   double x = fabs(shape.from.x - shape.to.x);
   double y = fabs(shape.from.y - shape.to.y);
 
@@ -333,6 +345,10 @@ static void render_shape_ellipse(cairo_t *cr, struct swappy_paint_shape shape) {
 static void render_shape_rectangle(cairo_t *cr,
                                    struct swappy_paint_shape shape) {
   double x, y, w, h;
+
+  if (shape.should_constrain_to_square) {
+    constrain_to_square(shape.from, &shape.to);
+  }
 
   if (shape.should_center_at_from) {
     x = shape.from.x - fabs(shape.from.x - shape.to.x);
@@ -394,12 +410,23 @@ static void clear_surface(cairo_t *cr) {
 static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
   struct swappy_paint_blur blur = paint->content.blur;
 
+  if (blur.should_constrain_to_square) constrain_to_square(blur.from, &blur.to);
+
   cairo_surface_t *target = cairo_get_target(cr);
 
-  double x = MIN(blur.from.x, blur.to.x);
-  double y = MIN(blur.from.y, blur.to.y);
-  double w = ABS(blur.from.x - blur.to.x);
-  double h = ABS(blur.from.y - blur.to.y);
+  double x, y, w, h;
+
+  if (blur.should_center_at_from) {
+    x = blur.from.x - ABS(blur.from.x - blur.to.x);
+    y = blur.from.y - ABS(blur.from.y - blur.to.y);
+    w = ABS(blur.from.x - blur.to.x) * 2;
+    h = ABS(blur.from.y - blur.to.y) * 2;
+  } else {
+    x = MIN(blur.from.x, blur.to.x);
+    y = MIN(blur.from.y, blur.to.y);
+    w = ABS(blur.from.x - blur.to.x);
+    h = ABS(blur.from.y - blur.to.y);
+  }
 
   cairo_save(cr);
 
@@ -433,6 +460,7 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
         .b = 1,
         .a = 0.5,
         .w = 5,
+        .should_center_at_from = blur.should_center_at_from,
         .from = blur.from,
         .to = blur.to,
         .type = SWAPPY_PAINT_MODE_RECTANGLE,

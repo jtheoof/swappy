@@ -153,7 +153,8 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
 }
 
 void paint_update_temporary_shape(struct swappy_state *state, double x,
-                                  double y, gboolean is_control_pressed) {
+                                  double y, gboolean is_control_pressed,
+                                  gboolean is_shift_pressed) {
   struct swappy_paint *paint = state->temp_paint;
   struct swappy_point *point;
   GList *points;
@@ -165,6 +166,8 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
   switch (paint->type) {
     case SWAPPY_PAINT_MODE_BLUR:
       paint->can_draw = true;
+      paint->content.blur.should_center_at_from = is_control_pressed;
+      paint->content.blur.should_constrain_to_square = is_shift_pressed;
       paint->content.blur.to.x = x;
       paint->content.blur.to.y = y;
       break;
@@ -181,6 +184,7 @@ void paint_update_temporary_shape(struct swappy_state *state, double x,
       paint->can_draw = true;  // all set
 
       paint->content.shape.should_center_at_from = is_control_pressed;
+      paint->content.shape.should_constrain_to_square = is_shift_pressed;
       paint->content.shape.to.x = x;
       paint->content.shape.to.y = y;
       break;

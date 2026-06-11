@@ -100,7 +100,8 @@ transparency=50
 
 <hr>
 
-- `Ctrl`: Center Shape (Rectangle & Ellipse) based on draw start
+- `Ctrl`: Center Shape (Rectangle, Ellipse & Blur) based on draw start
+- `Shift`: Constrain Shape to Square (Rectangle & Blur) or Circle (Ellipse)
 
 <hr>
 
