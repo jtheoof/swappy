@@ -55,6 +55,8 @@ auto_save=false
 custom_color=rgba(193,125,17,1)
 transparent=false
 transparency=50
+line_begin_arrow=false
+line_end_arrow=true
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -63,14 +65,15 @@ transparency=50
 - `line_size` is the default line size (must be between 1 and 50)
 - `text_size` is the default text size (must be between 10 and 50)
 - `text_font` is the font used to render text, its format is pango friendly
-- `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|arrow|blur, matching is case-insensitive)
+- `paint_mode` is the mode activated at application start (must be one of: brush|text|rectangle|ellipse|line|blur, matching is case-insensitive)
 - `early_exit` is used to make the application exit after saving the picture or copying it to the clipboard
 - `fill_shape` is used to toggle shape filling (for the rectangle and ellipsis tools) on or off upon startup
+- `line_begin_arrow` is used to draw an arrow head at the start of lines (for the line tool) on or off upon startup
+- `line_end_arrow` is used to draw an arrow head at the end of lines (for the line tool) on or off upon startup
 - `auto_save` is used to toggle auto saving of final buffer to `save_dir` upon exit
 - `custom_color` is used to set a default value for the custom color
 - `transparency` is used to set transparency of everything that is drawn during startup
 - `transparent` is used to toggle transparency during startup
-
 
 ## Keyboard Shortcuts
 
@@ -82,7 +85,7 @@ transparency=50
 - `e` `t`: Switch to Text (Editor)
 - `r` `s`: Switch to Rectangle (Square)
 - `c` `o`: Switch to Ellipse (Circle)
-- `a`: Switch to Arrow
+- `a` `l`: Switch to Line
 - `d`: Switch to Blur (`d` stands for droplet)
 
 <hr>

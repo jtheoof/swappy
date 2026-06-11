@@ -22,7 +22,7 @@ enum swappy_paint_type {
   SWAPPY_PAINT_MODE_TEXT,      /* Mode to draw texts */
   SWAPPY_PAINT_MODE_RECTANGLE, /* Rectangle shapes */
   SWAPPY_PAINT_MODE_ELLIPSE,   /* Ellipse shapes */
-  SWAPPY_PAINT_MODE_ARROW,     /* Arrow shapes */
+  SWAPPY_PAINT_MODE_LINE,      /* Line shapes (optionally arrow-headed) */
   SWAPPY_PAINT_MODE_BLUR,      /* Blur mode */
 };
 
@@ -62,6 +62,8 @@ struct swappy_paint_shape {
   double a;
   double w;
   bool should_center_at_from;
+  bool arrow_begin;
+  bool arrow_end;
   struct swappy_point from;
   struct swappy_point to;
   enum swappy_paint_type type;
@@ -132,7 +134,7 @@ struct swappy_state_ui {
   GtkRadioButton *text;
   GtkRadioButton *rectangle;
   GtkRadioButton *ellipse;
-  GtkRadioButton *arrow;
+  GtkRadioButton *line;
   GtkRadioButton *blur;
 
   GtkRadioButton *red;
@@ -148,6 +150,8 @@ struct swappy_state_ui {
   GtkButton *transparency_minus;
 
   GtkToggleButton *fill_shape;
+  GtkToggleButton *line_begin_arrow;
+  GtkToggleButton *line_end_arrow;
   GtkToggleButton *transparent;
 };
 
@@ -157,6 +161,8 @@ struct swappy_config {
   char *save_filename_format;
   gint8 paint_mode;
   gboolean fill_shape;
+  gboolean line_begin_arrow;
+  gboolean line_end_arrow;
   gboolean transparent;
   gboolean show_panel;
   guint32 line_size;

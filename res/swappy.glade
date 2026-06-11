@@ -146,7 +146,7 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="no">A</property>
+                        <property name="label" translatable="no">L</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -245,14 +245,14 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="arrow">
-                        <property name="label" translatable="no"></property>
+                      <object class="GtkRadioButton" id="line">
+                        <property name="label" translatable="no"></property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">False</property>
                         <property name="group">brush</property>
-                        <signal name="clicked" handler="arrow_clicked_handler" swapped="no"/>
+                        <signal name="clicked" handler="line_clicked_handler" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -701,6 +701,52 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkToggleButton" id="line-begin-arrow-toggle-button">
+                        <property name="label" translatable="yes">Start arrow</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="focus-on-click">False</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Toggle arrow head at line start</property>
+                        <property name="always-show-image">True</property>
+                        <signal name="toggled" handler="line_begin_arrow_toggled_handler" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="line-end-arrow-toggle-button">
+                        <property name="label" translatable="yes">End arrow</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="focus-on-click">False</property>
+                        <property name="receives-default">True</property>
+                        <property name="tooltip-text" translatable="yes">Toggle arrow head at line end</property>
+                        <property name="always-show-image">True</property>
+                        <signal name="toggled" handler="line_end_arrow_toggled_handler" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
               </object>

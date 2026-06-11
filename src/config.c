@@ -23,6 +23,8 @@ static void print_config(struct swappy_config *config) {
   g_info("paint_mode: %d", config->paint_mode);
   g_info("early_exit: %d", config->early_exit);
   g_info("fill_shape: %d", config->fill_shape);
+  g_info("line_begin_arrow: %d", config->line_begin_arrow);
+  g_info("line_end_arrow: %d", config->line_end_arrow);
   g_info("auto_save: %d", config->auto_save);
   g_info("custom_color: %s", config->custom_color);
   g_info("transparent: %d", config->transparent);
@@ -86,6 +88,8 @@ static void load_config_from_file(struct swappy_config *config,
   gchar *paint_mode = NULL;
   gboolean early_exit;
   gboolean fill_shape;
+  gboolean line_begin_arrow;
+  gboolean line_end_arrow;
   gboolean auto_save;
   gchar *custom_color = NULL;
   gboolean transparent;
@@ -233,7 +237,9 @@ static void load_config_from_file(struct swappy_config *config,
     } else if (g_ascii_strcasecmp(paint_mode, "ellipse") == 0) {
       config->paint_mode = SWAPPY_PAINT_MODE_ELLIPSE;
     } else if (g_ascii_strcasecmp(paint_mode, "arrow") == 0) {
-      config->paint_mode = SWAPPY_PAINT_MODE_ARROW;
+      config->paint_mode = SWAPPY_PAINT_MODE_LINE;
+    } else if (g_ascii_strcasecmp(paint_mode, "line") == 0) {
+      config->paint_mode = SWAPPY_PAINT_MODE_LINE;
     } else if (g_ascii_strcasecmp(paint_mode, "blur") == 0) {
       config->paint_mode = SWAPPY_PAINT_MODE_BLUR;
     } else {
@@ -253,6 +259,27 @@ static void load_config_from_file(struct swappy_config *config,
     config->fill_shape = fill_shape;
   } else {
     g_info("fill_shape is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
+  line_begin_arrow =
+      g_key_file_get_boolean(gkf, group, "line_begin_arrow", &error);
+
+  if (error == NULL) {
+    config->line_begin_arrow = line_begin_arrow;
+  } else {
+    g_info("line_begin_arrow is missing in %s (%s)", file, error->message);
+    g_error_free(error);
+    error = NULL;
+  }
+
+  line_end_arrow = g_key_file_get_boolean(gkf, group, "line_end_arrow", &error);
+
+  if (error == NULL) {
+    config->line_end_arrow = line_end_arrow;
+  } else {
+    g_info("line_end_arrow is missing in %s (%s)", file, error->message);
     g_error_free(error);
     error = NULL;
   }
@@ -304,6 +331,8 @@ static void load_default_config(struct swappy_config *config) {
   config->paint_mode = CONFIG_PAINT_MODE_DEFAULT;
   config->early_exit = CONFIG_EARLY_EXIT_DEFAULT;
   config->fill_shape = CONFIG_FILL_SHAPE_DEFAULT;
+  config->line_begin_arrow = CONFIG_LINE_BEGIN_ARROW_DEFAULT;
+  config->line_end_arrow = CONFIG_LINE_END_ARROW_DEFAULT;
   config->auto_save = CONFIG_AUTO_SAVE_DEFAULT;
   config->custom_color = g_strdup(CONFIG_CUSTOM_COLOR_DEFAULT);
   config->transparent = CONFIG_TRANSPARENT_DEFAULT;
