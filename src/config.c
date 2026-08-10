@@ -69,6 +69,16 @@ static char *get_config_file() {
     }
   }
 
+  // XDG_CONFIG_DIRS fallback (system-wide config, default /etc/xdg), so
+  // distributions can ship a declarative /etc/xdg/swappy/config that is
+  // used whenever the user has no config of their own.
+  const char *const *system_dirs = g_get_system_config_dirs();
+  for (size_t i = 0; system_dirs[i]; ++i) {
+    char *path = g_build_filename(system_dirs[i], "swappy", "config", NULL);
+    if (file_exists(path)) return path;
+    g_free(path);
+  }
+
   return NULL;
 }
 
