@@ -1,0 +1,70 @@
+# Georgian translation for swappy.
+# Copyright (C) 2026 swappy authors.
+# This file is distributed under the same license as the swappy package.
+# Ekaterine Papava <papava.e@gtu.ge>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: swappy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-06 23:00+0100\n"
+"PO-Revision-Date: 2026-02-04 16:31+0100\n"
+"Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+
+#: res/swappy.glade:461
+msgid "Line Width"
+msgstr "ხაზის სიგანე"
+
+#: res/swappy.glade:531
+msgid "Text Size"
+msgstr "ტექსტის ზომა"
+
+#: res/swappy.glade:601
+msgid "Transparency"
+msgstr "გამჭვირვალობა"
+
+#: res/swappy.glade:667
+msgid "Fill shape"
+msgstr "ფორმის შევსება"
+
+#: res/swappy.glade:672
+msgid "Toggle shape filling"
+msgstr "ფორმის შევსების გადართვა"
+
+#: res/swappy.glade:684
+msgid "Transparent"
+msgstr "გამჭვირვალე"
+
+#: res/swappy.glade:689
+msgid "Toggle transparency"
+msgstr "გამჭვირვალობის გადართვა"
+
+#: res/swappy.glade:763
+msgid "Toggle Paint Panel"
+msgstr "ხატვის პანელის გადართვა"
+
+#: res/swappy.glade:789
+msgid "Undo Last Paint"
+msgstr "ბოლო დახატვის გაუქმება"
+
+#: res/swappy.glade:808
+msgid "Redo Previous Paint"
+msgstr "წინა დახატვის დაბრუნება"
+
+#: res/swappy.glade:827
+msgid "Clear Paints"
+msgstr "დახატვების გასუფტავება"
+
+#: res/swappy.glade:855
+msgid "Copy Surface"
+msgstr "ზედაპირის კოპირება"
+
+#: res/swappy.glade:871
+msgid "Save Surface"
+msgstr "ზედაპირის შენახვა"
