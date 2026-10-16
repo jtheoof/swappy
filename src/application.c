@@ -326,10 +326,20 @@ static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
   gint w = gdk_pixbuf_get_width(state->original_image);
   gint h = gdk_pixbuf_get_height(state->original_image);
 
+  // Map to image coordinates using the drawing area's CURRENT allocation: the
+  // image is drawn stretched to fill the area, so the per-axis scale differs
+  // whenever the window isn't the same aspect ratio as the image (tiled
+  // windows, toggled paint panel — upstream issue #117).
+  GtkAllocation *alloc = g_new(GtkAllocation, 1);
+  gtk_widget_get_allocation(state->ui->area, alloc);
+  double scale_x = alloc->width > 0 ? (double)alloc->width / w : 1.0;
+  double scale_y = alloc->height > 0 ? (double)alloc->height / h : 1.0;
+  g_free(alloc);
+
   // Clamp coordinates to original image properties to avoid side effects in
   // rendering pipeline
-  x = CLAMP(screen_x / state->scaling_factor, 0, w);
-  y = CLAMP(screen_y / state->scaling_factor, 0, h);
+  x = CLAMP(screen_x / scale_x, 0, w);
+  y = CLAMP(screen_y / scale_y, 0, h);
 
   *image_x = x;
   *image_y = y;
@@ -765,9 +775,24 @@ void transparent_toggled_handler(GtkWidget *widget,
 static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   GdkRectangle workarea = {0};
   GdkDisplay *display = gdk_display_get_default();
+  GdkMonitor *monitor = NULL;
+
+  // The window is not realized yet (the glade keeps it hidden until the
+  // default size is set). The monitor lookup can fail before the display has
+  // enumerated its outputs, so try several sources and fall back to a
+  // reasonable default workarea instead of crashing.
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
-  GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
-  gdk_monitor_get_workarea(monitor, &workarea);
+  if (window) monitor = gdk_display_get_monitor_at_window(display, window);
+  if (!monitor) monitor = gdk_display_get_primary_monitor(display);
+  if (!monitor && gdk_display_get_n_monitors(display) > 0)
+    monitor = gdk_display_get_monitor(display, 0);
+  if (monitor) gdk_monitor_get_workarea(monitor, &workarea);
+
+  if (workarea.width <= 0 || workarea.height <= 0) {
+    g_warning("cannot determine the monitor workarea, using 1920x1080");
+    workarea.width = 1920;
+    workarea.height = 1080;
+  }
 
   g_assert(workarea.width > 0);
   g_assert(workarea.height > 0);
@@ -929,8 +954,21 @@ static bool load_layout(struct swappy_state *state) {
   state->ui->window = window;
 
   compute_window_size_and_scaling_factor(state);
-  gtk_widget_set_size_request(area, state->window->width,
+
+  // The drawing area must be allowed to shrink below the image size: the
+  // image is drawn scaled to fill the area's allocation, so a fixed minimum
+  // size (== image size) clips the picture whenever the window is smaller
+  // than the image — tiled windows, or when the paint panel is toggled
+  // (upstream issue #117). The computed size becomes the window's default
+  // size instead, and the window is resizable so it can be adapted freely.
+  gtk_widget_set_size_request(area, 1, 1);
+  gtk_window_set_default_size(window, state->window->width,
                               state->window->height);
+  gtk_window_set_resizable(window, TRUE);
+  // The glade keeps the window hidden until now, so the default size above
+  // is honored when it maps (otherwise it would map at its tiny natural size
+  // before the size is set).
+  gtk_widget_show(GTK_WIDGET(window));
   action_toggle_painting_panel(state, &state->config->show_panel);
 
   g_object_unref(G_OBJECT(builder));
