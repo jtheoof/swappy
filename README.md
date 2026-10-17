@@ -55,6 +55,7 @@ auto_save=false
 custom_color=rgba(193,125,17,1)
 transparent=false
 transparency=50
+keyboard_shortcuts=layout
 ```
 
 - `save_dir` is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -70,7 +71,7 @@ transparency=50
 - `custom_color` is used to set a default value for the custom color
 - `transparency` is used to set transparency of everything that is drawn during startup
 - `transparent` is used to toggle transparency during startup
-
+- `keyboard_shortcuts` selects how shortcuts are matched. Use `layout` (default) for the current layout symbols, or `physical` to match the US key positions so shortcuts still work on non-Latin layouts.   
 
 ## Keyboard Shortcuts
 
@@ -110,6 +111,9 @@ transparency=50
 - `Ctrl+c`: Copy to clipboard
 - `Escape` or `q` or `Ctrl+w`: Quit swappy
 
+If you use a non-Latin keyboard layout, set `keyboard_shortcuts=physical` in the
+config file to match the physical US key positions for all shortcuts.
+
 ## Limitations
 
 - **Copy**: If you don't have [wl-clipboard] installed, copy to clipboard won't work if you close swappy (the content of the clipboard is lost). This because GTK 3.24 [has not implemented persistent storage on wayland backend yet](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4. For now, we use `wl-copy` if installed and revert to `gtk` clipboard if not found.
@@ -136,6 +140,7 @@ Install dependencies (on Arch, name can vary for other distros):
 - gtk
 - glib2
 - scdoc
+- libxkbcommon
 
 Optional dependencies:
 

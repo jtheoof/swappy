@@ -70,6 +70,7 @@ The following lines can be used as swappy's default:
 	custom_color=rgba(192,125,17,1)
 	transparent=false
 	transparency=50
+	keyboard_shortcuts=layout
 ```
 
 - *save_dir* is where swappshots will be saved, can contain env variables, when it does not exist, swappy attempts to create it first, but does not abort if directory creation fails
@@ -86,6 +87,9 @@ The following lines can be used as swappy's default:
 formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/root/etc/X11/rgb.txt),  #rgb, #rrggbb, #rrrgggbbb, #rrrrggggbbbb, rgb(r,b,g), rgba(r,g,b,a)
 - *transparency* is used to set transparency of everything that is drawn during startup
 - *transparent* is used to toggle transparency during startup
+- *keyboard_shortcuts* selects how shortcuts are matched. Use *layout* (default)
+for the active layout symbols, or *physical* to match the US key positions so
+shortcuts still work on non-Latin layouts
 
 
 # KEY BINDINGS
@@ -125,6 +129,9 @@ formats are: standard name (one of: https://github.com/rgb-x/system/blob/master/
 - *Ctrl+s*: Save to file (see man page)
 - *Ctrl+c*: Copy to clipboard
 - *Escape* or *q* or *Ctrl+w*: Quit swappy
+
+If you use a non-Latin keyboard layout, set *keyboard_shortcuts=physical* in the
+config file to match the physical US key positions for all shortcuts.
 
 # AUTHORS
 

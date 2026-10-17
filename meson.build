@@ -42,6 +42,7 @@ pango = dependency('pango')
 math = cc.find_library('m')
 gtk = dependency('gtk+-3.0', version: '>=3.20.0')
 gio = dependency('gio-2.0')
+xkbcommon = dependency('xkbcommon')
 
 subdir('res')
 subdir('src/po')
@@ -57,6 +58,7 @@ executable(
 		'src/config.c',
 		'src/clipboard.c',
 		'src/file.c',
+		'src/keyboard.c',
 		'src/paint.c',
 		'src/pixbuf.c',
 		'src/render.c',
@@ -67,6 +69,7 @@ executable(
 		pango,
 		gio,
 		gtk,
+		xkbcommon,
 		math,
 	],
 	link_args: '-rdynamic',

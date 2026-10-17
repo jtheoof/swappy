@@ -12,6 +12,7 @@
 #define CONFIG_AUTO_SAVE_DEFAULT false
 #define CONFIG_CUSTOM_COLOR_DEFAULT "rgba(193,125,17,1)"
 #define CONFIG_TRANSPARENT_DEFAULT false
+#define CONFIG_KEYBOARD_SHORTCUTS_DEFAULT SWAPPY_KEYBOARD_SHORTCUTS_LAYOUT
 
 void config_load(struct swappy_state *state);
 void config_free(struct swappy_state *state);
