@@ -387,6 +387,98 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   clipboard_copy_drawing_area_to_selection(state);
 }
 
+static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
+  GdkRectangle workarea = {0};
+  GdkDisplay *display = gdk_display_get_default();
+  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
+  GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
+  gdk_monitor_get_workarea(monitor, &workarea);
+
+  g_assert(workarea.width > 0);
+  g_assert(workarea.height > 0);
+
+  if (state->window) {
+    g_free(state->window);
+    state->window = NULL;
+  }
+
+  state->window = g_new(struct swappy_box, 1);
+  state->window->x = workarea.x;
+  state->window->y = workarea.y;
+
+  double threshold = 0.75;
+  double scaling_factor = 1.0;
+
+  int image_width = gdk_pixbuf_get_width(state->original_image);
+  int image_height = gdk_pixbuf_get_height(state->original_image);
+
+  int max_width = workarea.width * threshold;
+  int max_height = workarea.height * threshold;
+
+  g_info("size of image: %ux%u", image_width, image_height);
+  g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
+  g_info("maxium size allowed for window: %ux%u", max_width, max_height);
+
+  int scaled_width = image_width;
+  int scaled_height = image_height;
+
+  double scaling_factor_width = (double)max_width / image_width;
+  double scaling_factor_height = (double)max_height / image_height;
+
+  if (scaling_factor_height < 1.0 || scaling_factor_width < 1.0) {
+    scaling_factor = MIN(scaling_factor_width, scaling_factor_height);
+    scaled_width = image_width * scaling_factor;
+    scaled_height = image_height * scaling_factor;
+    g_info("rendering area will be scaled by a factor of: %.2lf",
+           scaling_factor);
+  }
+
+  state->scaling_factor = scaling_factor;
+  state->window->width = scaled_width;
+  state->window->height = scaled_height;
+
+  g_info("size of window to render: %ux%u", state->window->width,
+         state->window->height);
+}
+
+static void rotate(struct swappy_state *state, GdkPixbufRotation rotation) {
+  GdkPixbuf *flattened = pixbuf_get_from_state(state);
+  GdkPixbuf *rotated = gdk_pixbuf_rotate_simple(flattened, rotation);
+  g_object_unref(flattened);
+
+  if (!rotated) {
+    g_warning("unable to rotate pixbuf");
+    return;
+  }
+
+  if (state->original_image) {
+    g_object_unref(state->original_image);
+  }
+  state->original_image = rotated;
+
+  if (state->original_image_surface) {
+    cairo_surface_destroy(state->original_image_surface);
+  }
+  state->original_image_surface =
+      gdk_cairo_surface_create_from_pixbuf(state->original_image, 1, NULL);
+
+  paint_free_all(state);
+  compute_window_size_and_scaling_factor(state);
+  gtk_widget_set_size_request(GTK_WIDGET(state->ui->area), state->window->width,
+                              state->window->height);
+
+  render_state(state);
+  update_ui_undo_redo(state);
+}
+
+static void action_rot_left(struct swappy_state *state) {
+  rotate(state, GDK_PIXBUF_ROTATE_COUNTERCLOCKWISE);
+}
+
+static void action_rot_right(struct swappy_state *state) {
+  rotate(state, GDK_PIXBUF_ROTATE_CLOCKWISE);
+}
+
 void control_modifier_changed(bool pressed, struct swappy_state *state) {
   if (state->temp_paint != NULL) {
     switch (state->temp_paint->type) {
@@ -454,6 +546,16 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       case GDK_KEY_Z:
       case GDK_KEY_y:
         action_redo(state);
+        break;
+      case GDK_KEY_Left:
+        if (event->state & GDK_CONTROL_MASK) {
+          action_rot_left(state);
+        }
+        break;
+      case GDK_KEY_Right:
+        if (event->state & GDK_CONTROL_MASK) {
+          action_rot_right(state);
+        }
         break;
       default:
         break;
@@ -575,6 +677,14 @@ void undo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
   action_redo(state);
+}
+
+void rot_left_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_rot_left(state);
+}
+
+void rot_right_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
+  action_rot_right(state);
 }
 
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
@@ -762,60 +872,6 @@ void transparent_toggled_handler(GtkWidget *widget,
   action_transparent_toggle(state, &toggled);
 }
 
-static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
-  GdkRectangle workarea = {0};
-  GdkDisplay *display = gdk_display_get_default();
-  GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
-  GdkMonitor *monitor = gdk_display_get_monitor_at_window(display, window);
-  gdk_monitor_get_workarea(monitor, &workarea);
-
-  g_assert(workarea.width > 0);
-  g_assert(workarea.height > 0);
-
-  if (state->window) {
-    g_free(state->window);
-    state->window = NULL;
-  }
-
-  state->window = g_new(struct swappy_box, 1);
-  state->window->x = workarea.x;
-  state->window->y = workarea.y;
-
-  double threshold = 0.75;
-  double scaling_factor = 1.0;
-
-  int image_width = gdk_pixbuf_get_width(state->original_image);
-  int image_height = gdk_pixbuf_get_height(state->original_image);
-
-  int max_width = workarea.width * threshold;
-  int max_height = workarea.height * threshold;
-
-  g_info("size of image: %ux%u", image_width, image_height);
-  g_info("size of monitor at window: %ux%u", workarea.width, workarea.height);
-  g_info("maxium size allowed for window: %ux%u", max_width, max_height);
-
-  int scaled_width = image_width;
-  int scaled_height = image_height;
-
-  double scaling_factor_width = (double)max_width / image_width;
-  double scaling_factor_height = (double)max_height / image_height;
-
-  if (scaling_factor_height < 1.0 || scaling_factor_width < 1.0) {
-    scaling_factor = MIN(scaling_factor_width, scaling_factor_height);
-    scaled_width = image_width * scaling_factor;
-    scaled_height = image_height * scaling_factor;
-    g_info("rendering area will be scaled by a factor of: %.2lf",
-           scaling_factor);
-  }
-
-  state->scaling_factor = scaling_factor;
-  state->window->width = scaled_width;
-  state->window->height = scaled_height;
-
-  g_info("size of window to render: %ux%u", state->window->width,
-         state->window->height);
-}
-
 static void apply_css(GtkWidget *widget, GtkStyleProvider *provider) {
   gtk_style_context_add_provider(gtk_widget_get_style_context(widget), provider,
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -870,6 +926,11 @@ static bool load_layout(struct swappy_state *state) {
 
   state->ui->undo = GTK_BUTTON(gtk_builder_get_object(builder, "undo-button"));
   state->ui->redo = GTK_BUTTON(gtk_builder_get_object(builder, "redo-button"));
+
+  state->ui->rot_left =
+      GTK_BUTTON(gtk_builder_get_object(builder, "rot-left-button"));
+  state->ui->rot_right =
+      GTK_BUTTON(gtk_builder_get_object(builder, "rot-right-button"));
 
   GtkWidget *area =
       GTK_WIDGET(gtk_builder_get_object(builder, "painting-area"));

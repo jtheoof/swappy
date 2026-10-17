@@ -16,6 +16,9 @@ void pane_toggled_handler(GtkWidget *widget, struct swappy_state *state);
 void undo_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state);
 
+void rot_left_clicked_handler(GtkWidget *widget, struct swappy_state *state);
+void rot_right_clicked_handler(GtkWidget *widget, struct swappy_state *state);
+
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
                            struct swappy_state *state);
 gboolean draw_area_configure_handler(GtkWidget *widget,
