@@ -900,7 +900,7 @@ static bool load_layout(struct swappy_state *state) {
   g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), state);
 
   if (!state->config->show_decorations) {
-    gtk_window_set_titlebar(window, NULL);
+    gtk_window_set_decorated(window, false);
     gtk_widget_hide(GTK_WIDGET(header_bar));
   }
 
