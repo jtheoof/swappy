@@ -431,8 +431,11 @@ static void clipboard_paste_selection(struct swappy_state *state) {
   }
 }
 
-void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                             struct swappy_state *state) {
+// Returns TRUE when the key was handled, so GTK stops propagating the event,
+// and FALSE otherwise so default handling (focus navigation, button
+// activation...) still applies.
+gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
+                                 struct swappy_state *state) {
   if (state->temp_paint && state->mode == SWAPPY_PAINT_MODE_TEXT) {
     /* ctrl-v: paste */
     if (event->state & GDK_CONTROL_MASK && event->keyval == GDK_KEY_v) {
@@ -441,7 +444,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
       paint_update_temporary_text(state, event);
     }
     render_state(state);
-    return;
+    return TRUE;
   }
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
@@ -465,7 +468,7 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         action_redo(state);
         break;
       default:
-        break;
+        return FALSE;
     }
   } else {
     switch (event->keyval) {
@@ -543,13 +546,15 @@ void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         action_transparent_toggle(state, NULL);
         break;
       default:
-        break;
+        return FALSE;
     }
   }
+
+  return TRUE;
 }
 
-void window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
-                               struct swappy_state *state) {
+gboolean window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
+                                   struct swappy_state *state) {
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
       case GDK_KEY_Control_L:
@@ -564,6 +569,9 @@ void window_keyrelease_handler(GtkWidget *widget, GdkEventKey *event,
         break;
     }
   }
+
+  // Only tracks the Control modifier: let GTK keep handling the release.
+  return FALSE;
 }
 
 gboolean window_delete_handler(GtkWidget *widget, GdkEvent *event,
