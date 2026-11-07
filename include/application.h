@@ -7,8 +7,8 @@ int application_run(struct swappy_state *state);
 void application_finish(struct swappy_state *state);
 
 /* Glade signals */
-void window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
-                             struct swappy_state *state);
+gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
+                                 struct swappy_state *state);
 gboolean window_delete_handler(GtkWidget *widget, GdkEvent *event,
                                struct swappy_state *state);
 
