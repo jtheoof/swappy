@@ -71,6 +71,27 @@ transparency=50
 - `transparency` is used to set transparency of everything that is drawn during startup
 - `transparent` is used to toggle transparency during startup
 
+## Tiling window managers
+
+The swappy window can be resized, and the image scales to fit it. On tiling compositors such as Sway and Hyprland, this means swappy opens as a regular tiled window.
+
+Swappy 1.8.0 and earlier opened with a fixed size. Tiling compositors float fixed-size windows automatically, so swappy used to open floating without any configuration.
+
+To keep swappy floating, add a window rule that matches its app id, `swappy`:
+
+Sway (`~/.config/sway/config`):
+
+```
+for_window [app_id="swappy"] floating enable
+```
+
+Hyprland (Lua config, `~/.config/hypr/hyprland.lua`):
+
+```lua
+hl.window_rule({ match = { class = "^(swappy)$" }, float = true })
+```
+
+Other compositors usually have an equivalent rule that matches on app id.
 
 ## Keyboard Shortcuts
 
