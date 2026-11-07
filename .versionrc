@@ -7,5 +7,9 @@
     {
       "filename": "package.json"
     }
-  ]
+  ],
+  "commitAll": true,
+  "scripts": {
+    "postchangelog": "node script/insert-release-notes.js"
+  }
 }
