@@ -330,11 +330,10 @@ static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
   // image is drawn stretched to fill the area, so the per-axis scale differs
   // whenever the window isn't the same aspect ratio as the image (tiled
   // windows, toggled paint panel — upstream issue #117).
-  GtkAllocation *alloc = g_new(GtkAllocation, 1);
-  gtk_widget_get_allocation(state->ui->area, alloc);
-  double scale_x = alloc->width > 0 ? (double)alloc->width / w : 1.0;
-  double scale_y = alloc->height > 0 ? (double)alloc->height / h : 1.0;
-  g_free(alloc);
+  GtkAllocation alloc;
+  gtk_widget_get_allocation(state->ui->area, &alloc);
+  double scale_x = (alloc.width > 0 && w > 0) ? (double)alloc.width / w : 1.0;
+  double scale_y = (alloc.height > 0 && h > 0) ? (double)alloc.height / h : 1.0;
 
   // Clamp coordinates to original image properties to avoid side effects in
   // rendering pipeline
