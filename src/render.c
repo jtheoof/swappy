@@ -233,13 +233,29 @@ static void render_text(cairo_t *cr, struct swappy_paint_text text,
   g_object_unref(layout);
 }
 
-static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
+static void render_arrow_head(cairo_t *cr, double xa, double ya, double xb,
+                              double yb, double scaling_factor) {
+  cairo_save(cr);
+  cairo_scale(cr, scaling_factor, scaling_factor);
+  cairo_move_to(cr, 0, 0);
+  cairo_line_to(cr, xa, ya);
+  cairo_line_to(cr, xb, yb);
+  cairo_line_to(cr, 0, 0);
+  cairo_fill(cr);
+  cairo_restore(cr);
+}
+
+static void render_shape_line(cairo_t *cr, struct swappy_paint_shape shape) {
   cairo_set_source_rgba(cr, shape.r, shape.g, shape.b, shape.a);
   cairo_set_line_width(cr, shape.w);
 
   double ftx = shape.to.x - shape.from.x;
   double fty = shape.to.y - shape.from.y;
   double ftn = sqrt(ftx * ftx + fty * fty);
+
+  if (ftn < DBL_EPSILON) {
+    return;
+  }
 
   double r = 20;
   double scaling_factor = shape.w / 4;
@@ -251,37 +267,45 @@ static void render_shape_arrow(cairo_t *cr, struct swappy_paint_shape shape) {
   double ya = r * sin(ta);
   double xb = r * cos(tb);
   double yb = r * sin(tb);
-  double xc = ftn - fabs(xa) * scaling_factor;
 
-  if (xc < DBL_EPSILON) {
-    xc = 0;
-  }
-
-  if (ftn < DBL_EPSILON) {
-    return;
-  }
+  // How much the line is shortened on an end that carries an arrow head so the
+  // stroke does not poke through the filled triangle.
+  double head = fabs(xa) * scaling_factor;
 
   double theta = copysign(1.0, fty) * acos(ftx / ftn);
 
-  // Draw line
+  // Work in a frame translated to `from` and rotated so the line runs along the
+  // positive x axis, with `to` sitting at (ftn, 0).
   cairo_save(cr);
   cairo_translate(cr, shape.from.x, shape.from.y);
   cairo_rotate(cr, theta);
-  cairo_move_to(cr, 0, 0);
-  cairo_line_to(cr, xc, 0);
-  cairo_stroke(cr);
-  cairo_restore(cr);
 
-  // Draw arrow
-  cairo_save(cr);
-  cairo_translate(cr, shape.to.x, shape.to.y);
-  cairo_rotate(cr, theta);
-  cairo_scale(cr, scaling_factor, scaling_factor);
-  cairo_move_to(cr, 0, 0);
-  cairo_line_to(cr, xa, ya);
-  cairo_line_to(cr, xb, yb);
-  cairo_line_to(cr, 0, 0);
-  cairo_fill(cr);
+  double start = shape.arrow_begin ? head : 0;
+  double end = shape.arrow_end ? ftn - head : ftn;
+
+  // Draw line (skip when arrow heads overlap on a very short segment)
+  if (end > start) {
+    cairo_move_to(cr, start, 0);
+    cairo_line_to(cr, end, 0);
+    cairo_stroke(cr);
+  }
+
+  // Arrow head at the `to` end, pointing forward
+  if (shape.arrow_end) {
+    cairo_save(cr);
+    cairo_translate(cr, ftn, 0);
+    render_arrow_head(cr, xa, ya, xb, yb, scaling_factor);
+    cairo_restore(cr);
+  }
+
+  // Arrow head at the `from` end, pointing backward
+  if (shape.arrow_begin) {
+    cairo_save(cr);
+    cairo_rotate(cr, G_PI);
+    render_arrow_head(cr, xa, ya, xb, yb, scaling_factor);
+    cairo_restore(cr);
+  }
+
   cairo_restore(cr);
 }
 
@@ -374,8 +398,8 @@ static void render_shape(cairo_t *cr, struct swappy_paint_shape shape) {
     case SWAPPY_PAINT_MODE_ELLIPSE:
       render_shape_ellipse(cr, shape);
       break;
-    case SWAPPY_PAINT_MODE_ARROW:
-      render_shape_arrow(cr, shape);
+    case SWAPPY_PAINT_MODE_LINE:
+      render_shape_line(cr, shape);
       break;
     default:
       break;
@@ -491,7 +515,7 @@ static void render_paint(cairo_t *cr, struct swappy_paint *paint,
       break;
     case SWAPPY_PAINT_MODE_RECTANGLE:
     case SWAPPY_PAINT_MODE_ELLIPSE:
-    case SWAPPY_PAINT_MODE_ARROW:
+    case SWAPPY_PAINT_MODE_LINE:
       render_shape(cr, paint->content.shape);
       break;
     case SWAPPY_PAINT_MODE_TEXT:
