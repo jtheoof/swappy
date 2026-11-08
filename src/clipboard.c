@@ -82,18 +82,56 @@ static void on_clear(gtk_clipboard_t *clipboard, gpointer data) {
   g_object_unref(data);
 }
 
-// Offer the image in every format GTK can convert a pixbuf to (image/png,
-// image/bmp, image/tiff, ...), like Pinta or GIMP do. The selection is set from
-// swappy's own window, which has focus when the user copies, so every
-// compositor accepts it.
+// Like gtk_target_list_add_image_targets(), but only with formats that can
+// hold a screenshot:
+// - ICO is skipped: it is limited to 256x256 pixels, so converting to it fails.
+// - Only image/ MIME types are kept. ICO also registers text/ico, which
+//   clients looking for text pick first: `wl-paste` without `-t` got nothing.
+// - Duplicates are skipped: several loaders can register the same format.
+// PNG comes first, as the default for clients that don't ask for a type.
+static GtkTargetList *image_target_list_new(void) {
+  GtkTargetList *list = gtk_target_list_new(NULL, 0);
+  GSList *formats = gdk_pixbuf_get_formats();
+
+  gtk_target_list_add(list, gdk_atom_intern_static_string("image/png"), 0, 0);
+
+  for (GSList *l = formats; l != NULL; l = l->next) {
+    GdkPixbufFormat *format = l->data;
+    gchar *name = gdk_pixbuf_format_get_name(format);
+    gboolean skip =
+        !gdk_pixbuf_format_is_writable(format) || g_strcmp0(name, "ico") == 0;
+
+    g_free(name);
+    if (skip) {
+      continue;
+    }
+
+    gchar **mime_types = gdk_pixbuf_format_get_mime_types(format);
+    for (gchar **mime_type = mime_types; *mime_type != NULL; mime_type++) {
+      GdkAtom target = gdk_atom_intern(*mime_type, FALSE);
+      if (g_str_has_prefix(*mime_type, "image/") &&
+          !gtk_target_list_find(list, target, NULL)) {
+        gtk_target_list_add(list, target, 0, 0);
+      }
+    }
+    g_strfreev(mime_types);
+  }
+
+  g_slist_free(formats);
+  return list;
+}
+
+// Offer the image in every format that can hold it (image/png, image/bmp,
+// image/tiff, ...), like Pinta or GIMP do. The selection is set from swappy's
+// own window, which has focus when the user copies, so every compositor accepts
+// it.
 static gboolean send_pixbuf_to_gtk_clipboard(gdk_pixbuf_t *pixbuf) {
   gtk_clipboard_t *clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-  GtkTargetList *list = gtk_target_list_new(NULL, 0);
+  GtkTargetList *list = image_target_list_new();
   GtkTargetEntry *targets;
   gint count = 0;
   gboolean done;
 
-  gtk_target_list_add_image_targets(list, 0, TRUE);
   targets = gtk_target_table_new_from_list(list, &count);
   gtk_target_list_unref(list);
 
