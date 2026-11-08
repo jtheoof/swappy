@@ -1079,6 +1079,13 @@ static gint command_line_handler(GtkApplication *app,
                                  GApplicationCommandLine *cmdline,
                                  struct swappy_state *state) {
   config_load(state);
+
+  // --no-decorations takes precedence over the config file
+  if (!state->cli_show_decorations) {
+    g_info("show_decorations: 0 (--no-decorations)");
+    state->config->show_decorations = false;
+  }
+
   init_settings(state);
 
   if (has_option_file(state)) {
@@ -1115,6 +1122,9 @@ bool application_init(struct swappy_state *state) {
                              gpointer data, GError **error);
   GOptionArgFunc = &callback_on_flag;
 
+  // Reversed by --no-decorations
+  state->cli_show_decorations = TRUE;
+
   const GOptionEntry cli_options[] = {
       {
           .long_name = "file",
@@ -1130,6 +1140,14 @@ bool application_init(struct swappy_state *state) {
           .arg_data = &state->output_file,
           .description = "Print the final surface to the given file when "
                          "exiting, use - to print to stdout",
+      },
+      {
+          .long_name = "no-decorations",
+          .flags = G_OPTION_FLAG_REVERSE,
+          .arg = G_OPTION_ARG_NONE,
+          .arg_data = &state->cli_show_decorations,
+          .description = "Hide the toolbar, window decorations and margins, "
+                         "overriding the config file",
       },
       {
           .long_name = "version",

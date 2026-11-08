@@ -43,6 +43,11 @@ to: *$HOME/Desktop*.
 	Note that the *Save* button will save the image to the config *save_dir*
 	parameter, as described in the DESCRIPTION section.
 
+*--no-decorations*
+	Hide the toolbar, window decorations and margins around the image, as if
+	*show_decorations* were set to *false* in the config file. Takes
+	precedence over the config file.
+
 # CONFIG FILE
 
 The config file is located at *$XDG\_CONFIG\_HOME/swappy/config* or at
