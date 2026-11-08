@@ -399,7 +399,9 @@ void copy_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 static void modifier_changed(struct swappy_state *state,
                              gboolean is_control_pressed,
                              gboolean is_shift_pressed) {
-  if (state->temp_paint == NULL) return;
+  if (state->temp_paint == NULL) {
+    return;
+  }
 
   switch (state->temp_paint->type) {
     case SWAPPY_PAINT_MODE_ELLIPSE:
