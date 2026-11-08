@@ -454,6 +454,21 @@ gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
     render_state(state);
     return TRUE;
   }
+
+  // Handle modifiers before splitting on Control, so that pressing Shift
+  // while Control is held (or the reverse) updates the shape right away.
+  switch (event->keyval) {
+    case GDK_KEY_Control_L:
+      modifier_changed(state, true, event->state & GDK_SHIFT_MASK);
+      return TRUE;
+    case GDK_KEY_Shift_L:
+    case GDK_KEY_Shift_R:
+      modifier_changed(state, event->state & GDK_CONTROL_MASK, true);
+      return TRUE;
+    default:
+      break;
+  }
+
   if (event->state & GDK_CONTROL_MASK) {
     switch (event->keyval) {
       case GDK_KEY_c:
@@ -543,13 +558,6 @@ gboolean window_keypress_handler(GtkWidget *widget, GdkEventKey *event,
         break;
       case GDK_KEY_plus:
         action_stroke_size_increase(state);
-        break;
-      case GDK_KEY_Control_L:
-        modifier_changed(state, true, event->state & GDK_SHIFT_MASK);
-        break;
-      case GDK_KEY_Shift_L:
-      case GDK_KEY_Shift_R:
-        modifier_changed(state, event->state & GDK_CONTROL_MASK, true);
         break;
       case GDK_KEY_f:
         action_fill_shape_toggle(state, NULL);
