@@ -48,6 +48,11 @@ to: *$HOME/Desktop*.
 The config file is located at *$XDG\_CONFIG\_HOME/swappy/config* or at
 *$HOME/.config/swappy/config*. The file follows the GLib *conf* format.
 
+If no user config exists, swappy falls back to *swappy/config* in each
+directory listed in *$XDG\_CONFIG\_DIRS* (default: */etc/xdg/swappy/config*).
+Only the first file found is loaded: a user config replaces the system one
+entirely, keys are not merged.
+
 ```
 	[Section]
 	key=value
