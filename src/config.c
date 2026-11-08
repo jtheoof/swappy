@@ -75,7 +75,9 @@ static char *get_config_file() {
   const char *const *system_dirs = g_get_system_config_dirs();
   for (size_t i = 0; system_dirs[i]; ++i) {
     char *path = g_build_filename(system_dirs[i], "swappy", "config", NULL);
-    if (file_exists(path)) return path;
+    if (file_exists(path)) {
+      return path;
+    }
     g_free(path);
   }
 
