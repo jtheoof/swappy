@@ -319,6 +319,26 @@ static void maybe_save_output_file(struct swappy_state *state) {
   }
 }
 
+// Where the image sits in the drawing area: scaled uniformly to fit (no
+// stretching), never enlarged (an image that fits is drawn 1:1, pixel for
+// pixel, so it stays crisp), and centered on whole pixels.
+static void get_image_placement(struct swappy_state *state, double *scale,
+                                double *offset_x, double *offset_y) {
+  GtkAllocation alloc;
+  gint w = gdk_pixbuf_get_width(state->original_image);
+  gint h = gdk_pixbuf_get_height(state->original_image);
+  double s = 1.0;
+
+  gtk_widget_get_allocation(state->ui->area, &alloc);
+  if (alloc.width > 0 && alloc.height > 0 && w > 0 && h > 0) {
+    s = MIN(1.0, MIN((double)alloc.width / w, (double)alloc.height / h));
+  }
+
+  *scale = s;
+  *offset_x = (int)((alloc.width - w * s) / 2);
+  *offset_y = (int)((alloc.height - h * s) / 2);
+}
+
 static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
                                                     gdouble screen_x,
                                                     gdouble screen_y,
@@ -329,19 +349,13 @@ static void screen_coordinates_to_image_coordinates(struct swappy_state *state,
   gint w = gdk_pixbuf_get_width(state->original_image);
   gint h = gdk_pixbuf_get_height(state->original_image);
 
-  // Map to image coordinates using the drawing area's CURRENT allocation: the
-  // image is drawn stretched to fill the area, so the per-axis scale differs
-  // whenever the window isn't the same aspect ratio as the image (tiled
-  // windows, toggled paint panel — upstream issue #117).
-  GtkAllocation alloc;
-  gtk_widget_get_allocation(state->ui->area, &alloc);
-  double scale_x = (alloc.width > 0 && w > 0) ? (double)alloc.width / w : 1.0;
-  double scale_y = (alloc.height > 0 && h > 0) ? (double)alloc.height / h : 1.0;
+  double scale, offset_x, offset_y;
+  get_image_placement(state, &scale, &offset_x, &offset_y);
 
   // Clamp coordinates to original image properties to avoid side effects in
   // rendering pipeline
-  x = CLAMP(screen_x / scale_x, 0, w);
-  y = CLAMP(screen_y / scale_y, 0, h);
+  x = CLAMP((screen_x - offset_x) / scale, 0, w);
+  y = CLAMP((screen_y - offset_y) / scale, 0, h);
 
   *image_x = x;
   *image_y = y;
@@ -659,16 +673,11 @@ void redo_clicked_handler(GtkWidget *widget, struct swappy_state *state) {
 
 gboolean draw_area_handler(GtkWidget *widget, cairo_t *cr,
                            struct swappy_state *state) {
-  GtkAllocation *alloc = g_new(GtkAllocation, 1);
-  gtk_widget_get_allocation(widget, alloc);
+  double scale, offset_x, offset_y;
+  get_image_placement(state, &scale, &offset_x, &offset_y);
 
-  GdkPixbuf *image = state->original_image;
-  gint image_width = gdk_pixbuf_get_width(image);
-  gint image_height = gdk_pixbuf_get_height(image);
-  double scale_x = (double)alloc->width / image_width;
-  double scale_y = (double)alloc->height / image_height;
-
-  cairo_scale(cr, scale_x, scale_y);
+  cairo_translate(cr, offset_x, offset_y);
+  cairo_scale(cr, scale, scale);
   cairo_set_source_surface(cr, state->rendering_surface, 0, 0);
   cairo_paint(cr);
 
@@ -1049,9 +1058,9 @@ static bool load_layout(struct swappy_state *state) {
   compute_window_size_and_scaling_factor(state);
 
   // The drawing area must be allowed to shrink below the image size: the
-  // image is drawn scaled to fill the area's allocation, so a fixed minimum
-  // size (== image size) clips the picture whenever the window is smaller
-  // than the image — tiled windows, or when the paint panel is toggled
+  // image is scaled down to fit the area (see get_image_placement), so a fixed
+  // minimum size (== image size) clips the picture whenever the window is
+  // smaller than the image — tiled windows, or when the paint panel is toggled
   // (upstream issue #117). The computed size becomes the window's default
   // size instead, and the window is resizable so it can be adapted freely.
   gtk_widget_set_size_request(area, 1, 1);
