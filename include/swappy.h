@@ -186,6 +186,7 @@ struct swappy_state {
   /* Options */
   char *file_str;
   char *output_file;
+  gboolean cli_show_decorations;
 
   char *temp_file_str;
 
