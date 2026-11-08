@@ -36,6 +36,8 @@ grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect
 
 The config file is located at `$XDG_CONFIG_HOME/swappy/config` or at `$HOME/.config/swappy/config`.
 
+If no user config exists, swappy falls back to `swappy/config` in each directory listed in `$XDG_CONFIG_DIRS` (default: `/etc/xdg/swappy/config`). This lets distributions ship a system-wide default. Only the first file found is loaded: a user config replaces the system one entirely, keys are not merged.
+
 The file follows the GLib `conf` format. See the `man` page for details. There is example config file [here](example/config).
 
 The following lines can be used as swappy's default:
