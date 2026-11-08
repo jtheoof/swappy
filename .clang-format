@@ -4,3 +4,6 @@ IndentWidth: 2
 
 DerivePointerAlignment: false
 PointerAlignment: Right
+
+# Always brace if/else/for/while/do bodies, even single statements.
+InsertBraces: true
