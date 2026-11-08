@@ -139,7 +139,7 @@ Other compositors usually have an equivalent rule that matches on app id.
 
 ## Limitations
 
-- **Copy**: If you don't have [wl-clipboard] installed, copy to clipboard won't work if you close swappy (the content of the clipboard is lost). This because GTK 3.24 [has not implemented persistent storage on wayland backend yet](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4. For now, we use `wl-copy` if installed and revert to `gtk` clipboard if not found.
+- **Copy**: While swappy is open, the copied image is offered in every image format GTK supports (`image/png`, `image/bmp`, `image/tiff`, ...), so applications that need a format other than PNG (e.g. Remmina) can paste it. When swappy exits, it hands the image to `wl-copy`, as PNG only. If you don't have [wl-clipboard] installed, the clipboard is lost when you close swappy. This is because GTK 3.24 [has not implemented persistent storage on wayland backend yet](https://gitlab.gnome.org/GNOME/gtk/blob/3.24.13/gdk/wayland/gdkdisplay-wayland.c#L857). We need to do it on the [Wayland level](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-data-control-unstable-v1.xml), or wait for GTK 4.
 - **Fonts**: Swappy relies on Font Awesome 5 being present to properly render the icons. On Arch you can simply install those with: `sudo pacman -S otf-font-awesome`
 - **Output Format**: Only PNG is supported.
 

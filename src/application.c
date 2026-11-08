@@ -72,6 +72,7 @@ static void update_ui_transparent_toggle_button(struct swappy_state *state) {
 
 void application_finish(struct swappy_state *state) {
   g_debug("application finishing, cleaning up");
+  clipboard_hand_off_selection();
   paint_free_all(state);
   pixbuf_free(state);
   cairo_surface_destroy(state->rendering_surface);
