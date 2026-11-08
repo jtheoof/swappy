@@ -428,6 +428,19 @@ static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
     h = ABS(blur.from.y - blur.to.y);
   }
 
+  // Ctrl centering and the Shift square constraint can push the area past
+  // the image edges, but blur_surface() only reads inside the surface.
+  double scale_x, scale_y;
+  cairo_surface_get_device_scale(target, &scale_x, &scale_y);
+  double max_x = cairo_image_surface_get_width(target) / scale_x;
+  double max_y = cairo_image_surface_get_height(target) / scale_y;
+  double x2 = MIN(x + w, max_x);
+  double y2 = MIN(y + h, max_y);
+  x = MAX(x, 0);
+  y = MAX(y, 0);
+  w = MAX(x2 - x, 0);
+  h = MAX(y2 - y, 0);
+
   cairo_save(cr);
 
   if (paint->is_committed) {
