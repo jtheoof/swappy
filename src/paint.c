@@ -70,7 +70,9 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
   double w = state->settings.w;
   double t = state->settings.t;
 
-  if (state->config->transparent) a *= (1 - state->settings.tr / 100.0);
+  if (state->config->transparent) {
+    a *= (1 - state->settings.tr / 100.0);
+  }
 
   paint->type = type;
   paint->is_committed = false;
@@ -122,10 +124,11 @@ void paint_add_temporary(struct swappy_state *state, double x, double y,
       paint->content.shape.a = a;
       paint->content.shape.w = w;
       paint->content.shape.type = type;
-      if (state->config->fill_shape)
+      if (state->config->fill_shape) {
         paint->content.shape.operation = SWAPPY_PAINT_SHAPE_OPERATION_FILL;
-      else
+      } else {
         paint->content.shape.operation = SWAPPY_PAINT_SHAPE_OPERATION_STROKE;
+      }
       break;
     case SWAPPY_PAINT_MODE_TEXT:
       paint->can_draw = false;
