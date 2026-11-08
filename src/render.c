@@ -410,7 +410,9 @@ static void clear_surface(cairo_t *cr) {
 static void render_blur(cairo_t *cr, struct swappy_paint *paint) {
   struct swappy_paint_blur blur = paint->content.blur;
 
-  if (blur.should_constrain_to_square) constrain_to_square(blur.from, &blur.to);
+  if (blur.should_constrain_to_square) {
+    constrain_to_square(blur.from, &blur.to);
+  }
 
   cairo_surface_t *target = cairo_get_target(cr);
 
