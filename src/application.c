@@ -270,7 +270,9 @@ static void action_fill_shape_toggle(struct swappy_state *state,
                                      gboolean *toggled) {
   // Don't allow changing the state via a shortcut if the button can't be
   // clicked.
-  if (!gtk_widget_get_sensitive(GTK_WIDGET(state->ui->fill_shape))) return;
+  if (!gtk_widget_get_sensitive(GTK_WIDGET(state->ui->fill_shape))) {
+    return;
+  }
 
   gboolean toggle = (toggled == NULL) ? !state->config->fill_shape : *toggled;
   state->config->fill_shape = toggle;
@@ -810,11 +812,18 @@ static void compute_window_size_and_scaling_factor(struct swappy_state *state) {
   // enumerated its outputs, so try several sources and fall back to a
   // reasonable default workarea instead of crashing.
   GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(state->ui->window));
-  if (window) monitor = gdk_display_get_monitor_at_window(display, window);
-  if (!monitor) monitor = gdk_display_get_primary_monitor(display);
-  if (!monitor && gdk_display_get_n_monitors(display) > 0)
+  if (window) {
+    monitor = gdk_display_get_monitor_at_window(display, window);
+  }
+  if (!monitor) {
+    monitor = gdk_display_get_primary_monitor(display);
+  }
+  if (!monitor && gdk_display_get_n_monitors(display) > 0) {
     monitor = gdk_display_get_monitor(display, 0);
-  if (monitor) gdk_monitor_get_workarea(monitor, &workarea);
+  }
+  if (monitor) {
+    gdk_monitor_get_workarea(monitor, &workarea);
+  }
 
   if (workarea.width <= 0 || workarea.height <= 0) {
     g_warning("cannot determine the monitor workarea, using 1920x1080");
