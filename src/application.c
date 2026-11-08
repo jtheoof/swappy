@@ -1055,8 +1055,14 @@ static bool load_layout(struct swappy_state *state) {
   // (upstream issue #117). The computed size becomes the window's default
   // size instead, and the window is resizable so it can be adapted freely.
   gtk_widget_set_size_request(area, 1, 1);
-  gtk_window_set_default_size(window, state->window->width,
-                              state->window->height);
+  // Add the drawing area's margins, so that it gets exactly the computed size
+  // and the image is drawn 1:1.
+  gtk_window_set_default_size(
+      window,
+      state->window->width + gtk_widget_get_margin_start(area) +
+          gtk_widget_get_margin_end(area),
+      state->window->height + gtk_widget_get_margin_top(area) +
+          gtk_widget_get_margin_bottom(area));
   gtk_window_set_resizable(window, TRUE);
   // The glade keeps the window hidden until now, so the default size above
   // is honored when it maps (otherwise it would map at its tiny natural size
