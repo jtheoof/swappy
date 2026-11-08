@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: swappy\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-06 23:00+0100\n"
+"POT-Creation-Date: 2026-11-07 21:56-0500\n"
 "PO-Revision-Date: 2020-06-21 21:57-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,54 +17,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: res/swappy.glade:461
+#: res/swappy.glade:466
 msgid "Line Width"
 msgstr "行宽"
 
-#: res/swappy.glade:531
+#: res/swappy.glade:536
 msgid "Text Size"
 msgstr "文本大小"
 
-#: res/swappy.glade:601
+#: res/swappy.glade:606
 msgid "Transparency"
 msgstr ""
 
-#: res/swappy.glade:667
+#: res/swappy.glade:672
 msgid "Fill shape"
 msgstr "填充"
 
-#: res/swappy.glade:672
+#: res/swappy.glade:677
 msgid "Toggle shape filling"
 msgstr "切换填充状态"
 
-#: res/swappy.glade:684
+#: res/swappy.glade:689
 msgid "Transparent"
 msgstr ""
 
-#: res/swappy.glade:689
+#: res/swappy.glade:694
 msgid "Toggle transparency"
 msgstr ""
 
-#: res/swappy.glade:763
+#: res/swappy.glade:769
 msgid "Toggle Paint Panel"
 msgstr "切换绘图板状态"
 
-#: res/swappy.glade:789
+#: res/swappy.glade:795
 msgid "Undo Last Paint"
 msgstr "撤销"
 
-#: res/swappy.glade:808
+#: res/swappy.glade:814
 msgid "Redo Previous Paint"
 msgstr "恢复"
 
-#: res/swappy.glade:827
+#: res/swappy.glade:831
 msgid "Clear Paints"
 msgstr "清除绘图"
 
-#: res/swappy.glade:855
+#: res/swappy.glade:859
 msgid "Copy Surface"
 msgstr "复制"
 
-#: res/swappy.glade:871
+#: res/swappy.glade:875
 msgid "Save Surface"
 msgstr "保存"
+
+#: res/swappy.glade:891
+msgid "Save Surface As..."
+msgstr "另存为..."
